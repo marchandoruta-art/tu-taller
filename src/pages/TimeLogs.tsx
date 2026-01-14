@@ -3,7 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Clock, Calendar } from 'lucide-react';
+import { AttendanceClock } from '@/components/attendance/AttendanceClock';
+import { Loader2, Clock, Calendar, Wrench } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -84,79 +85,91 @@ export default function TimeLogs() {
         {/* Header */}
         <div>
           <h1 className="text-2xl font-bold">Registro de Tiempo</h1>
-          <p className="text-muted-foreground">Tu historial de trabajo</p>
+          <p className="text-muted-foreground">Control de jornada y reparaciones</p>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Hoy
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold font-mono">{formatDuration(getTodayTotal())}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Últimos 7 días
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold font-mono">{formatDuration(getWeekTotal())}</div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Grid layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Attendance Clock */}
+          <div className="lg:col-span-1">
+            <AttendanceClock />
+          </div>
 
-        {/* Time logs list */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              Historial
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {timeLogs.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                No hay registros de tiempo
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {timeLogs.map((log) => (
-                  <div
-                    key={log.id}
-                    className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <Calendar className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <div className="font-medium">
-                          {log.vehicle.plate} - {log.vehicle.brand} {log.vehicle.model}
+          {/* Right Column - Repair time logs */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Stats */}
+            <div className="grid grid-cols-2 gap-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                    <Wrench className="h-4 w-4" />
+                    Reparaciones Hoy
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold font-mono">{formatDuration(getTodayTotal())}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Últimos 7 días
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold font-mono">{formatDuration(getWeekTotal())}</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Time logs list */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  Historial de Reparaciones
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {timeLogs.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">
+                    No hay registros de tiempo
+                  </p>
+                ) : (
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {timeLogs.map((log) => (
+                      <div
+                        key={log.id}
+                        className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Calendar className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <div className="font-medium">
+                              {log.vehicle.plate} - {log.vehicle.brand} {log.vehicle.model}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {format(new Date(log.started_at), "d 'de' MMMM, HH:mm", { locale: es })}
+                              {' → '}
+                              {log.ended_at && format(new Date(log.ended_at), 'HH:mm', { locale: es })}
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                          {format(new Date(log.started_at), "d 'de' MMMM, HH:mm", { locale: es })}
-                          {' → '}
-                          {log.ended_at && format(new Date(log.ended_at), 'HH:mm', { locale: es })}
+                        <div className="text-right">
+                          <div className="font-mono font-medium text-lg">
+                            {formatDuration(log.total_minutes)}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-mono font-medium text-lg">
-                        {formatDuration(log.total_minutes)}
-                      </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </MainLayout>
   );

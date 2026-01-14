@@ -9,6 +9,8 @@ import Vehicles from "./pages/Vehicles";
 import VehicleDetail from "./pages/VehicleDetail";
 import TimeLogs from "./pages/TimeLogs";
 import Notifications from "./pages/Notifications";
+import AdminAttendance from "./pages/AdminAttendance";
+import InstallApp from "./pages/InstallApp";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +28,8 @@ const App = () => (
             <Route path="/vehicles/:id" element={<VehicleDetail />} />
             <Route path="/time-logs" element={<TimeLogs />} />
             <Route path="/notifications" element={<Notifications />} />
+            <Route path="/admin/attendance" element={<AdminAttendance />} />
+            <Route path="/install" element={<InstallApp />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
