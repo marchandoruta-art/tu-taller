@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Vehicle, Owner, VehicleStatus } from '@/lib/types';
+import { VehicleWithOwner, VehicleStatus } from '@/lib/types';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { StatusColumn } from '@/components/dashboard/StatusColumn';
 import { VehicleCard } from '@/components/vehicles/VehicleCard';
@@ -10,7 +10,7 @@ import { Loader2, Car, Clock, Wrench, CheckCircle } from 'lucide-react';
 const statusOrder: VehicleStatus[] = ['recibido', 'en_reparacion', 'pendiente_piezas', 'terminado'];
 
 export default function Dashboard() {
-  const [vehicles, setVehicles] = useState<(Vehicle & { owner: Owner })[]>([]);
+  const [vehicles, setVehicles] = useState<VehicleWithOwner[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchVehicles = async () => {
