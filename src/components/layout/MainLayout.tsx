@@ -1,7 +1,8 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
-import { PanelLeft } from 'lucide-react';
+import { PanelLeft, LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
 interface MainLayoutProps {
@@ -9,6 +10,7 @@ interface MainLayoutProps {
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
+  const { signOut } = useAuth();
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('sidebar-collapsed');
@@ -75,15 +77,26 @@ export function MainLayout({ children }: MainLayoutProps) {
       >
         {/* Mobile header */}
         {isMobile && (
-          <header className="sticky top-0 z-20 bg-card border-b border-border px-4 py-3 flex items-center gap-3">
-            <Button 
-              variant="ghost" 
+          <header className="sticky top-0 z-20 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setMobileOpen(true)}
+              >
+                <PanelLeft className="h-5 w-5" />
+              </Button>
+              <span className="font-semibold">Autos Formentera</span>
+            </div>
+            <Button
+              variant="ghost"
               size="icon"
-              onClick={() => setMobileOpen(true)}
+              onClick={signOut}
+              className="text-muted-foreground hover:text-destructive"
+              title="Cerrar sesión"
             >
-              <PanelLeft className="h-5 w-5" />
+              <LogOut className="h-5 w-5" />
             </Button>
-            <span className="font-semibold">Autos Formentera</span>
           </header>
         )}
         
