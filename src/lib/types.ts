@@ -26,6 +26,7 @@ export interface Vehicle {
   color?: string;
   vin?: string;
   client_description?: string;
+  work_summary?: string;
   status: VehicleStatus;
   assigned_to?: string;
   created_by?: string;
