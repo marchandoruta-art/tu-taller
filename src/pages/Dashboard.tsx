@@ -73,36 +73,36 @@ export default function Dashboard() {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground">Vista general del taller</p>
+            <h1 className="text-xl md:text-2xl font-bold">Dashboard</h1>
+            <p className="text-sm text-muted-foreground">Vista general del taller</p>
           </div>
           <NewVehicleDialog onSuccess={fetchVehicles} />
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className="bg-card rounded-xl border border-border p-4 flex items-center gap-4"
+              className="bg-card rounded-xl border border-border p-3 md:p-4 flex items-center gap-3"
             >
-              <div className={`p-3 rounded-lg bg-muted ${stat.color}`}>
-                <stat.icon className="h-5 w-5" />
+              <div className={`p-2 md:p-3 rounded-lg bg-muted ${stat.color}`}>
+                <stat.icon className="h-4 w-4 md:h-5 md:w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{stat.value}</p>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
+                <p className="text-xl md:text-2xl font-bold">{stat.value}</p>
+                <p className="text-xs md:text-sm text-muted-foreground">{stat.label}</p>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Kanban Board */}
-        <div className="overflow-x-auto pb-4">
+        {/* Kanban Board - horizontal scroll on mobile, grid on larger screens */}
+        <div className="lg:hidden overflow-x-auto pb-4 -mx-4 px-4">
           <div className="flex gap-4 min-w-max">
             {statusOrder.map((status) => {
               const statusVehicles = getVehiclesByStatus(status);
@@ -121,6 +121,26 @@ export default function Dashboard() {
               );
             })}
           </div>
+        </div>
+
+        {/* Kanban Board - grid layout on desktop */}
+        <div className="hidden lg:grid lg:grid-cols-4 gap-4">
+          {statusOrder.map((status) => {
+            const statusVehicles = getVehiclesByStatus(status);
+            return (
+              <StatusColumn key={status} status={status} count={statusVehicles.length}>
+                {statusVehicles.length === 0 ? (
+                  <p className="text-center text-sm text-muted-foreground py-8">
+                    Sin vehículos
+                  </p>
+                ) : (
+                  statusVehicles.map((vehicle) => (
+                    <VehicleCard key={vehicle.id} vehicle={vehicle} />
+                  ))
+                )}
+              </StatusColumn>
+            );
+          })}
         </div>
       </div>
     </MainLayout>
