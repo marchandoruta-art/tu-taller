@@ -3,17 +3,31 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogIn, LogOut, Clock } from 'lucide-react';
+import { LogIn, LogOut, Clock, Stethoscope, Coffee, UtensilsCrossed } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface AttendanceLog {
   id: string;
   clock_in: string;
   clock_out: string | null;
   total_minutes: number | null;
+  exit_type: string | null;
 }
+
+const EXIT_TYPES = {
+  normal: { label: 'Salida Normal', icon: LogOut },
+  medico: { label: 'Salida Médico', icon: Stethoscope },
+  descanso: { label: 'Descanso', icon: Coffee },
+  desayuno: { label: 'Desayuno', icon: UtensilsCrossed },
+} as const;
 
 export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClock(_, ref) {
   const { user } = useAuth();
@@ -57,9 +71,9 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
       .order('clock_in', { ascending: false });
 
     if (data) {
-      setTodayLogs(data);
+      setTodayLogs(data as AttendanceLog[]);
       const active = data.find(log => !log.clock_out);
-      setActiveSession(active || null);
+      setActiveSession(active as AttendanceLog || null);
     }
     setLoading(false);
   };
@@ -76,15 +90,15 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
 
       if (error) throw error;
 
-      setActiveSession(data);
-      setTodayLogs(prev => [data, ...prev]);
+      setActiveSession(data as AttendanceLog);
+      setTodayLogs(prev => [data as AttendanceLog, ...prev]);
       toast.success('Entrada registrada');
     } catch (error) {
       toast.error('Error al registrar entrada');
     }
   };
 
-  const clockOut = async () => {
+  const clockOut = async (exitType: string = 'normal') => {
     if (!activeSession) return;
 
     try {
@@ -95,6 +109,7 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
         .update({
           clock_out: new Date().toISOString(),
           total_minutes: totalMinutes,
+          exit_type: exitType,
         })
         .eq('id', activeSession.id);
 
@@ -103,7 +118,7 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
       setActiveSession(null);
       setElapsed(0);
       fetchTodayLogs();
-      toast.success('Salida registrada');
+      toast.success(`${EXIT_TYPES[exitType as keyof typeof EXIT_TYPES]?.label || 'Salida'} registrada`);
     } catch (error) {
       toast.error('Error al registrar salida');
     }
@@ -129,6 +144,11 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
     return todayLogs.reduce((acc, log) => acc + (log.total_minutes || 0), 0);
   };
 
+  const getExitTypeLabel = (exitType: string | null) => {
+    if (!exitType) return '';
+    return EXIT_TYPES[exitType as keyof typeof EXIT_TYPES]?.label || exitType;
+  };
+
   if (loading) {
     return <div className="animate-pulse h-32 bg-muted rounded-xl" />;
   }
@@ -152,10 +172,26 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
               <p className="text-sm text-muted-foreground">
                 Entrada: {format(new Date(activeSession.clock_in), 'HH:mm', { locale: es })}
               </p>
-              <Button onClick={clockOut} variant="destructive" className="w-full gap-2">
-                <LogOut className="h-4 w-4" />
-                Registrar Salida
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="destructive" className="w-full gap-2">
+                    <LogOut className="h-4 w-4" />
+                    Registrar Salida
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="center" className="w-48 bg-popover">
+                  {Object.entries(EXIT_TYPES).map(([key, { label, icon: Icon }]) => (
+                    <DropdownMenuItem
+                      key={key}
+                      onClick={() => clockOut(key)}
+                      className="gap-2 cursor-pointer"
+                    >
+                      <Icon className="h-4 w-4" />
+                      {label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           ) : (
             <Button onClick={clockIn} className="w-full gap-2" size="lg">
@@ -181,13 +217,20 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
                   key={log.id}
                   className="flex justify-between text-sm p-2 bg-muted/30 rounded"
                 >
-                  <span>
-                    {format(new Date(log.clock_in), 'HH:mm', { locale: es })}
-                    {' → '}
-                    {log.clock_out
-                      ? format(new Date(log.clock_out), 'HH:mm', { locale: es })
-                      : 'En curso...'}
-                  </span>
+                  <div className="flex flex-col">
+                    <span>
+                      {format(new Date(log.clock_in), 'HH:mm', { locale: es })}
+                      {' → '}
+                      {log.clock_out
+                        ? format(new Date(log.clock_out), 'HH:mm', { locale: es })
+                        : 'En curso...'}
+                    </span>
+                    {log.exit_type && log.exit_type !== 'normal' && (
+                      <span className="text-xs text-muted-foreground">
+                        {getExitTypeLabel(log.exit_type)}
+                      </span>
+                    )}
+                  </div>
                   {log.total_minutes && (
                     <span className="text-muted-foreground">
                       {formatDuration(log.total_minutes)}

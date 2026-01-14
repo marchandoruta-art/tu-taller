@@ -6,11 +6,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Calendar, Clock, Users, Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import { format, startOfWeek, endOfWeek, addWeeks, subWeeks } from 'date-fns';
+import { Calendar, Clock, Search, ChevronLeft, ChevronRight, Download, Stethoscope, Coffee, UtensilsCrossed, LogOut } from 'lucide-react';
+import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, startOfMonth, endOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Navigate } from 'react-router-dom';
 import { ROLE_LABELS, UserRole } from '@/lib/types';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { toast } from 'sonner';
 
 interface AttendanceWithUser {
   id: string;
@@ -18,6 +27,7 @@ interface AttendanceWithUser {
   clock_in: string;
   clock_out: string | null;
   total_minutes: number | null;
+  exit_type: string | null;
   profile?: {
     full_name: string;
     avatar_url?: string;
@@ -34,6 +44,13 @@ interface UserSummary {
   sessions: number;
 }
 
+const EXIT_TYPES = {
+  normal: { label: 'Normal', icon: LogOut, color: 'default' },
+  medico: { label: 'Médico', icon: Stethoscope, color: 'destructive' },
+  descanso: { label: 'Descanso', icon: Coffee, color: 'secondary' },
+  desayuno: { label: 'Desayuno', icon: UtensilsCrossed, color: 'outline' },
+} as const;
+
 export default function AdminAttendance() {
   const { role, loading: authLoading } = useAuth();
   const [logs, setLogs] = useState<AttendanceWithUser[]>([]);
@@ -41,6 +58,7 @@ export default function AdminAttendance() {
   const [loading, setLoading] = useState(true);
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [search, setSearch] = useState('');
+  const [exportPeriod, setExportPeriod] = useState<'week' | 'month' | 'all'>('month');
 
   useEffect(() => {
     if (role === 'admin') {
@@ -84,6 +102,7 @@ export default function AdminAttendance() {
     // Combine data
     const enrichedLogs: AttendanceWithUser[] = logsData.map(log => ({
       ...log,
+      exit_type: (log as any).exit_type || 'normal',
       profile: profiles?.find(p => p.user_id === log.user_id),
       role: roles?.find(r => r.user_id === log.user_id)?.role as UserRole,
     }));
@@ -113,6 +132,103 @@ export default function AdminAttendance() {
     setLoading(false);
   };
 
+  const exportToCSV = async () => {
+    try {
+      let startDate: Date;
+      let endDate: Date = new Date();
+
+      if (exportPeriod === 'week') {
+        startDate = startOfWeek(currentWeek, { weekStartsOn: 1 });
+        endDate = endOfWeek(currentWeek, { weekStartsOn: 1 });
+      } else if (exportPeriod === 'month') {
+        startDate = startOfMonth(currentWeek);
+        endDate = endOfMonth(currentWeek);
+      } else {
+        // All time - set to a very old date
+        startDate = new Date('2020-01-01');
+      }
+
+      // Fetch all logs for the period
+      const { data: logsData, error } = await supabase
+        .from('attendance_logs')
+        .select('*')
+        .gte('clock_in', startDate.toISOString())
+        .lte('clock_in', endDate.toISOString())
+        .order('clock_in', { ascending: true });
+
+      if (error) throw error;
+
+      if (!logsData || logsData.length === 0) {
+        toast.error('No hay registros para exportar');
+        return;
+      }
+
+      // Get unique user IDs
+      const userIds = [...new Set(logsData.map(log => log.user_id))];
+
+      // Fetch profiles
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, full_name')
+        .in('user_id', userIds);
+
+      // Fetch roles
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .in('user_id', userIds);
+
+      // Create CSV content
+      const headers = ['Empleado', 'Rol', 'Fecha', 'Entrada', 'Salida', 'Tipo Salida', 'Minutos Totales', 'Horas Totales'];
+      const rows = logsData.map(log => {
+        const profile = profiles?.find(p => p.user_id === log.user_id);
+        const userRole = roles?.find(r => r.user_id === log.user_id)?.role;
+        const exitType = (log as any).exit_type || 'normal';
+        const exitLabel = EXIT_TYPES[exitType as keyof typeof EXIT_TYPES]?.label || exitType;
+        
+        return [
+          profile?.full_name || 'Usuario',
+          userRole ? ROLE_LABELS[userRole] : 'Sin rol',
+          format(new Date(log.clock_in), 'dd/MM/yyyy', { locale: es }),
+          format(new Date(log.clock_in), 'HH:mm', { locale: es }),
+          log.clock_out ? format(new Date(log.clock_out), 'HH:mm', { locale: es }) : 'En curso',
+          exitLabel,
+          log.total_minutes || 0,
+          log.total_minutes ? (log.total_minutes / 60).toFixed(2) : '0',
+        ];
+      });
+
+      const csvContent = [
+        headers.join(';'),
+        ...rows.map(row => row.join(';'))
+      ].join('\n');
+
+      // Add BOM for Excel compatibility with Spanish characters
+      const BOM = '\uFEFF';
+      const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      const periodLabel = exportPeriod === 'week' 
+        ? `semana_${format(startDate, 'dd-MM-yyyy')}`
+        : exportPeriod === 'month'
+        ? `mes_${format(startDate, 'MM-yyyy')}`
+        : 'historico';
+      
+      link.download = `registro_horario_${periodLabel}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success('Archivo CSV descargado correctamente');
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+      toast.error('Error al exportar los datos');
+    }
+  };
+
   const formatDuration = (minutes: number) => {
     const hrs = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -129,6 +245,19 @@ export default function AdminAttendance() {
       .join('')
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  const getExitTypeBadge = (exitType: string | null) => {
+    const type = exitType || 'normal';
+    const config = EXIT_TYPES[type as keyof typeof EXIT_TYPES] || EXIT_TYPES.normal;
+    const Icon = config.icon;
+    
+    return (
+      <Badge variant={config.color as any} className="gap-1 text-xs">
+        <Icon className="h-3 w-3" />
+        {config.label}
+      </Badge>
+    );
   };
 
   const filteredSummaries = userSummaries.filter(user =>
@@ -185,15 +314,33 @@ export default function AdminAttendance() {
           </div>
         </div>
 
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar empleado..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="pl-10 max-w-md"
-          />
+        {/* Export and Search */}
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar empleado..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Select value={exportPeriod} onValueChange={(v: 'week' | 'month' | 'all') => setExportPeriod(v)}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="week">Esta semana</SelectItem>
+                <SelectItem value="month">Este mes</SelectItem>
+                <SelectItem value="all">Todo el historial</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button onClick={exportToCSV} className="gap-2">
+              <Download className="h-4 w-4" />
+              Exportar CSV
+            </Button>
+          </div>
         </div>
 
         {loading ? (
@@ -272,19 +419,22 @@ export default function AdminAttendance() {
                             </p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium">
-                            {format(new Date(log.clock_in), 'HH:mm', { locale: es })}
-                            {' → '}
-                            {log.clock_out
-                              ? format(new Date(log.clock_out), 'HH:mm', { locale: es })
-                              : 'En curso'}
-                          </p>
-                          {log.total_minutes && (
-                            <p className="text-xs text-primary font-medium">
-                              {formatDuration(log.total_minutes)}
+                        <div className="flex items-center gap-3">
+                          {log.clock_out && getExitTypeBadge(log.exit_type)}
+                          <div className="text-right">
+                            <p className="text-sm font-medium">
+                              {format(new Date(log.clock_in), 'HH:mm', { locale: es })}
+                              {' → '}
+                              {log.clock_out
+                                ? format(new Date(log.clock_out), 'HH:mm', { locale: es })
+                                : 'En curso'}
                             </p>
-                          )}
+                            {log.total_minutes && (
+                              <p className="text-xs text-primary font-medium">
+                                {formatDuration(log.total_minutes)}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}

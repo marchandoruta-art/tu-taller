@@ -19,6 +19,7 @@ export type Database = {
           clock_in: string
           clock_out: string | null
           created_at: string
+          exit_type: string | null
           id: string
           total_minutes: number | null
           user_id: string
@@ -27,6 +28,7 @@ export type Database = {
           clock_in?: string
           clock_out?: string | null
           created_at?: string
+          exit_type?: string | null
           id?: string
           total_minutes?: number | null
           user_id: string
@@ -35,6 +37,7 @@ export type Database = {
           clock_in?: string
           clock_out?: string | null
           created_at?: string
+          exit_type?: string | null
           id?: string
           total_minutes?: number | null
           user_id?: string
