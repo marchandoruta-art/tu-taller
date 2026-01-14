@@ -102,6 +102,38 @@ export default function VehicleDetail() {
     } else {
       setVehicle({ ...vehicle, status: newStatus });
       toast.success(`Estado actualizado a: ${STATUS_LABELS[newStatus]}`);
+      
+      // Notify admin when vehicle is finished
+      if (newStatus === 'terminado') {
+        await notifyAdminVehicleFinished();
+      }
+    }
+  };
+
+  const notifyAdminVehicleFinished = async () => {
+    if (!vehicle) return;
+
+    try {
+      // Get all admin users
+      const { data: adminRoles } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'admin');
+
+      if (adminRoles && adminRoles.length > 0) {
+        const notifications = adminRoles.map(admin => ({
+          user_id: admin.user_id,
+          vehicle_id: vehicle.id,
+          type: 'vehicle_finished',
+          message: `Vehículo ${vehicle.plate} (${vehicle.brand} ${vehicle.model}) ha sido marcado como TERMINADO`,
+          read: false,
+        }));
+
+        await supabase.from('notifications').insert(notifications);
+        toast.info('Administradores notificados');
+      }
+    } catch (error) {
+      console.error('Error notifying admins:', error);
     }
   };
 

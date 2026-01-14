@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Play, Pause, StopCircle } from 'lucide-react';
+import { Play, StopCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -29,7 +29,7 @@ export function WorkTimer({ vehicleId, onUpdate }: WorkTimerProps) {
         .eq('vehicle_id', vehicleId)
         .eq('user_id', user.id)
         .is('ended_at', null)
-        .single();
+        .maybeSingle();
 
       if (data) {
         setActiveLogId(data.id);
@@ -56,10 +56,45 @@ export function WorkTimer({ vehicleId, onUpdate }: WorkTimerProps) {
     return () => clearInterval(interval);
   }, [isRunning, startTime]);
 
+  // Pause any other active timers before starting a new one
+  const pauseOtherTimers = async () => {
+    if (!user) return;
+
+    // Find all active timers for this user on OTHER vehicles
+    const { data: activeTimers } = await supabase
+      .from('time_logs')
+      .select('*')
+      .eq('user_id', user.id)
+      .is('ended_at', null)
+      .neq('vehicle_id', vehicleId);
+
+    if (activeTimers && activeTimers.length > 0) {
+      // Stop each active timer
+      for (const timer of activeTimers) {
+        const startedAt = new Date(timer.started_at);
+        const now = new Date();
+        const totalMinutes = Math.floor((now.getTime() - startedAt.getTime()) / 60000);
+
+        await supabase
+          .from('time_logs')
+          .update({
+            ended_at: now.toISOString(),
+            total_minutes: totalMinutes,
+          })
+          .eq('id', timer.id);
+      }
+
+      toast.info(`Se pausó automáticamente ${activeTimers.length} tarea(s) anterior(es)`);
+    }
+  };
+
   const startTimer = async () => {
     if (!user) return;
 
     try {
+      // First, pause any other active timers
+      await pauseOtherTimers();
+
       const { data, error } = await supabase
         .from('time_logs')
         .insert([{ vehicle_id: vehicleId, user_id: user.id }])
