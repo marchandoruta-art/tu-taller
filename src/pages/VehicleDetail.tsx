@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Vehicle, Owner, Part, TimeLog, VehicleStatus, STATUS_LABELS } from '@/lib/types';
+import { VehicleWithOwner, Part, TimeLog, VehicleStatus, STATUS_LABELS } from '@/lib/types';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { VehicleStatusBadge } from '@/components/vehicles/VehicleStatusBadge';
 import { WorkTimer } from '@/components/timer/WorkTimer';
 import { VehicleChat } from '@/components/chat/VehicleChat';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
@@ -23,6 +24,8 @@ import {
   Loader2,
   MessageSquare,
   Bell,
+  Lock,
+  FileText,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -30,12 +33,14 @@ import { useAuth } from '@/hooks/useAuth';
 export default function VehicleDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [vehicle, setVehicle] = useState<(Vehicle & { owner: Owner }) | null>(null);
+  const { user, role } = useAuth();
+  const [vehicle, setVehicle] = useState<VehicleWithOwner | null>(null);
   const [parts, setParts] = useState<Part[]>([]);
   const [timeLogs, setTimeLogs] = useState<TimeLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newPart, setNewPart] = useState({ name: '', quantity: 1, unit_price: '' });
+  const [newPart, setNewPart] = useState({ name: '', quantity: 1 });
+  const [workSummary, setWorkSummary] = useState('');
+  const [savingSummary, setSavingSummary] = useState(false);
 
   useEffect(() => {
     fetchVehicleData();
@@ -45,12 +50,15 @@ export default function VehicleDetail() {
     if (!id) return;
 
     const [vehicleRes, partsRes, timeLogsRes] = await Promise.all([
-      supabase.from('vehicles').select('*, owner:owners(*)').eq('id', id).single(),
+      supabase.from('vehicles').select('*, owner:owners(*)').eq('id', id).maybeSingle(),
       supabase.from('parts').select('*').eq('vehicle_id', id).order('created_at', { ascending: false }),
       supabase.from('time_logs').select('*').eq('vehicle_id', id).order('started_at', { ascending: false }),
     ]);
 
-    if (vehicleRes.data) setVehicle(vehicleRes.data as any);
+    if (vehicleRes.data) {
+      setVehicle(vehicleRes.data as VehicleWithOwner);
+      setWorkSummary(vehicleRes.data.work_summary || '');
+    }
     if (partsRes.data) setParts(partsRes.data);
     if (timeLogsRes.data) setTimeLogs(timeLogsRes.data);
     setLoading(false);
@@ -81,7 +89,6 @@ export default function VehicleDetail() {
         vehicle_id: vehicle.id,
         name: newPart.name,
         quantity: newPart.quantity,
-        unit_price: newPart.unit_price ? parseFloat(newPart.unit_price) : null,
         added_by: user.id,
       },
     ]);
@@ -90,7 +97,7 @@ export default function VehicleDetail() {
       toast.error('Error al añadir la pieza');
     } else {
       toast.success('Pieza añadida');
-      setNewPart({ name: '', quantity: 1, unit_price: '' });
+      setNewPart({ name: '', quantity: 1 });
       fetchVehicleData();
     }
   };
@@ -103,6 +110,24 @@ export default function VehicleDetail() {
       setParts(parts.filter((p) => p.id !== partId));
       toast.success('Pieza eliminada');
     }
+  };
+
+  const saveWorkSummary = async () => {
+    if (!vehicle) return;
+    setSavingSummary(true);
+    
+    const { error } = await supabase
+      .from('vehicles')
+      .update({ work_summary: workSummary })
+      .eq('id', vehicle.id);
+
+    if (error) {
+      toast.error('Error al guardar el resumen');
+    } else {
+      toast.success('Resumen guardado');
+      setVehicle({ ...vehicle, work_summary: workSummary });
+    }
+    setSavingSummary(false);
   };
 
   const notifyClient = async () => {
@@ -121,9 +146,8 @@ export default function VehicleDetail() {
     return `${hours}h ${mins}m`;
   };
 
-  const getTotalPartsPrice = () => {
-    return parts.reduce((acc, p) => acc + (p.unit_price || 0) * p.quantity, 0);
-  };
+  const isAdmin = role === 'admin';
+
 
   if (loading) {
     return (
@@ -235,12 +259,6 @@ export default function VehicleDetail() {
               <CardContent className="space-y-4">
                 <form onSubmit={addPart} className="flex gap-2">
                   <Input
-                    placeholder="Nombre de la pieza"
-                    value={newPart.name}
-                    onChange={(e) => setNewPart({ ...newPart, name: e.target.value })}
-                    className="flex-1"
-                  />
-                  <Input
                     type="number"
                     placeholder="Cant."
                     value={newPart.quantity}
@@ -249,12 +267,10 @@ export default function VehicleDetail() {
                     min={1}
                   />
                   <Input
-                    type="number"
-                    placeholder="Precio €"
-                    value={newPart.unit_price}
-                    onChange={(e) => setNewPart({ ...newPart, unit_price: e.target.value })}
-                    className="w-24"
-                    step="0.01"
+                    placeholder="Descripción de la pieza"
+                    value={newPart.name}
+                    onChange={(e) => setNewPart({ ...newPart, name: e.target.value })}
+                    className="flex-1"
                   />
                   <Button type="submit" size="icon">
                     <Plus className="h-4 w-4" />
@@ -273,32 +289,50 @@ export default function VehicleDetail() {
                         className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
                       >
                         <div>
+                          <span className="font-medium text-sm text-muted-foreground mr-2">x{part.quantity}</span>
                           <span className="font-medium">{part.name}</span>
-                          <span className="text-sm text-muted-foreground ml-2">x{part.quantity}</span>
                         </div>
-                        <div className="flex items-center gap-3">
-                          {part.unit_price && (
-                            <span className="font-mono">
-                              {(part.unit_price * part.quantity).toFixed(2)}€
-                            </span>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive"
-                            onClick={() => deletePart(part.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive"
+                          onClick={() => deletePart(part.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     ))}
-                    <div className="flex justify-between pt-3 border-t border-border">
-                      <span className="font-medium">Total Piezas</span>
-                      <span className="font-mono font-bold">{getTotalPartsPrice().toFixed(2)}€</span>
-                    </div>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Work Summary */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <FileText className="h-5 w-5" />
+                  Resumen de Trabajos
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Textarea
+                  placeholder="Describe los trabajos realizados en el vehículo..."
+                  value={workSummary}
+                  onChange={(e) => setWorkSummary(e.target.value)}
+                  rows={4}
+                  className="resize-none"
+                />
+                <Button 
+                  onClick={saveWorkSummary} 
+                  disabled={savingSummary}
+                  className="w-full"
+                >
+                  {savingSummary ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : null}
+                  Guardar Resumen
+                </Button>
               </CardContent>
             </Card>
           </div>
@@ -314,25 +348,34 @@ export default function VehicleDetail() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="font-medium">{vehicle.owner.name}</div>
-                {vehicle.owner.phone && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Phone className="h-4 w-4" />
-                    <a href={`tel:${vehicle.owner.phone}`} className="hover:text-primary">
-                      {vehicle.owner.phone}
-                    </a>
+                {vehicle.owner && isAdmin ? (
+                  <>
+                    <div className="font-medium">{vehicle.owner.name}</div>
+                    {vehicle.owner.phone && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Phone className="h-4 w-4" />
+                        <a href={`tel:${vehicle.owner.phone}`} className="hover:text-primary">
+                          {vehicle.owner.phone}
+                        </a>
+                      </div>
+                    )}
+                    {vehicle.owner.email && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Mail className="h-4 w-4" />
+                        <a href={`mailto:${vehicle.owner.email}`} className="hover:text-primary">
+                          {vehicle.owner.email}
+                        </a>
+                      </div>
+                    )}
+                    {vehicle.owner.dni && (
+                      <div className="text-sm text-muted-foreground">DNI: {vehicle.owner.dni}</div>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Lock className="h-4 w-4" />
+                    <span className="italic">Datos restringidos (solo admin)</span>
                   </div>
-                )}
-                {vehicle.owner.email && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Mail className="h-4 w-4" />
-                    <a href={`mailto:${vehicle.owner.email}`} className="hover:text-primary">
-                      {vehicle.owner.email}
-                    </a>
-                  </div>
-                )}
-                {vehicle.owner.dni && (
-                  <div className="text-sm text-muted-foreground">DNI: {vehicle.owner.dni}</div>
                 )}
               </CardContent>
             </Card>
