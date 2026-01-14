@@ -120,6 +120,7 @@ export type Database = {
           name: string
           notes: string | null
           quantity: number
+          reference: string | null
           unit_price: number | null
           vehicle_id: string
         }
@@ -130,6 +131,7 @@ export type Database = {
           name: string
           notes?: string | null
           quantity?: number
+          reference?: string | null
           unit_price?: number | null
           vehicle_id: string
         }
@@ -140,6 +142,7 @@ export type Database = {
           name?: string
           notes?: string | null
           quantity?: number
+          reference?: string | null
           unit_price?: number | null
           vehicle_id?: string
         }
@@ -235,6 +238,76 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      vehicle_anomalies: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description: string
+          id?: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_anomalies_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_files: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          file_type: string | null
+          id: string
+          uploaded_by: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_type?: string | null
+          id?: string
+          uploaded_by?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_type?: string | null
+          id?: string
+          uploaded_by?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_files_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vehicle_messages: {
         Row: {

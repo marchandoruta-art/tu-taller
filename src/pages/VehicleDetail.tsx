@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { VehicleWithOwner, Part, TimeLog, VehicleStatus, STATUS_LABELS, Profile, ROLE_LABELS, UserRole } from '@/lib/types';
+import { VehicleWithOwner, Part, TimeLog, VehicleStatus, STATUS_LABELS, Profile, ROLE_LABELS, UserRole, VehicleAnomaly, VehicleFile } from '@/lib/types';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { VehicleStatusBadge } from '@/components/vehicles/VehicleStatusBadge';
 import { WorkTimer } from '@/components/timer/WorkTimer';
@@ -29,6 +29,11 @@ import {
   Lock,
   FileText,
   UserCheck,
+  AlertTriangle,
+  Upload,
+  Image,
+  File,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -40,8 +45,12 @@ export default function VehicleDetail() {
   const [vehicle, setVehicle] = useState<VehicleWithOwner | null>(null);
   const [parts, setParts] = useState<Part[]>([]);
   const [timeLogs, setTimeLogs] = useState<TimeLog[]>([]);
+  const [anomalies, setAnomalies] = useState<VehicleAnomaly[]>([]);
+  const [vehicleFiles, setVehicleFiles] = useState<VehicleFile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newPart, setNewPart] = useState({ name: '', quantity: 1 });
+  const [newPart, setNewPart] = useState({ name: '', quantity: 1, reference: '' });
+  const [newAnomaly, setNewAnomaly] = useState('');
+  const [uploadingFile, setUploadingFile] = useState(false);
   const [workSummary, setWorkSummary] = useState('');
   const [savingSummary, setSavingSummary] = useState(false);
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
@@ -53,10 +62,12 @@ export default function VehicleDetail() {
   const fetchVehicleData = async () => {
     if (!id) return;
 
-    const [vehicleRes, partsRes, timeLogsRes] = await Promise.all([
+    const [vehicleRes, partsRes, timeLogsRes, anomaliesRes, filesRes] = await Promise.all([
       supabase.from('vehicles').select('*, owner:owners(*)').eq('id', id).maybeSingle(),
       supabase.from('parts').select('*').eq('vehicle_id', id).order('created_at', { ascending: false }),
       supabase.from('time_logs').select('*').eq('vehicle_id', id).order('started_at', { ascending: false }),
+      supabase.from('vehicle_anomalies').select('*').eq('vehicle_id', id).order('created_at', { ascending: false }),
+      supabase.from('vehicle_files').select('*').eq('vehicle_id', id).order('created_at', { ascending: false }),
     ]);
 
     if (vehicleRes.data) {
@@ -84,8 +95,10 @@ export default function VehicleDetail() {
         setAssignedUser(null);
       }
     }
-    if (partsRes.data) setParts(partsRes.data);
+    if (partsRes.data) setParts(partsRes.data as Part[]);
     if (timeLogsRes.data) setTimeLogs(timeLogsRes.data);
+    if (anomaliesRes.data) setAnomalies(anomaliesRes.data as VehicleAnomaly[]);
+    if (filesRes.data) setVehicleFiles(filesRes.data as VehicleFile[]);
     setLoading(false);
   };
 
@@ -146,6 +159,7 @@ export default function VehicleDetail() {
         vehicle_id: vehicle.id,
         name: newPart.name,
         quantity: newPart.quantity,
+        reference: newPart.reference || null,
         added_by: user.id,
       },
     ]);
@@ -154,8 +168,101 @@ export default function VehicleDetail() {
       toast.error('Error al añadir la pieza');
     } else {
       toast.success('Pieza añadida');
-      setNewPart({ name: '', quantity: 1 });
+      setNewPart({ name: '', quantity: 1, reference: '' });
       fetchVehicleData();
+    }
+  };
+
+  const addAnomaly = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!vehicle || !newAnomaly.trim() || !user) return;
+
+    const { error } = await supabase.from('vehicle_anomalies').insert([
+      {
+        vehicle_id: vehicle.id,
+        description: newAnomaly.trim(),
+        created_by: user.id,
+      },
+    ]);
+
+    if (error) {
+      toast.error('Error al añadir la anomalía');
+    } else {
+      toast.success('Anomalía registrada');
+      setNewAnomaly('');
+      fetchVehicleData();
+    }
+  };
+
+  const deleteAnomaly = async (anomalyId: string) => {
+    const { error } = await supabase.from('vehicle_anomalies').delete().eq('id', anomalyId);
+    if (error) {
+      toast.error('Error al eliminar la anomalía');
+    } else {
+      setAnomalies(anomalies.filter((a) => a.id !== anomalyId));
+      toast.success('Anomalía eliminada');
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!vehicle || !user || !e.target.files || e.target.files.length === 0) return;
+    
+    const file = e.target.files[0];
+    setUploadingFile(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${vehicle.id}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('vehicle-files')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('vehicle-files')
+        .getPublicUrl(fileName);
+
+      const { error: dbError } = await supabase.from('vehicle_files').insert([
+        {
+          vehicle_id: vehicle.id,
+          file_name: file.name,
+          file_path: publicUrl,
+          file_type: file.type,
+          uploaded_by: user.id,
+        },
+      ]);
+
+      if (dbError) throw dbError;
+
+      toast.success('Archivo subido correctamente');
+      fetchVehicleData();
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast.error('Error al subir el archivo');
+    } finally {
+      setUploadingFile(false);
+      e.target.value = '';
+    }
+  };
+
+  const deleteFile = async (fileId: string, filePath: string) => {
+    try {
+      // Extract the path from the full URL
+      const pathParts = filePath.split('/vehicle-files/');
+      if (pathParts.length > 1) {
+        await supabase.storage.from('vehicle-files').remove([pathParts[1]]);
+      }
+
+      const { error } = await supabase.from('vehicle_files').delete().eq('id', fileId);
+      if (error) throw error;
+
+      setVehicleFiles(vehicleFiles.filter((f) => f.id !== fileId));
+      toast.success('Archivo eliminado');
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      toast.error('Error al eliminar el archivo');
     }
   };
 
@@ -350,24 +457,34 @@ export default function VehicleDetail() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <form onSubmit={addPart} className="flex gap-2">
-                  <Input
-                    type="number"
-                    placeholder="Cant."
-                    value={newPart.quantity}
-                    onChange={(e) => setNewPart({ ...newPart, quantity: parseInt(e.target.value) || 1 })}
-                    className="w-20"
-                    min={1}
-                  />
-                  <Input
-                    placeholder="Descripción de la pieza"
-                    value={newPart.name}
-                    onChange={(e) => setNewPart({ ...newPart, name: e.target.value })}
-                    className="flex-1"
-                  />
-                  <Button type="submit" size="icon">
-                    <Plus className="h-4 w-4" />
-                  </Button>
+                <form onSubmit={addPart} className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      placeholder="Cant."
+                      value={newPart.quantity}
+                      onChange={(e) => setNewPart({ ...newPart, quantity: parseInt(e.target.value) || 1 })}
+                      className="w-20"
+                      min={1}
+                    />
+                    <Input
+                      placeholder="Descripción de la pieza"
+                      value={newPart.name}
+                      onChange={(e) => setNewPart({ ...newPart, name: e.target.value })}
+                      className="flex-1"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Referencia (opcional)"
+                      value={newPart.reference}
+                      onChange={(e) => setNewPart({ ...newPart, reference: e.target.value })}
+                      className="flex-1"
+                    />
+                    <Button type="submit" size="icon">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </form>
 
                 {parts.length === 0 ? (
@@ -381,9 +498,14 @@ export default function VehicleDetail() {
                         key={part.id}
                         className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
                       >
-                        <div>
-                          <span className="font-medium text-sm text-muted-foreground mr-2">x{part.quantity}</span>
-                          <span className="font-medium">{part.name}</span>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-sm text-muted-foreground">x{part.quantity}</span>
+                            <span className="font-medium">{part.name}</span>
+                          </div>
+                          {part.reference && (
+                            <p className="text-xs text-muted-foreground mt-1">Ref: {part.reference}</p>
+                          )}
                         </div>
                         <Button
                           variant="ghost"
@@ -392,6 +514,155 @@ export default function VehicleDetail() {
                           onClick={() => deletePart(part.id)}
                         >
                           <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Anomalies */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <AlertTriangle className="h-5 w-5 text-orange-500" />
+                  Anomalías Encontradas
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <form onSubmit={addAnomaly} className="flex gap-2">
+                  <Input
+                    placeholder="Describe la anomalía encontrada..."
+                    value={newAnomaly}
+                    onChange={(e) => setNewAnomaly(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button type="submit" size="icon">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </form>
+
+                {anomalies.length === 0 ? (
+                  <p className="text-center text-sm text-muted-foreground py-4">
+                    No hay anomalías registradas
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {anomalies.map((anomaly) => (
+                      <div
+                        key={anomaly.id}
+                        className="flex items-center justify-between p-3 bg-orange-500/10 border border-orange-500/20 rounded-lg"
+                      >
+                        <div className="flex-1">
+                          <p className="text-sm">{anomaly.description}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(anomaly.created_at).toLocaleDateString('es-ES', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive"
+                          onClick={() => deleteAnomaly(anomaly.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Files */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Upload className="h-5 w-5" />
+                  Archivos y Fotos
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    id="file-upload"
+                    className="hidden"
+                    accept="image/*,.pdf,.doc,.docx"
+                    onChange={handleFileUpload}
+                    disabled={uploadingFile}
+                  />
+                  <label htmlFor="file-upload" className="flex-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full cursor-pointer"
+                      disabled={uploadingFile}
+                      onClick={() => document.getElementById('file-upload')?.click()}
+                    >
+                      {uploadingFile ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Subiendo...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-4 w-4 mr-2" />
+                          Subir Archivo o Foto
+                        </>
+                      )}
+                    </Button>
+                  </label>
+                </div>
+
+                {vehicleFiles.length === 0 ? (
+                  <p className="text-center text-sm text-muted-foreground py-4">
+                    No hay archivos subidos
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {vehicleFiles.map((file) => (
+                      <div
+                        key={file.id}
+                        className="relative group rounded-lg overflow-hidden border bg-muted/30"
+                      >
+                        {file.file_type?.startsWith('image/') ? (
+                          <a href={file.file_path} target="_blank" rel="noopener noreferrer">
+                            <img
+                              src={file.file_path}
+                              alt={file.file_name}
+                              className="w-full h-24 object-cover hover:opacity-80 transition-opacity"
+                            />
+                          </a>
+                        ) : (
+                          <a
+                            href={file.file_path}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center h-24 hover:bg-muted/50 transition-colors"
+                          >
+                            <File className="h-8 w-8 text-muted-foreground" />
+                          </a>
+                        )}
+                        <div className="p-2">
+                          <p className="text-xs truncate" title={file.file_name}>
+                            {file.file_name}
+                          </p>
+                        </div>
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => deleteFile(file.id, file.file_path)}
+                        >
+                          <X className="h-3 w-3" />
                         </Button>
                       </div>
                     ))}

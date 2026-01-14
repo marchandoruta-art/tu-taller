@@ -54,7 +54,26 @@ export interface Part {
   quantity: number;
   unit_price?: number;
   notes?: string;
+  reference?: string;
   added_by?: string;
+  created_at: string;
+}
+
+export interface VehicleAnomaly {
+  id: string;
+  vehicle_id: string;
+  description: string;
+  created_by?: string;
+  created_at: string;
+}
+
+export interface VehicleFile {
+  id: string;
+  vehicle_id: string;
+  file_name: string;
+  file_path: string;
+  file_type?: string;
+  uploaded_by?: string;
   created_at: string;
 }
 
