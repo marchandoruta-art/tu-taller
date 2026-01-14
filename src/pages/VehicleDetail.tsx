@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { VehicleWithOwner, Part, TimeLog, VehicleStatus, STATUS_LABELS } from '@/lib/types';
+import { VehicleWithOwner, Part, TimeLog, VehicleStatus, STATUS_LABELS, Profile, ROLE_LABELS, UserRole } from '@/lib/types';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { VehicleStatusBadge } from '@/components/vehicles/VehicleStatusBadge';
 import { WorkTimer } from '@/components/timer/WorkTimer';
 import { VehicleChat } from '@/components/chat/VehicleChat';
+import { AssignUserDialog } from '@/components/vehicles/AssignUserDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   ArrowLeft,
   Car,
@@ -26,6 +28,7 @@ import {
   Bell,
   Lock,
   FileText,
+  UserCheck,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -41,6 +44,7 @@ export default function VehicleDetail() {
   const [newPart, setNewPart] = useState({ name: '', quantity: 1 });
   const [workSummary, setWorkSummary] = useState('');
   const [savingSummary, setSavingSummary] = useState(false);
+  const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
 
   useEffect(() => {
     fetchVehicleData();
@@ -58,6 +62,27 @@ export default function VehicleDetail() {
     if (vehicleRes.data) {
       setVehicle(vehicleRes.data as VehicleWithOwner);
       setWorkSummary(vehicleRes.data.work_summary || '');
+      
+      // Fetch assigned user
+      if (vehicleRes.data.assigned_to) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', vehicleRes.data.assigned_to)
+          .maybeSingle();
+        
+        if (profile) {
+          const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', vehicleRes.data.assigned_to)
+            .maybeSingle();
+          
+          setAssignedUser({ ...profile, role: roleData?.role as UserRole | undefined });
+        }
+      } else {
+        setAssignedUser(null);
+      }
     }
     if (partsRes.data) setParts(partsRes.data);
     if (timeLogsRes.data) setTimeLogs(timeLogsRes.data);
@@ -172,31 +197,67 @@ export default function VehicleDetail() {
     );
   }
 
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <MainLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-start gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
+        <div className="flex flex-col lg:flex-row lg:items-start gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="self-start">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex flex-wrap items-center gap-3 mb-2">
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Car className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">{vehicle.plate}</h1>
-                <p className="text-muted-foreground">
+                <h1 className="text-xl md:text-2xl font-bold">{vehicle.plate}</h1>
+                <p className="text-sm text-muted-foreground">
                   {vehicle.brand} {vehicle.model} {vehicle.year && `(${vehicle.year})`}
                 </p>
               </div>
               <VehicleStatusBadge status={vehicle.status} />
             </div>
+            
+            {/* Assigned user info */}
+            <div className="flex items-center gap-2 mt-2">
+              <UserCheck className="h-4 w-4 text-muted-foreground" />
+              {assignedUser ? (
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src={assignedUser.avatar_url || undefined} />
+                    <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                      {getInitials(assignedUser.full_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm">{assignedUser.full_name}</span>
+                  {assignedUser.role && (
+                    <span className="text-xs text-muted-foreground">({ROLE_LABELS[assignedUser.role]})</span>
+                  )}
+                </div>
+              ) : (
+                <span className="text-sm text-muted-foreground">Sin asignar</span>
+              )}
+            </div>
           </div>
-          <div className="flex gap-2">
+          
+          <div className="flex flex-wrap gap-2">
+            <AssignUserDialog 
+              vehicleId={vehicle.id} 
+              currentAssignedTo={vehicle.assigned_to} 
+              onAssigned={fetchVehicleData}
+            />
             <Select value={vehicle.status} onValueChange={(v) => updateStatus(v as VehicleStatus)}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-40 md:w-48">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -210,7 +271,7 @@ export default function VehicleDetail() {
             {vehicle.status === 'terminado' && (
               <Button onClick={notifyClient} className="gap-2">
                 <Bell className="h-4 w-4" />
-                Avisar Cliente
+                <span className="hidden sm:inline">Avisar Cliente</span>
               </Button>
             )}
           </div>
