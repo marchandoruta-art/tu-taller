@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ import {
   Globe
 } from 'lucide-react';
 
-export default function InstallApp() {
+const InstallApp = forwardRef<HTMLDivElement>(function InstallApp(_, _ref) {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [platform, setPlatform] = useState<'ios' | 'android' | 'desktop'>('desktop');
@@ -236,4 +236,6 @@ export default function InstallApp() {
       </div>
     </MainLayout>
   );
-}
+});
+
+export default InstallApp;

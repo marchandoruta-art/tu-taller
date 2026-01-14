@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ interface AttendanceLog {
   total_minutes: number | null;
 }
 
-export function AttendanceClock() {
+export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClock(_, ref) {
   const { user } = useAuth();
   const [activeSession, setActiveSession] = useState<AttendanceLog | null>(null);
   const [todayLogs, setTodayLogs] = useState<AttendanceLog[]>([]);
@@ -134,7 +134,7 @@ export function AttendanceClock() {
   }
 
   return (
-    <Card>
+    <Card ref={ref}>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Clock className="h-5 w-5 text-primary" />
@@ -201,4 +201,4 @@ export function AttendanceClock() {
       </CardContent>
     </Card>
   );
-}
+});
