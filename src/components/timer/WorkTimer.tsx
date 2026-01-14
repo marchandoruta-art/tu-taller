@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useOfflineOperation } from '@/hooks/useOfflineOperation';
 import { Button } from '@/components/ui/button';
 import { Play, StopCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -13,6 +14,7 @@ interface WorkTimerProps {
 
 export function WorkTimer({ vehicleId, onUpdate }: WorkTimerProps) {
   const { user } = useAuth();
+  const { executeInsert, executeUpdate, isOnline } = useOfflineOperation();
   const [isRunning, setIsRunning] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [activeLogId, setActiveLogId] = useState<string | null>(null);
@@ -75,13 +77,10 @@ export function WorkTimer({ vehicleId, onUpdate }: WorkTimerProps) {
         const now = new Date();
         const totalMinutes = Math.floor((now.getTime() - startedAt.getTime()) / 60000);
 
-        await supabase
-          .from('time_logs')
-          .update({
-            ended_at: now.toISOString(),
-            total_minutes: totalMinutes,
-          })
-          .eq('id', timer.id);
+        await executeUpdate('time_logs', timer.id, {
+          ended_at: now.toISOString(),
+          total_minutes: totalMinutes,
+        }, { showToast: false });
       }
 
       toast.info(`Se pausó automáticamente ${activeTimers.length} tarea(s) anterior(es)`);
@@ -95,20 +94,21 @@ export function WorkTimer({ vehicleId, onUpdate }: WorkTimerProps) {
       // First, pause any other active timers
       await pauseOtherTimers();
 
-      const { data, error } = await supabase
-        .from('time_logs')
-        .insert([{ vehicle_id: vehicleId, user_id: user.id }])
-        .select()
-        .single();
+      const now = new Date();
+      const result = await executeInsert('time_logs', {
+        vehicle_id: vehicleId,
+        user_id: user.id,
+        started_at: now.toISOString(),
+      });
 
-      if (error) throw error;
-
-      setActiveLogId(data.id);
-      setStartTime(new Date(data.started_at));
-      setIsRunning(true);
-      setElapsed(0);
-      toast.success('Cronómetro iniciado');
-    } catch (error: any) {
+      if (result.success && result.data) {
+        setActiveLogId(result.data.id);
+        setStartTime(now);
+        setIsRunning(true);
+        setElapsed(0);
+        toast.success(result.offline ? 'Cronómetro iniciado (offline)' : 'Cronómetro iniciado');
+      }
+    } catch (error) {
       toast.error('Error al iniciar el cronómetro');
     }
   };
@@ -119,23 +119,24 @@ export function WorkTimer({ vehicleId, onUpdate }: WorkTimerProps) {
     try {
       const totalMinutes = Math.floor(elapsed / 60);
 
-      const { error } = await supabase
-        .from('time_logs')
-        .update({
-          ended_at: new Date().toISOString(),
-          total_minutes: totalMinutes,
-        })
-        .eq('id', activeLogId);
+      const result = await executeUpdate('time_logs', activeLogId, {
+        ended_at: new Date().toISOString(),
+        total_minutes: totalMinutes,
+      });
 
-      if (error) throw error;
-
-      setIsRunning(false);
-      setActiveLogId(null);
-      setStartTime(null);
-      setElapsed(0);
-      toast.success(`Tiempo registrado: ${formatTime(elapsed)}`);
-      onUpdate?.();
-    } catch (error: any) {
+      if (result.success) {
+        setIsRunning(false);
+        setActiveLogId(null);
+        setStartTime(null);
+        const formattedTime = formatTime(elapsed);
+        setElapsed(0);
+        toast.success(result.offline 
+          ? `Tiempo registrado (offline): ${formattedTime}` 
+          : `Tiempo registrado: ${formattedTime}`
+        );
+        onUpdate?.();
+      }
+    } catch (error) {
       toast.error('Error al detener el cronómetro');
     }
   };
@@ -152,7 +153,7 @@ export function WorkTimer({ vehicleId, onUpdate }: WorkTimerProps) {
       <div className={cn('timer-display', isRunning && 'text-primary')}>
         {formatTime(elapsed)}
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
         {!isRunning ? (
           <Button onClick={startTimer} size="sm" className="gap-2">
             <Play className="h-4 w-4" />
@@ -164,6 +165,7 @@ export function WorkTimer({ vehicleId, onUpdate }: WorkTimerProps) {
             Detener
           </Button>
         )}
+        {!isOnline && <span className="text-xs text-yellow-500">(Offline)</span>}
       </div>
     </div>
   );

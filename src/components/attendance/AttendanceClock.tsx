@@ -1,6 +1,7 @@
 import { useState, useEffect, forwardRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useOfflineOperation } from '@/hooks/useOfflineOperation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogIn, LogOut, Clock, Stethoscope, Coffee, UtensilsCrossed } from 'lucide-react';
@@ -20,6 +21,7 @@ interface AttendanceLog {
   clock_out: string | null;
   total_minutes: number | null;
   exit_type: string | null;
+  user_id: string;
 }
 
 const EXIT_TYPES = {
@@ -31,6 +33,7 @@ const EXIT_TYPES = {
 
 export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClock(_, ref) {
   const { user } = useAuth();
+  const { executeInsert, executeUpdate, isOnline } = useOfflineOperation();
   const [activeSession, setActiveSession] = useState<AttendanceLog | null>(null);
   const [todayLogs, setTodayLogs] = useState<AttendanceLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,17 +85,19 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('attendance_logs')
-        .insert([{ user_id: user.id }])
-        .select()
-        .single();
+      const newLog = {
+        user_id: user.id,
+        clock_in: new Date().toISOString(),
+      };
 
-      if (error) throw error;
+      const result = await executeInsert('attendance_logs', newLog);
 
-      setActiveSession(data as AttendanceLog);
-      setTodayLogs(prev => [data as AttendanceLog, ...prev]);
-      toast.success('Entrada registrada');
+      if (result.success && result.data) {
+        const logData = result.data as unknown as AttendanceLog;
+        setActiveSession(logData);
+        setTodayLogs(prev => [logData, ...prev]);
+        toast.success(result.offline ? 'Entrada registrada (offline)' : 'Entrada registrada');
+      }
     } catch (error) {
       toast.error('Error al registrar entrada');
     }
@@ -104,21 +109,30 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
     try {
       const totalMinutes = Math.floor(elapsed / 60);
 
-      const { error } = await supabase
-        .from('attendance_logs')
-        .update({
-          clock_out: new Date().toISOString(),
-          total_minutes: totalMinutes,
-          exit_type: exitType,
-        })
-        .eq('id', activeSession.id);
+      const result = await executeUpdate('attendance_logs', activeSession.id, {
+        clock_out: new Date().toISOString(),
+        total_minutes: totalMinutes,
+        exit_type: exitType,
+      });
 
-      if (error) throw error;
-
-      setActiveSession(null);
-      setElapsed(0);
-      fetchTodayLogs();
-      toast.success(`${EXIT_TYPES[exitType as keyof typeof EXIT_TYPES]?.label || 'Salida'} registrada`);
+      if (result.success) {
+        setActiveSession(null);
+        setElapsed(0);
+        if (!result.offline) {
+          fetchTodayLogs();
+        } else {
+          // Update local state for offline mode
+          setTodayLogs(prev => prev.map(log => 
+            log.id === activeSession.id 
+              ? { ...log, clock_out: new Date().toISOString(), total_minutes: totalMinutes, exit_type: exitType }
+              : log
+          ));
+        }
+        toast.success(result.offline 
+          ? `${EXIT_TYPES[exitType as keyof typeof EXIT_TYPES]?.label || 'Salida'} registrada (offline)` 
+          : `${EXIT_TYPES[exitType as keyof typeof EXIT_TYPES]?.label || 'Salida'} registrada`
+        );
+      }
     } catch (error) {
       toast.error('Error al registrar salida');
     }
@@ -159,6 +173,7 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
         <CardTitle className="flex items-center gap-2 text-lg">
           <Clock className="h-5 w-5 text-primary" />
           Control Horario
+          {!isOnline && <span className="text-xs text-yellow-500 ml-2">(Offline)</span>}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
