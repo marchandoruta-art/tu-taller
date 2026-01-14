@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { OnlineStatusProvider } from "@/hooks/useOnlineStatus";
 import { ConnectionStatus } from "@/components/ui/ConnectionStatus";
+import { RealtimeNotificationListener } from "@/components/notifications/RealtimeNotificationListener";
 import Index from "./pages/Index";
 import Vehicles from "./pages/Vehicles";
 import VehicleDetail from "./pages/VehicleDetail";
@@ -26,6 +27,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <ConnectionStatus />
+          <RealtimeNotificationListener />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
