@@ -10,6 +10,7 @@ import VehicleDetail from "./pages/VehicleDetail";
 import TimeLogs from "./pages/TimeLogs";
 import Notifications from "./pages/Notifications";
 import AdminAttendance from "./pages/AdminAttendance";
+import UserManagement from "./pages/UserManagement";
 import InstallApp from "./pages/InstallApp";
 import NotFound from "./pages/NotFound";
 
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/time-logs" element={<TimeLogs />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/admin/attendance" element={<AdminAttendance />} />
+            <Route path="/users" element={<UserManagement />} />
             <Route path="/install" element={<InstallApp />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
