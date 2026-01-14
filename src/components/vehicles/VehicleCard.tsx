@@ -1,12 +1,11 @@
-import { Vehicle, Owner } from '@/lib/types';
+import { VehicleWithOwner } from '@/lib/types';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { VehicleStatusBadge } from './VehicleStatusBadge';
-import { Car, User, Clock, MessageSquare, Wrench } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Car, User, Clock, MessageSquare, Wrench, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface VehicleCardProps {
-  vehicle: Vehicle & { owner: Owner };
+  vehicle: VehicleWithOwner;
   totalTime?: number;
   messagesCount?: number;
 }
@@ -44,12 +43,21 @@ export function VehicleCard({ vehicle, totalTime = 0, messagesCount = 0 }: Vehic
       <CardContent className="space-y-4">
         {/* Owner info */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <User className="w-4 h-4" />
-          <span>{vehicle.owner.name}</span>
-          {vehicle.owner.phone && (
-            <span className="text-xs bg-muted px-2 py-0.5 rounded-full">
-              {vehicle.owner.phone}
-            </span>
+          {vehicle.owner ? (
+            <>
+              <User className="w-4 h-4" />
+              <span>{vehicle.owner.name}</span>
+              {vehicle.owner.phone && (
+                <span className="text-xs bg-muted px-2 py-0.5 rounded-full">
+                  {vehicle.owner.phone}
+                </span>
+              )}
+            </>
+          ) : (
+            <>
+              <Lock className="w-4 h-4" />
+              <span className="italic">Datos restringidos</span>
+            </>
           )}
         </div>
 

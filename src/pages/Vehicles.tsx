@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Vehicle, Owner } from '@/lib/types';
+import { VehicleWithOwner, STATUS_LABELS } from '@/lib/types';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { VehicleCard } from '@/components/vehicles/VehicleCard';
 import { NewVehicleDialog } from '@/components/vehicles/NewVehicleDialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Search } from 'lucide-react';
-import { STATUS_LABELS, VehicleStatus } from '@/lib/types';
 
 export default function Vehicles() {
-  const [vehicles, setVehicles] = useState<(Vehicle & { owner: Owner })[]>([]);
+  const [vehicles, setVehicles] = useState<VehicleWithOwner[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -32,11 +31,12 @@ export default function Vehicles() {
   }, []);
 
   const filteredVehicles = vehicles.filter((v) => {
+    const ownerName = v.owner?.name?.toLowerCase() || '';
     const matchesSearch =
       v.plate.toLowerCase().includes(search.toLowerCase()) ||
       v.brand.toLowerCase().includes(search.toLowerCase()) ||
       v.model.toLowerCase().includes(search.toLowerCase()) ||
-      v.owner.name.toLowerCase().includes(search.toLowerCase());
+      ownerName.includes(search.toLowerCase());
 
     const matchesStatus = statusFilter === 'all' || v.status === statusFilter;
 
