@@ -5,9 +5,9 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { StatusColumn } from '@/components/dashboard/StatusColumn';
 import { VehicleCard } from '@/components/vehicles/VehicleCard';
 import { NewVehicleDialog } from '@/components/vehicles/NewVehicleDialog';
-import { Loader2, Car, Clock, Wrench, CheckCircle } from 'lucide-react';
+import { Loader2, Car, Clock, Wrench, CheckCircle, PackageCheck } from 'lucide-react';
 
-const statusOrder: VehicleStatus[] = ['recibido', 'en_reparacion', 'pendiente_piezas', 'terminado'];
+const statusOrder: VehicleStatus[] = ['recibido', 'en_reparacion', 'pendiente_piezas', 'terminado', 'entregado'];
 
 export default function Dashboard() {
   const [vehicles, setVehicles] = useState<VehicleWithOwner[]>([]);
@@ -17,7 +17,6 @@ export default function Dashboard() {
     const { data } = await supabase
       .from('vehicles')
       .select('*, owner:owners(*)')
-      .neq('status', 'entregado')
       .order('created_at', { ascending: false });
 
     if (data) {
@@ -37,7 +36,7 @@ export default function Dashboard() {
   const stats = [
     {
       label: 'En Taller',
-      value: vehicles.filter((v) => v.status !== 'terminado').length,
+      value: vehicles.filter((v) => v.status !== 'terminado' && v.status !== 'entregado').length,
       icon: Car,
       color: 'text-primary',
     },
@@ -58,6 +57,12 @@ export default function Dashboard() {
       value: vehicles.filter((v) => v.status === 'terminado').length,
       icon: CheckCircle,
       color: 'text-status-completed',
+    },
+    {
+      label: 'Entregados',
+      value: vehicles.filter((v) => v.status === 'entregado').length,
+      icon: PackageCheck,
+      color: 'text-status-delivered',
     },
   ];
 
@@ -84,7 +89,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
           {stats.map((stat) => (
             <div
               key={stat.label}
@@ -124,7 +129,7 @@ export default function Dashboard() {
         </div>
 
         {/* Kanban Board - grid layout on desktop */}
-        <div className="hidden lg:grid lg:grid-cols-4 gap-4">
+        <div className="hidden lg:grid lg:grid-cols-5 gap-4">
           {statusOrder.map((status) => {
             const statusVehicles = getVehiclesByStatus(status);
             return (
