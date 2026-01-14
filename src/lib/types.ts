@@ -1,0 +1,101 @@
+export type UserRole = 'mecanico' | 'chapista' | 'oficina' | 'admin';
+
+export type VehicleStatus = 'recibido' | 'en_reparacion' | 'pendiente_piezas' | 'terminado' | 'entregado';
+
+export interface Owner {
+  id: string;
+  name: string;
+  phone?: string;
+  email?: string;
+  dni?: string;
+  address?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Vehicle {
+  id: string;
+  owner_id: string;
+  plate: string;
+  brand: string;
+  model: string;
+  year?: number;
+  color?: string;
+  vin?: string;
+  client_description?: string;
+  status: VehicleStatus;
+  assigned_to?: string;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+  owner?: Owner;
+  time_logs?: TimeLog[];
+  parts?: Part[];
+}
+
+export interface TimeLog {
+  id: string;
+  vehicle_id: string;
+  user_id: string;
+  started_at: string;
+  ended_at?: string;
+  total_minutes: number;
+  notes?: string;
+}
+
+export interface Part {
+  id: string;
+  vehicle_id: string;
+  name: string;
+  quantity: number;
+  unit_price?: number;
+  notes?: string;
+  added_by?: string;
+  created_at: string;
+}
+
+export interface VehicleMessage {
+  id: string;
+  vehicle_id: string;
+  user_id: string;
+  message: string;
+  created_at: string;
+  profile?: {
+    full_name: string;
+    avatar_url?: string;
+  };
+}
+
+export interface Profile {
+  id: string;
+  user_id: string;
+  full_name: string;
+  avatar_url?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Notification {
+  id: string;
+  vehicle_id?: string;
+  user_id?: string;
+  type: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+}
+
+export const STATUS_LABELS: Record<VehicleStatus, string> = {
+  recibido: 'Recibido',
+  en_reparacion: 'En Reparación',
+  pendiente_piezas: 'Pendiente Piezas',
+  terminado: 'Terminado',
+  entregado: 'Entregado',
+};
+
+export const ROLE_LABELS: Record<UserRole, string> = {
+  mecanico: 'Mecánico',
+  chapista: 'Chapista',
+  oficina: 'Oficina',
+  admin: 'Administrador',
+};
