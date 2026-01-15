@@ -35,6 +35,16 @@ export interface Vehicle {
   owner?: Owner;
   time_logs?: TimeLog[];
   parts?: Part[];
+  // Reception fields
+  fuel_level?: number;
+  mileage?: number;
+  exterior_damages?: unknown;
+  interior_check?: unknown;
+  client_belongings?: string;
+  reception_notes?: string;
+  client_signature?: string;
+  reception_date?: string;
+  deposit_receipt_generated?: boolean;
 }
 
 export interface TimeLog {

@@ -7,6 +7,7 @@ import { VehicleStatusBadge } from '@/components/vehicles/VehicleStatusBadge';
 import { WorkTimer } from '@/components/timer/WorkTimer';
 import { VehicleChat } from '@/components/chat/VehicleChat';
 import { AssignUserDialog } from '@/components/vehicles/AssignUserDialog';
+import { ViewDepositReceipt } from '@/components/vehicles/reception/ViewDepositReceipt';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -750,6 +751,9 @@ export default function VehicleDetail() {
 
           {/* Right Column */}
           <div className="space-y-6">
+            {/* Deposit Receipt */}
+            <ViewDepositReceipt vehicle={vehicle} />
+
             {/* Owner Info */}
             <Card>
               <CardHeader className="pb-3">
