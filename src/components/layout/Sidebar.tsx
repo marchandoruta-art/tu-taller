@@ -14,6 +14,8 @@ import {
   Download,
   CalendarClock,
   Database,
+  Settings,
+  History,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -22,6 +24,7 @@ import { cn } from '@/lib/utils';
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Vehículos', href: '/vehicles', icon: Car },
+  { name: 'Historial', href: '/repair-history', icon: History },
   { name: 'Registro Tiempo', href: '/time-logs', icon: Clock },
   { name: 'Notificaciones', href: '/notifications', icon: Bell },
   { name: 'Instalar App', href: '/install', icon: Download },
@@ -31,6 +34,7 @@ const adminNavigation = [
   { name: 'Usuarios', href: '/users', icon: Users },
   { name: 'Control Horario', href: '/admin/attendance', icon: CalendarClock },
   { name: 'Gestión Datos', href: '/admin/data', icon: Database },
+  { name: 'Ajustes', href: '/settings', icon: Settings },
 ];
 
 interface SidebarProps {

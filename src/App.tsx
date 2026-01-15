@@ -16,6 +16,8 @@ import AdminAttendance from "./pages/AdminAttendance";
 import AdminData from "./pages/AdminData";
 import UserManagement from "./pages/UserManagement";
 import InstallApp from "./pages/InstallApp";
+import Settings from "./pages/Settings";
+import RepairHistory from "./pages/RepairHistory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +42,8 @@ const App = () => (
               <Route path="/admin/data" element={<AdminData />} />
               <Route path="/users" element={<UserManagement />} />
               <Route path="/install" element={<InstallApp />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/repair-history" element={<RepairHistory />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

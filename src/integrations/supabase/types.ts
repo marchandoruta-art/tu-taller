@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          updated_at: string
+          value: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          updated_at?: string
+          value?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: string | null
+        }
+        Relationships: []
+      }
       attendance_logs: {
         Row: {
           clock_in: string
@@ -346,6 +370,7 @@ export type Database = {
       }
       vehicles: {
         Row: {
+          archived: boolean | null
           assigned_to: string | null
           brand: string
           client_belongings: string | null
@@ -354,6 +379,7 @@ export type Database = {
           color: string | null
           created_at: string
           created_by: string | null
+          delivered_at: string | null
           deposit_receipt_generated: boolean | null
           exterior_damages: Json | null
           fuel_level: number | null
@@ -372,6 +398,7 @@ export type Database = {
           year: number | null
         }
         Insert: {
+          archived?: boolean | null
           assigned_to?: string | null
           brand: string
           client_belongings?: string | null
@@ -380,6 +407,7 @@ export type Database = {
           color?: string | null
           created_at?: string
           created_by?: string | null
+          delivered_at?: string | null
           deposit_receipt_generated?: boolean | null
           exterior_damages?: Json | null
           fuel_level?: number | null
@@ -398,6 +426,7 @@ export type Database = {
           year?: number | null
         }
         Update: {
+          archived?: boolean | null
           assigned_to?: string | null
           brand?: string
           client_belongings?: string | null
@@ -406,6 +435,7 @@ export type Database = {
           color?: string | null
           created_at?: string
           created_by?: string | null
+          delivered_at?: string | null
           deposit_receipt_generated?: boolean | null
           exterior_damages?: Json | null
           fuel_level?: number | null
@@ -438,6 +468,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      archive_old_delivered_vehicles: { Args: never; Returns: undefined }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
