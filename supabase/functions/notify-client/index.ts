@@ -103,9 +103,16 @@ const handler = async (req: Request): Promise<Response> => {
       const phoneWithCode = cleanPhone.startsWith('+') ? cleanPhone : `+34${cleanPhone}`;
       
       const message = encodeURIComponent(
-        notificationType === 'completed'
-          ? `Hola ${ownerName}! Le informamos que su vehículo ${vehiclePlate} (${vehicleBrand} ${vehicleModel}) ha sido reparado y está listo para recoger. Gracias por confiar en nosotros.`
-          : `Hola ${ownerName}! Su vehículo ${vehiclePlate} (${vehicleBrand} ${vehicleModel}) está listo para ser recogido. Le esperamos en nuestras instalaciones.`
+        `Estimado/a ${ownerName},
+
+Le informamos de que su vehículo ${vehiclePlate} (${vehicleBrand} ${vehicleModel}) ya se encuentra terminado y disponible para su recogida en nuestras instalaciones.
+
+Puede pasar a retirarlo dentro de nuestro horario habitual.
+
+Quedamos a su disposición para cualquier aclaración.
+
+Atentamente,
+Taller Autos Formentera Es Brolls S.L.`
       );
       
       // Return WhatsApp API link
