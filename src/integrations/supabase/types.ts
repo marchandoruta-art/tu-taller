@@ -348,14 +348,23 @@ export type Database = {
         Row: {
           assigned_to: string | null
           brand: string
+          client_belongings: string | null
           client_description: string | null
+          client_signature: string | null
           color: string | null
           created_at: string
           created_by: string | null
+          deposit_receipt_generated: boolean | null
+          exterior_damages: Json | null
+          fuel_level: number | null
           id: string
+          interior_check: Json | null
+          mileage: number | null
           model: string
           owner_id: string | null
           plate: string
+          reception_date: string | null
+          reception_notes: string | null
           status: Database["public"]["Enums"]["vehicle_status"]
           updated_at: string
           vin: string | null
@@ -365,14 +374,23 @@ export type Database = {
         Insert: {
           assigned_to?: string | null
           brand: string
+          client_belongings?: string | null
           client_description?: string | null
+          client_signature?: string | null
           color?: string | null
           created_at?: string
           created_by?: string | null
+          deposit_receipt_generated?: boolean | null
+          exterior_damages?: Json | null
+          fuel_level?: number | null
           id?: string
+          interior_check?: Json | null
+          mileage?: number | null
           model: string
           owner_id?: string | null
           plate: string
+          reception_date?: string | null
+          reception_notes?: string | null
           status?: Database["public"]["Enums"]["vehicle_status"]
           updated_at?: string
           vin?: string | null
@@ -382,14 +400,23 @@ export type Database = {
         Update: {
           assigned_to?: string | null
           brand?: string
+          client_belongings?: string | null
           client_description?: string | null
+          client_signature?: string | null
           color?: string | null
           created_at?: string
           created_by?: string | null
+          deposit_receipt_generated?: boolean | null
+          exterior_damages?: Json | null
+          fuel_level?: number | null
           id?: string
+          interior_check?: Json | null
+          mileage?: number | null
           model?: string
           owner_id?: string | null
           plate?: string
+          reception_date?: string | null
+          reception_notes?: string | null
           status?: Database["public"]["Enums"]["vehicle_status"]
           updated_at?: string
           vin?: string | null
