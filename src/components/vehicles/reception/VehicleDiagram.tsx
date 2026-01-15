@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { X, Plus, Camera, Image, Loader2 } from 'lucide-react';
+import { X, Camera, Image, Loader2, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -21,34 +21,42 @@ interface VehicleDiagramProps {
   onChange: (damages: ExteriorDamage[]) => void;
 }
 
-const VEHICLE_ZONES = [
-  { id: 'front_bumper', label: 'Parachoques delantero' },
-  { id: 'rear_bumper', label: 'Parachoques trasero' },
-  { id: 'front_left_fender', label: 'Aleta delantera izquierda' },
-  { id: 'front_right_fender', label: 'Aleta delantera derecha' },
-  { id: 'rear_left_fender', label: 'Aleta trasera izquierda' },
-  { id: 'rear_right_fender', label: 'Aleta trasera derecha' },
-  { id: 'left_door_front', label: 'Puerta delantera izquierda' },
-  { id: 'left_door_rear', label: 'Puerta trasera izquierda' },
-  { id: 'right_door_front', label: 'Puerta delantera derecha' },
-  { id: 'right_door_rear', label: 'Puerta trasera derecha' },
-  { id: 'hood', label: 'Capó' },
-  { id: 'trunk', label: 'Maletero' },
-  { id: 'roof', label: 'Techo' },
-  { id: 'windshield', label: 'Parabrisas' },
-  { id: 'rear_window', label: 'Luneta trasera' },
-  { id: 'left_mirror', label: 'Retrovisor izquierdo' },
-  { id: 'right_mirror', label: 'Retrovisor derecho' },
-  { id: 'wheel_fl', label: 'Rueda delantera izquierda' },
-  { id: 'wheel_fr', label: 'Rueda delantera derecha' },
-  { id: 'wheel_rl', label: 'Rueda trasera izquierda' },
-  { id: 'wheel_rr', label: 'Rueda trasera derecha' },
+interface VehicleZone {
+  id: string;
+  label: string;
+  path: string;
+}
+
+// SVG paths for each zone of the vehicle (top-down view)
+const VEHICLE_ZONES: VehicleZone[] = [
+  { id: 'hood', label: 'Capó', path: 'M 80 40 L 170 40 L 180 80 L 70 80 Z' },
+  { id: 'windshield', label: 'Parabrisas', path: 'M 70 80 L 180 80 L 185 100 L 65 100 Z' },
+  { id: 'roof', label: 'Techo', path: 'M 65 100 L 185 100 L 185 180 L 65 180 Z' },
+  { id: 'rear_window', label: 'Luneta trasera', path: 'M 65 180 L 185 180 L 180 200 L 70 200 Z' },
+  { id: 'trunk', label: 'Maletero', path: 'M 70 200 L 180 200 L 170 240 L 80 240 Z' },
+  { id: 'front_bumper', label: 'Parachoques delantero', path: 'M 70 25 L 180 25 L 180 40 L 70 40 Z' },
+  { id: 'rear_bumper', label: 'Parachoques trasero', path: 'M 70 240 L 180 240 L 180 255 L 70 255 Z' },
+  { id: 'front_left_fender', label: 'Aleta delantera izquierda', path: 'M 40 40 L 70 40 L 70 90 L 40 85 Z' },
+  { id: 'front_right_fender', label: 'Aleta delantera derecha', path: 'M 180 40 L 210 40 L 210 85 L 180 90 Z' },
+  { id: 'left_door_front', label: 'Puerta delantera izquierda', path: 'M 40 90 L 65 90 L 65 145 L 40 145 Z' },
+  { id: 'left_door_rear', label: 'Puerta trasera izquierda', path: 'M 40 145 L 65 145 L 65 190 L 40 190 Z' },
+  { id: 'right_door_front', label: 'Puerta delantera derecha', path: 'M 185 90 L 210 90 L 210 145 L 185 145 Z' },
+  { id: 'right_door_rear', label: 'Puerta trasera derecha', path: 'M 185 145 L 210 145 L 210 190 L 185 190 Z' },
+  { id: 'rear_left_fender', label: 'Aleta trasera izquierda', path: 'M 40 190 L 65 190 L 70 240 L 40 235 Z' },
+  { id: 'rear_right_fender', label: 'Aleta trasera derecha', path: 'M 185 190 L 210 190 L 210 235 L 180 240 Z' },
+  { id: 'left_mirror', label: 'Retrovisor izquierdo', path: 'M 30 85 L 40 80 L 40 95 L 30 95 Z' },
+  { id: 'right_mirror', label: 'Retrovisor derecho', path: 'M 210 80 L 220 85 L 220 95 L 210 95 Z' },
+  { id: 'wheel_fl', label: 'Rueda delantera izquierda', path: 'M 25 55 A 12 18 0 1 1 25 55.01 Z' },
+  { id: 'wheel_fr', label: 'Rueda delantera derecha', path: 'M 225 55 A 12 18 0 1 1 225 55.01 Z' },
+  { id: 'wheel_rl', label: 'Rueda trasera izquierda', path: 'M 25 215 A 12 18 0 1 1 25 215.01 Z' },
+  { id: 'wheel_rr', label: 'Rueda trasera derecha', path: 'M 225 215 A 12 18 0 1 1 225 215.01 Z' },
 ];
 
 export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
-  const [newDamage, setNewDamage] = useState({ zone: '', description: '', photos: [] as string[] });
-  const [showForm, setShowForm] = useState(false);
+  const [selectedZone, setSelectedZone] = useState<VehicleZone | null>(null);
+  const [newDamage, setNewDamage] = useState({ description: '', photos: [] as string[] });
   const [uploading, setUploading] = useState(false);
+  const [hoveredZone, setHoveredZone] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -91,7 +99,6 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
     setNewDamage(prev => ({ ...prev, photos: [...prev.photos, ...newPhotos] }));
     setUploading(false);
     
-    // Reset input
     if (fileInputRef.current) fileInputRef.current.value = '';
     if (cameraInputRef.current) cameraInputRef.current.value = '';
   };
@@ -103,62 +110,163 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
     }));
   };
 
+  const handleZoneClick = (zone: VehicleZone) => {
+    setSelectedZone(zone);
+    setNewDamage({ description: '', photos: [] });
+  };
+
   const addDamage = () => {
-    if (!newDamage.zone || !newDamage.description) return;
+    if (!selectedZone || !newDamage.description) return;
     
     const damage: ExteriorDamage = {
       id: crypto.randomUUID(),
-      zone: newDamage.zone,
+      zone: selectedZone.id,
       description: newDamage.description,
       photos: newDamage.photos.length > 0 ? newDamage.photos : undefined,
     };
     
     onChange([...damages, damage]);
-    setNewDamage({ zone: '', description: '', photos: [] });
-    setShowForm(false);
+    setNewDamage({ description: '', photos: [] });
+    setSelectedZone(null);
   };
 
   const removeDamage = (id: string) => {
     onChange(damages.filter(d => d.id !== id));
   };
 
+  const getZoneDamageCount = (zoneId: string) => {
+    return damages.filter(d => d.zone === zoneId).length;
+  };
+
+  const getZoneColor = (zone: VehicleZone) => {
+    const damageCount = getZoneDamageCount(zone.id);
+    if (damageCount > 0) return 'hsl(var(--destructive))';
+    if (hoveredZone === zone.id) return 'hsl(var(--primary) / 0.6)';
+    if (selectedZone?.id === zone.id) return 'hsl(var(--primary))';
+    return 'hsl(var(--muted))';
+  };
+
+  const getZoneStroke = (zone: VehicleZone) => {
+    const damageCount = getZoneDamageCount(zone.id);
+    if (damageCount > 0) return 'hsl(var(--destructive))';
+    if (selectedZone?.id === zone.id) return 'hsl(var(--primary))';
+    return 'hsl(var(--border))';
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <Label className="text-base font-medium">Daños Exteriores</Label>
-        {!showForm && (
-          <Button type="button" variant="outline" size="sm" onClick={() => setShowForm(true)}>
-            <Plus className="h-4 w-4 mr-1" />
-            Añadir daño
-          </Button>
+        <span className="text-xs text-muted-foreground">Toca una zona para marcar daños</span>
+      </div>
+
+      {/* Interactive Vehicle Diagram */}
+      <div className="relative bg-muted/20 rounded-lg p-4 border">
+        <svg
+          viewBox="0 0 250 280"
+          className="w-full max-w-[300px] mx-auto h-auto cursor-pointer"
+          style={{ touchAction: 'manipulation' }}
+        >
+          {/* Vehicle body outline for context */}
+          <defs>
+            <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.15" />
+            </filter>
+          </defs>
+          
+          {/* Background shape */}
+          <path
+            d="M 70 25 Q 125 15 180 25 L 210 40 L 220 75 L 225 215 L 210 240 L 180 255 Q 125 265 70 255 L 40 240 L 25 215 L 30 75 L 40 40 Z"
+            fill="hsl(var(--background))"
+            stroke="hsl(var(--border))"
+            strokeWidth="1"
+            filter="url(#shadow)"
+          />
+
+          {/* Interactive zones */}
+          {VEHICLE_ZONES.map((zone) => {
+            const damageCount = getZoneDamageCount(zone.id);
+            return (
+              <g key={zone.id}>
+                <path
+                  d={zone.path}
+                  fill={getZoneColor(zone)}
+                  stroke={getZoneStroke(zone)}
+                  strokeWidth={selectedZone?.id === zone.id || damageCount > 0 ? 2 : 1}
+                  className="transition-all duration-200 cursor-pointer"
+                  onClick={() => handleZoneClick(zone)}
+                  onMouseEnter={() => setHoveredZone(zone.id)}
+                  onMouseLeave={() => setHoveredZone(null)}
+                  style={{ opacity: damageCount > 0 ? 0.8 : hoveredZone === zone.id ? 0.7 : 0.5 }}
+                />
+                {/* Damage indicator */}
+                {damageCount > 0 && (
+                  <g>
+                    <circle
+                      cx={zone.id.includes('left') ? 50 : zone.id.includes('right') ? 200 : 125}
+                      cy={
+                        zone.id.includes('front') || zone.id === 'hood' || zone.id === 'windshield' ? 70 :
+                        zone.id.includes('rear') || zone.id === 'trunk' ? 220 : 140
+                      }
+                      r="8"
+                      fill="hsl(var(--destructive))"
+                      stroke="hsl(var(--background))"
+                      strokeWidth="2"
+                    />
+                    <text
+                      x={zone.id.includes('left') ? 50 : zone.id.includes('right') ? 200 : 125}
+                      y={
+                        (zone.id.includes('front') || zone.id === 'hood' || zone.id === 'windshield' ? 70 :
+                        zone.id.includes('rear') || zone.id === 'trunk' ? 220 : 140) + 4
+                      }
+                      textAnchor="middle"
+                      fontSize="10"
+                      fontWeight="bold"
+                      fill="hsl(var(--destructive-foreground))"
+                    >
+                      {damageCount}
+                    </text>
+                  </g>
+                )}
+              </g>
+            );
+          })}
+
+          {/* Front indicator */}
+          <text x="125" y="18" textAnchor="middle" fontSize="8" fill="hsl(var(--muted-foreground))">
+            FRONTAL
+          </text>
+          
+          {/* Rear indicator */}
+          <text x="125" y="272" textAnchor="middle" fontSize="8" fill="hsl(var(--muted-foreground))">
+            TRASERO
+          </text>
+        </svg>
+
+        {/* Zone label on hover/select */}
+        {(hoveredZone || selectedZone) && (
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-background/95 px-3 py-1 rounded-full text-xs font-medium border shadow-sm">
+            {VEHICLE_ZONES.find(z => z.id === (selectedZone?.id || hoveredZone))?.label}
+          </div>
         )}
       </div>
 
-      {showForm && (
-        <div className="space-y-3 p-3 border rounded-lg bg-muted/30">
-          <div className="space-y-2">
-            <Label htmlFor="damage-zone">Zona del vehículo</Label>
-            <select
-              id="damage-zone"
-              value={newDamage.zone}
-              onChange={(e) => setNewDamage({ ...newDamage, zone: e.target.value })}
-              className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
-            >
-              <option value="">Seleccionar zona...</option>
-              {VEHICLE_ZONES.map((zone) => (
-                <option key={zone.id} value={zone.id}>
-                  {zone.label}
-                </option>
-              ))}
-            </select>
+      {/* Damage Form when zone is selected */}
+      {selectedZone && (
+        <div className="space-y-3 p-3 border rounded-lg bg-primary/5 animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-primary" />
+            <span className="font-medium text-sm">{selectedZone.label}</span>
           </div>
+          
           <div className="space-y-2">
             <Label htmlFor="damage-description">Descripción del daño</Label>
             <Input
               id="damage-description"
               value={newDamage.description}
               onChange={(e) => setNewDamage({ ...newDamage, description: e.target.value })}
-              placeholder="Ej: Arañazo de 10cm, abolladuras, pintura descascarillada..."
+              placeholder="Ej: Arañazo de 10cm, abolladura, pintura descascarillada..."
+              autoFocus
             />
           </div>
 
@@ -228,18 +336,20 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
           </div>
 
           <div className="flex gap-2">
-            <Button type="button" size="sm" onClick={addDamage} disabled={!newDamage.zone || !newDamage.description || uploading}>
-              Añadir
+            <Button type="button" size="sm" onClick={addDamage} disabled={!newDamage.description || uploading}>
+              Añadir daño
             </Button>
-            <Button type="button" variant="ghost" size="sm" onClick={() => { setShowForm(false); setNewDamage({ zone: '', description: '', photos: [] }); }}>
+            <Button type="button" variant="ghost" size="sm" onClick={() => { setSelectedZone(null); setNewDamage({ description: '', photos: [] }); }}>
               Cancelar
             </Button>
           </div>
         </div>
       )}
 
+      {/* Damage List */}
       {damages.length > 0 && (
         <div className="space-y-2">
+          <Label className="text-sm text-muted-foreground">Daños registrados ({damages.length})</Label>
           {damages.map((damage) => {
             const zone = VEHICLE_ZONES.find(z => z.id === damage.zone);
             return (
@@ -252,7 +362,10 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm">{zone?.label || damage.zone}</p>
+                    <p className="font-medium text-sm flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3 text-destructive" />
+                      {zone?.label || damage.zone}
+                    </p>
                     <p className="text-sm text-muted-foreground">{damage.description}</p>
                   </div>
                   <Button
@@ -284,8 +397,8 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
         </div>
       )}
 
-      {damages.length === 0 && !showForm && (
-        <p className="text-sm text-muted-foreground text-center py-4">
+      {damages.length === 0 && !selectedZone && (
+        <p className="text-sm text-muted-foreground text-center py-2">
           No se han registrado daños exteriores
         </p>
       )}
