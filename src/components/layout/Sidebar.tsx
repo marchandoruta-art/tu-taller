@@ -13,6 +13,7 @@ import {
   PanelLeft,
   Download,
   CalendarClock,
+  Database,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -29,6 +30,7 @@ const navigation = [
 const adminNavigation = [
   { name: 'Usuarios', href: '/users', icon: Users },
   { name: 'Control Horario', href: '/admin/attendance', icon: CalendarClock },
+  { name: 'Gestión Datos', href: '/admin/data', icon: Database },
 ];
 
 interface SidebarProps {
