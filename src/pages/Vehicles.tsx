@@ -18,6 +18,7 @@ export default function Vehicles() {
     const { data } = await supabase
       .from('vehicles')
       .select('*, owner:owners(*)')
+      .eq('archived', false)
       .order('created_at', { ascending: false });
 
     if (data) {
@@ -101,7 +102,7 @@ export default function Vehicles() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {filteredVehicles.map((vehicle) => (
-              <VehicleCard key={vehicle.id} vehicle={vehicle} />
+              <VehicleCard key={vehicle.id} vehicle={vehicle} onStatusChange={fetchVehicles} />
             ))}
           </div>
         )}

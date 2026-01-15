@@ -4,10 +4,22 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { VehicleStatusBadge } from './VehicleStatusBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Car, User, Clock, Wrench, Lock, UserCheck, ArrowRight, ChevronRight } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Car, User, Clock, Wrench, Lock, UserCheck, ArrowRight, ChevronRight, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 
 interface VehicleCardProps {
   vehicle: VehicleWithOwner;
@@ -29,8 +41,10 @@ const nextStatusLabels: Record<VehicleStatus, string> = {
 
 export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, onStatusChange }: VehicleCardProps) {
   const navigate = useNavigate();
+  const { role } = useAuth();
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
   const [updating, setUpdating] = useState(false);
+  const isAdmin = role === 'admin';
 
   useEffect(() => {
     if (vehicle.assigned_to) {
@@ -166,12 +180,56 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
           </div>
         )}
 
-        {/* Stats */}
-        <div className="flex items-center gap-4 pt-2 border-t border-border">
+        {/* Stats and Delete Button */}
+        <div className="flex items-center justify-between pt-2 border-t border-border">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Clock className="w-3.5 h-3.5" />
             <span className="font-mono">{formatTime(totalTime)}</span>
           </div>
+          {isAdmin && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Eliminar vehículo?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción eliminará permanentemente el vehículo {vehicle.plate} y toda su información asociada.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      const { error } = await supabase
+                        .from('vehicles')
+                        .delete()
+                        .eq('id', vehicle.id);
+                      
+                      if (error) {
+                        toast.error('Error al eliminar el vehículo');
+                      } else {
+                        toast.success('Vehículo eliminado');
+                        onStatusChange?.();
+                      }
+                    }}
+                  >
+                    Eliminar
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
 
         {/* Next status action button */}

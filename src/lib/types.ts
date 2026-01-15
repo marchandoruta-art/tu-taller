@@ -45,6 +45,9 @@ export interface Vehicle {
   client_signature?: string;
   reception_date?: string;
   deposit_receipt_generated?: boolean;
+  // Archive fields
+  delivered_at?: string;
+  archived?: boolean;
 }
 
 export interface TimeLog {

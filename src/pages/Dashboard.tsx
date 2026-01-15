@@ -14,9 +14,13 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   const fetchVehicles = async () => {
+    // First, archive old delivered vehicles
+    await supabase.rpc('archive_old_delivered_vehicles');
+    
     const { data } = await supabase
       .from('vehicles')
       .select('*, owner:owners(*)')
+      .eq('archived', false)
       .order('created_at', { ascending: false });
 
     if (data) {
