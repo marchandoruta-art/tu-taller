@@ -22,28 +22,42 @@ function playNotificationSound(isUrgent: boolean = false) {
     gainNode.connect(audioContext.destination);
 
     if (isUrgent) {
-      // Urgent sound: higher pitch, longer duration, two beeps
-      oscillator.frequency.value = 880; // A5 note
+      // Bell sound for vehicle completed - distinct chime pattern
+      oscillator.frequency.value = 1047; // C6 note - high bell tone
       oscillator.type = 'sine';
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
 
       oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.3);
+      oscillator.stop(audioContext.currentTime + 0.5);
 
-      // Second beep
+      // Second chime - lower
       setTimeout(() => {
         const osc2 = audioContext.createOscillator();
         const gain2 = audioContext.createGain();
         osc2.connect(gain2);
         gain2.connect(audioContext.destination);
-        osc2.frequency.value = 880;
+        osc2.frequency.value = 784; // G5 note
         osc2.type = 'sine';
-        gain2.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        gain2.gain.setValueAtTime(0.35, audioContext.currentTime);
+        gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
         osc2.start(audioContext.currentTime);
-        osc2.stop(audioContext.currentTime + 0.3);
-      }, 350);
+        osc2.stop(audioContext.currentTime + 0.4);
+      }, 200);
+
+      // Third chime - back to high
+      setTimeout(() => {
+        const osc3 = audioContext.createOscillator();
+        const gain3 = audioContext.createGain();
+        osc3.connect(gain3);
+        gain3.connect(audioContext.destination);
+        osc3.frequency.value = 1047; // C6 note
+        osc3.type = 'sine';
+        gain3.gain.setValueAtTime(0.4, audioContext.currentTime);
+        gain3.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
+        osc3.start(audioContext.currentTime);
+        osc3.stop(audioContext.currentTime + 0.6);
+      }, 450);
     } else {
       // Regular notification sound
       oscillator.frequency.value = 587.33; // D5 note
@@ -60,7 +74,7 @@ function playNotificationSound(isUrgent: boolean = false) {
 }
 
 export function useRealtimeNotifications() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const vehicleCacheRef = useRef<Map<string, { plate: string; brand: string; model: string }>>(new Map());
 
   const showNotification = useCallback((notification: RealtimeNotification) => {
@@ -184,7 +198,7 @@ export function useRealtimeNotifications() {
             model: string;
           };
 
-          // Only notify when status changes to 'terminado'
+          // Only notify admins when status changes to 'terminado'
           if (oldVehicle.status !== 'terminado' && newVehicle.status === 'terminado') {
             // Cache the vehicle info
             vehicleCacheRef.current.set(newVehicle.id, {
@@ -193,13 +207,16 @@ export function useRealtimeNotifications() {
               model: newVehicle.model,
             });
 
-            showNotification({
-              type: 'vehicle_completed',
-              title: `🎉 ¡Vehículo Terminado!`,
-              message: `${newVehicle.plate} - ${newVehicle.brand} ${newVehicle.model} está listo para entregar`,
-              vehicleId: newVehicle.id,
-              vehiclePlate: newVehicle.plate,
-            });
+            // Only show notification to admins
+            if (role === 'admin') {
+              showNotification({
+                type: 'vehicle_completed',
+                title: `🔔 ¡Vehículo Terminado!`,
+                message: `${newVehicle.plate} - ${newVehicle.brand} ${newVehicle.model} está listo para entregar`,
+                vehicleId: newVehicle.id,
+                vehiclePlate: newVehicle.plate,
+              });
+            }
           }
         }
       )
@@ -209,7 +226,7 @@ export function useRealtimeNotifications() {
       supabase.removeChannel(messagesChannel);
       supabase.removeChannel(vehiclesChannel);
     };
-  }, [user, showNotification, getVehicleInfo, getUserName]);
+  }, [user, role, showNotification, getVehicleInfo, getUserName]);
 
   return { playNotificationSound };
 }

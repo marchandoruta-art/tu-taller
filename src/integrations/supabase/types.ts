@@ -354,7 +354,7 @@ export type Database = {
           created_by: string | null
           id: string
           model: string
-          owner_id: string
+          owner_id: string | null
           plate: string
           status: Database["public"]["Enums"]["vehicle_status"]
           updated_at: string
@@ -371,7 +371,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           model: string
-          owner_id: string
+          owner_id?: string | null
           plate: string
           status?: Database["public"]["Enums"]["vehicle_status"]
           updated_at?: string
@@ -388,7 +388,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           model?: string
-          owner_id?: string
+          owner_id?: string | null
           plate?: string
           status?: Database["public"]["Enums"]["vehicle_status"]
           updated_at?: string

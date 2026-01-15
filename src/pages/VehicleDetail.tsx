@@ -294,10 +294,53 @@ export default function VehicleDetail() {
     setSavingSummary(false);
   };
 
+  const [notifyingClient, setNotifyingClient] = useState(false);
+
   const notifyClient = async () => {
     if (!vehicle) return;
-    // Here you would implement the notification logic (email, SMS, etc.)
-    toast.success('Notificación enviada al cliente');
+    
+    setNotifyingClient(true);
+    
+    try {
+      const ownerName = vehicle.owner?.name || 'Cliente';
+      const ownerEmail = vehicle.owner?.email;
+      const ownerPhone = vehicle.owner?.phone;
+
+      // Call edge function
+      const { data, error } = await supabase.functions.invoke('notify-client', {
+        body: {
+          ownerName,
+          ownerEmail,
+          ownerPhone,
+          vehiclePlate: vehicle.plate,
+          vehicleBrand: vehicle.brand,
+          vehicleModel: vehicle.model,
+          notificationType: 'completed',
+        },
+      });
+
+      if (error) throw error;
+
+      // Show results
+      if (data.email === 'sent') {
+        toast.success('Email enviado al cliente');
+      }
+
+      // Open WhatsApp if available
+      if (data.whatsapp) {
+        window.open(data.whatsapp, '_blank');
+        toast.success('Abriendo WhatsApp...');
+      }
+
+      if (!data.whatsapp && data.email !== 'sent') {
+        toast.warning('El cliente no tiene email ni teléfono registrado');
+      }
+    } catch (error) {
+      console.error('Error notifying client:', error);
+      toast.error('Error al notificar al cliente');
+    } finally {
+      setNotifyingClient(false);
+    }
   };
 
   const getTotalTime = () => {
@@ -408,8 +451,12 @@ export default function VehicleDetail() {
               </SelectContent>
             </Select>
             {vehicle.status === 'terminado' && (
-              <Button onClick={notifyClient} className="gap-2">
-                <Bell className="h-4 w-4" />
+              <Button onClick={notifyClient} className="gap-2" disabled={notifyingClient}>
+                {notifyingClient ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Bell className="h-4 w-4" />
+                )}
                 <span className="hidden sm:inline">Avisar Cliente</span>
               </Button>
             )}

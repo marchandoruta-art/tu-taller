@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -12,8 +12,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Loader2, Car, User } from 'lucide-react';
+import { Plus, Loader2, Car, User, SkipForward } from 'lucide-react';
 import { toast } from 'sonner';
+import { UserRole } from '@/lib/types';
 
 interface NewVehicleDialogProps {
   onSuccess?: () => void;
@@ -24,6 +25,8 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'owner' | 'vehicle'>('owner');
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [skipOwner, setSkipOwner] = useState(false);
 
   const [ownerData, setOwnerData] = useState({
     name: '',
@@ -43,30 +46,55 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
     client_description: '',
   });
 
+  // Fetch user role
+  useEffect(() => {
+    const fetchRole = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
+      if (data) {
+        setUserRole(data.role as UserRole);
+      }
+    };
+    fetchRole();
+  }, [user]);
+
+  const isAdmin = userRole === 'admin';
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (step === 'owner') {
+    
+    // If on owner step and not skipping, go to vehicle step
+    if (step === 'owner' && !skipOwner) {
       setStep('vehicle');
       return;
     }
 
     setLoading(true);
     try {
-      // Create owner
-      const { data: owner, error: ownerError } = await supabase
-        .from('owners')
-        .insert([ownerData])
-        .select()
-        .single();
+      let ownerId: string | null = null;
 
-      if (ownerError) throw ownerError;
+      // Only create owner if we have owner data and not skipping
+      if (!skipOwner && ownerData.name.trim()) {
+        const { data: owner, error: ownerError } = await supabase
+          .from('owners')
+          .insert([ownerData])
+          .select()
+          .single();
 
-      // Create vehicle
+        if (ownerError) throw ownerError;
+        ownerId = owner.id;
+      }
+
+      // Create vehicle (with or without owner)
       const { error: vehicleError } = await supabase.from('vehicles').insert([
         {
           ...vehicleData,
           year: vehicleData.year ? parseInt(vehicleData.year) : null,
-          owner_id: owner.id,
+          owner_id: ownerId,
           created_by: user?.id,
         },
       ]);
@@ -77,15 +105,22 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
       setOpen(false);
       resetForm();
       onSuccess?.();
-    } catch (error: any) {
-      toast.error('Error al registrar el vehículo', { description: error.message });
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      toast.error('Error al registrar el vehículo', { description: errorMessage });
     } finally {
       setLoading(false);
     }
   };
 
+  const handleSkipOwner = () => {
+    setSkipOwner(true);
+    setStep('vehicle');
+  };
+
   const resetForm = () => {
     setStep('owner');
+    setSkipOwner(false);
     setOwnerData({ name: '', phone: '', email: '', dni: '', address: '' });
     setVehicleData({
       plate: '',
@@ -126,14 +161,21 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           {step === 'owner' ? (
             <>
+              {!isAdmin && (
+                <div className="bg-muted/50 p-3 rounded-lg mb-4">
+                  <p className="text-sm text-muted-foreground">
+                    Puedes omitir los datos del propietario y registrar solo el vehículo.
+                  </p>
+                </div>
+              )}
               <div className="space-y-2">
-                <Label htmlFor="owner-name">Nombre *</Label>
+                <Label htmlFor="owner-name">Nombre {isAdmin && '*'}</Label>
                 <Input
                   id="owner-name"
                   value={ownerData.name}
                   onChange={(e) => setOwnerData({ ...ownerData, name: e.target.value })}
                   placeholder="Juan Pérez"
-                  required
+                  required={isAdmin}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -256,8 +298,14 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
           )}
 
           <div className="flex gap-3 pt-4">
+            {step === 'owner' && !isAdmin && (
+              <Button type="button" variant="outline" onClick={handleSkipOwner}>
+                <SkipForward className="mr-2 h-4 w-4" />
+                Omitir
+              </Button>
+            )}
             {step === 'vehicle' && (
-              <Button type="button" variant="outline" onClick={() => setStep('owner')}>
+              <Button type="button" variant="outline" onClick={() => { setStep('owner'); setSkipOwner(false); }}>
                 Atrás
               </Button>
             )}
