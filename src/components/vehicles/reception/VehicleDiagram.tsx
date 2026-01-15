@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { X, Plus } from 'lucide-react';
+import { X, Plus, Camera, Image, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export interface ExteriorDamage {
   id: string;
@@ -11,6 +13,7 @@ export interface ExteriorDamage {
   description: string;
   x?: number;
   y?: number;
+  photos?: string[];
 }
 
 interface VehicleDiagramProps {
@@ -43,8 +46,62 @@ const VEHICLE_ZONES = [
 ];
 
 export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
-  const [newDamage, setNewDamage] = useState({ zone: '', description: '' });
+  const [newDamage, setNewDamage] = useState({ zone: '', description: '', photos: [] as string[] });
   const [showForm, setShowForm] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  const uploadPhoto = async (file: File): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `damage-${crypto.randomUUID()}.${fileExt}`;
+      const filePath = `damages/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('vehicle-files')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('vehicle-files')
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      toast.error('Error al subir la foto');
+      return null;
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    const newPhotos: string[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const url = await uploadPhoto(files[i]);
+      if (url) newPhotos.push(url);
+    }
+
+    setNewDamage(prev => ({ ...prev, photos: [...prev.photos, ...newPhotos] }));
+    setUploading(false);
+    
+    // Reset input
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (cameraInputRef.current) cameraInputRef.current.value = '';
+  };
+
+  const removePhoto = (photoUrl: string) => {
+    setNewDamage(prev => ({
+      ...prev,
+      photos: prev.photos.filter(p => p !== photoUrl)
+    }));
+  };
 
   const addDamage = () => {
     if (!newDamage.zone || !newDamage.description) return;
@@ -53,10 +110,11 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
       id: crypto.randomUUID(),
       zone: newDamage.zone,
       description: newDamage.description,
+      photos: newDamage.photos.length > 0 ? newDamage.photos : undefined,
     };
     
     onChange([...damages, damage]);
-    setNewDamage({ zone: '', description: '' });
+    setNewDamage({ zone: '', description: '', photos: [] });
     setShowForm(false);
   };
 
@@ -103,11 +161,77 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
               placeholder="Ej: Arañazo de 10cm, abolladuras, pintura descascarillada..."
             />
           </div>
+
+          {/* Photo Upload Section */}
+          <div className="space-y-2">
+            <Label>Fotos del daño (opcional)</Label>
+            <div className="flex gap-2">
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => cameraInputRef.current?.click()}
+                disabled={uploading}
+              >
+                {uploading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Camera className="h-4 w-4 mr-1" />}
+                Cámara
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+              >
+                <Image className="h-4 w-4 mr-1" />
+                Galería
+              </Button>
+            </div>
+
+            {/* Photo Preview */}
+            {newDamage.photos.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {newDamage.photos.map((photo, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={photo}
+                      alt={`Daño ${index + 1}`}
+                      className="h-16 w-16 object-cover rounded-md border"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(photo)}
+                      className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="flex gap-2">
-            <Button type="button" size="sm" onClick={addDamage} disabled={!newDamage.zone || !newDamage.description}>
+            <Button type="button" size="sm" onClick={addDamage} disabled={!newDamage.zone || !newDamage.description || uploading}>
               Añadir
             </Button>
-            <Button type="button" variant="ghost" size="sm" onClick={() => setShowForm(false)}>
+            <Button type="button" variant="ghost" size="sm" onClick={() => { setShowForm(false); setNewDamage({ zone: '', description: '', photos: [] }); }}>
               Cancelar
             </Button>
           </div>
@@ -122,23 +246,38 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
               <div
                 key={damage.id}
                 className={cn(
-                  'flex items-start justify-between gap-2 p-3 rounded-lg',
+                  'flex flex-col gap-2 p-3 rounded-lg',
                   'bg-destructive/10 border border-destructive/20'
                 )}
               >
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm">{zone?.label || damage.zone}</p>
-                  <p className="text-sm text-muted-foreground truncate">{damage.description}</p>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm">{zone?.label || damage.zone}</p>
+                    <p className="text-sm text-muted-foreground">{damage.description}</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="shrink-0 h-8 w-8"
+                    onClick={() => removeDamage(damage.id)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="shrink-0 h-8 w-8"
-                  onClick={() => removeDamage(damage.id)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+                {damage.photos && damage.photos.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {damage.photos.map((photo, index) => (
+                      <img
+                        key={index}
+                        src={photo}
+                        alt={`Daño ${index + 1}`}
+                        className="h-12 w-12 object-cover rounded-md border cursor-pointer hover:opacity-80"
+                        onClick={() => window.open(photo, '_blank')}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })}
