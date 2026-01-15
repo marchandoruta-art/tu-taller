@@ -37,14 +37,25 @@ export function VehicleChat({ vehicleId }: VehicleChatProps) {
         },
         async (payload) => {
           // Fetch the full message with profile
-          const { data } = await supabase
+          const { data: messageData } = await supabase
             .from('vehicle_messages')
-            .select('*, profile:profiles!vehicle_messages_user_id_fkey(full_name, avatar_url)')
+            .select('*')
             .eq('id', payload.new.id)
             .single();
 
-          if (data) {
-            setMessages((prev) => [...prev, data as any]);
+          if (messageData) {
+            // Fetch the profile separately
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('full_name, avatar_url')
+              .eq('user_id', messageData.user_id)
+              .maybeSingle();
+
+            const messageWithProfile = {
+              ...messageData,
+              profile: profileData
+            };
+            setMessages((prev) => [...prev, messageWithProfile as any]);
           }
         }
       )
@@ -61,14 +72,38 @@ export function VehicleChat({ vehicleId }: VehicleChatProps) {
 
   const fetchMessages = async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data: messagesData, error } = await supabase
       .from('vehicle_messages')
-      .select('*, profile:profiles!vehicle_messages_user_id_fkey(full_name, avatar_url)')
+      .select('*')
       .eq('vehicle_id', vehicleId)
       .order('created_at', { ascending: true });
 
-    if (data) {
-      setMessages(data as any);
+    if (error) {
+      console.error('Error fetching messages:', error);
+      setLoading(false);
+      return;
+    }
+
+    if (messagesData && messagesData.length > 0) {
+      // Fetch profiles for all unique user_ids
+      const userIds = [...new Set(messagesData.map(m => m.user_id))];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_url')
+        .in('user_id', userIds);
+
+      const profilesMap = new Map(
+        profilesData?.map(p => [p.user_id, { full_name: p.full_name, avatar_url: p.avatar_url }]) || []
+      );
+
+      const messagesWithProfiles = messagesData.map(msg => ({
+        ...msg,
+        profile: profilesMap.get(msg.user_id) || null
+      }));
+
+      setMessages(messagesWithProfiles as any);
+    } else {
+      setMessages([]);
     }
     setLoading(false);
   };
