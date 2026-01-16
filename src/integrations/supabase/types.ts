@@ -736,6 +736,10 @@ export type Database = {
         Returns: boolean
       }
       is_org_admin: { Args: { _user_id?: string }; Returns: boolean }
+      is_org_owner: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
       lookup_organization_by_slug: {
         Args: { _slug: string }
         Returns: {
