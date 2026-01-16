@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { VehicleWithOwner, STATUS_LABELS } from '@/lib/types';
 import { 
   Calendar as CalendarIcon, 
@@ -40,6 +41,7 @@ interface ScheduledDelivery {
 export default function CalendarPage() {
   const navigate = useNavigate();
   const { user, role } = useAuth();
+  const { organizationId } = useOrganization();
   const [loading, setLoading] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -108,6 +110,7 @@ export default function CalendarPage() {
       scheduled_time: selectedTime || null,
       notes: notes || null,
       created_by: user.id,
+      organization_id: organizationId,
     });
 
     if (error) {

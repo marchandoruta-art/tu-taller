@@ -21,6 +21,7 @@ import {
   AlertTriangle,
   Calendar,
   Building2,
+  Scale,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -43,6 +44,7 @@ const adminNavigation = [
   { name: 'Productividad', href: '/admin/productivity', icon: BarChart3 },
   { name: 'Alertas', href: '/admin/alerts', icon: AlertTriangle },
   { name: 'Gestión Datos', href: '/admin/data', icon: Database },
+  { name: 'Legal', href: '/legal', icon: Scale },
   { name: 'Ajustes', href: '/settings', icon: Settings },
 ];
 
