@@ -25,6 +25,12 @@ import RepairHistory from "./pages/RepairHistory";
 import Onboarding from "./pages/Onboarding";
 import OrganizationSettings from "./pages/OrganizationSettings";
 import NotFound from "./pages/NotFound";
+import AvisoLegal from "./pages/legal/AvisoLegal";
+import PoliticaPrivacidad from "./pages/legal/PoliticaPrivacidad";
+import PoliticaCookies from "./pages/legal/PoliticaCookies";
+import TerminosCondiciones from "./pages/legal/TerminosCondiciones";
+import ContratoEncargado from "./pages/legal/ContratoEncargado";
+import TextosLegales from "./pages/legal/TextosLegales";
 
 const queryClient = new QueryClient();
 
