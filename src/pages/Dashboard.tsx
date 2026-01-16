@@ -5,13 +5,18 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { StatusColumn } from '@/components/dashboard/StatusColumn';
 import { VehicleCard } from '@/components/vehicles/VehicleCard';
 import { NewVehicleDialog } from '@/components/vehicles/NewVehicleDialog';
-import { Loader2, Car, Clock, Wrench, CheckCircle, PackageCheck } from 'lucide-react';
+import { DashboardCharts } from '@/components/dashboard/DashboardCharts';
+import { Loader2, Car, Clock, Wrench, CheckCircle, PackageCheck, BarChart2, LayoutGrid } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 
 const statusOrder: VehicleStatus[] = ['recibido', 'en_reparacion', 'pendiente_piezas', 'terminado', 'entregado'];
 
 export default function Dashboard() {
+  const { role } = useAuth();
   const [vehicles, setVehicles] = useState<VehicleWithOwner[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCharts, setShowCharts] = useState(false);
 
   const fetchVehicles = async () => {
     // First, archive old delivered vehicles
@@ -70,6 +75,8 @@ export default function Dashboard() {
     },
   ];
 
+  const isAdmin = role === 'admin';
+
   if (loading) {
     return (
       <MainLayout>
@@ -89,7 +96,20 @@ export default function Dashboard() {
             <h1 className="text-xl md:text-2xl font-bold">Dashboard</h1>
             <p className="text-sm text-muted-foreground">Vista general del taller</p>
           </div>
-          <NewVehicleDialog onSuccess={fetchVehicles} />
+          <div className="flex gap-2">
+            {isAdmin && (
+              <Button 
+                variant={showCharts ? "default" : "outline"} 
+                size="sm"
+                onClick={() => setShowCharts(!showCharts)}
+                className="gap-2"
+              >
+                {showCharts ? <LayoutGrid className="h-4 w-4" /> : <BarChart2 className="h-4 w-4" />}
+                {showCharts ? 'Kanban' : 'Gráficos'}
+              </Button>
+            )}
+            <NewVehicleDialog onSuccess={fetchVehicles} />
+          </div>
         </div>
 
         {/* Stats */}
@@ -110,47 +130,56 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Kanban Board - horizontal scroll on mobile, grid on larger screens */}
-        <div className="lg:hidden overflow-x-auto pb-4 -mx-4 px-4">
-          <div className="flex gap-4 min-w-max">
-            {statusOrder.map((status) => {
-              const statusVehicles = getVehiclesByStatus(status);
-              return (
-                <StatusColumn key={status} status={status} count={statusVehicles.length}>
-                  {statusVehicles.length === 0 ? (
-                    <p className="text-center text-sm text-muted-foreground py-8">
-                      Sin vehículos
-                    </p>
-                  ) : (
-                    statusVehicles.map((vehicle) => (
-                      <VehicleCard key={vehicle.id} vehicle={vehicle} showNextAction onStatusChange={fetchVehicles} />
-                    ))
-                  )}
-                </StatusColumn>
-              );
-            })}
-          </div>
-        </div>
+        {/* Charts View */}
+        {showCharts && isAdmin && (
+          <DashboardCharts vehicles={vehicles} />
+        )}
 
-        {/* Kanban Board - grid layout on desktop */}
-        <div className="hidden lg:grid lg:grid-cols-5 gap-4">
-          {statusOrder.map((status) => {
-            const statusVehicles = getVehiclesByStatus(status);
-            return (
-              <StatusColumn key={status} status={status} count={statusVehicles.length}>
-                {statusVehicles.length === 0 ? (
-                  <p className="text-center text-sm text-muted-foreground py-8">
-                    Sin vehículos
-                  </p>
-                ) : (
-                  statusVehicles.map((vehicle) => (
-                    <VehicleCard key={vehicle.id} vehicle={vehicle} showNextAction onStatusChange={fetchVehicles} />
-                  ))
-                )}
-              </StatusColumn>
-            );
-          })}
-        </div>
+        {/* Kanban Board - horizontal scroll on mobile, grid on larger screens */}
+        {!showCharts && (
+          <>
+            <div className="lg:hidden overflow-x-auto pb-4 -mx-4 px-4">
+              <div className="flex gap-4 min-w-max">
+                {statusOrder.map((status) => {
+                  const statusVehicles = getVehiclesByStatus(status);
+                  return (
+                    <StatusColumn key={status} status={status} count={statusVehicles.length}>
+                      {statusVehicles.length === 0 ? (
+                        <p className="text-center text-sm text-muted-foreground py-8">
+                          Sin vehículos
+                        </p>
+                      ) : (
+                        statusVehicles.map((vehicle) => (
+                          <VehicleCard key={vehicle.id} vehicle={vehicle} showNextAction onStatusChange={fetchVehicles} />
+                        ))
+                      )}
+                    </StatusColumn>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Kanban Board - grid layout on desktop */}
+            <div className="hidden lg:grid lg:grid-cols-5 gap-4">
+              {statusOrder.map((status) => {
+                const statusVehicles = getVehiclesByStatus(status);
+                return (
+                  <StatusColumn key={status} status={status} count={statusVehicles.length}>
+                    {statusVehicles.length === 0 ? (
+                      <p className="text-center text-sm text-muted-foreground py-8">
+                        Sin vehículos
+                      </p>
+                    ) : (
+                      statusVehicles.map((vehicle) => (
+                        <VehicleCard key={vehicle.id} vehicle={vehicle} showNextAction onStatusChange={fetchVehicles} />
+                      ))
+                    )}
+                  </StatusColumn>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
     </MainLayout>
   );
