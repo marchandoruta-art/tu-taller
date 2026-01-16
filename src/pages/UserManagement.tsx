@@ -2,6 +2,7 @@ import { useState, useEffect, forwardRef } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Profile, UserRole, ROLE_LABELS } from '@/lib/types';
@@ -41,6 +42,7 @@ interface UserWithRole extends Profile {
 
 const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
   const { role } = useAuth();
+  const { organizationId } = useOrganization();
   const navigate = useNavigate();
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,9 +93,14 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
       return;
     }
 
+    if (!organizationId) {
+      toast.error('No se encontró la organización');
+      return;
+    }
+
     setProcessing(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data: authData, error } = await supabase.auth.signUp({
         email: newUser.email,
         password: newUser.password,
         options: {
@@ -104,12 +111,30 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
 
       if (error) throw error;
 
+      // After signup, update the profile and role with organization_id
+      if (authData.user) {
+        // Wait for trigger to create profile and role, then update them
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Update profile with organization_id
+        await supabase
+          .from('profiles')
+          .update({ organization_id: organizationId })
+          .eq('user_id', authData.user.id);
+        
+        // Update role with organization_id
+        await supabase
+          .from('user_roles')
+          .update({ organization_id: organizationId })
+          .eq('user_id', authData.user.id);
+      }
+
       toast.success('Usuario creado correctamente');
       setShowNewUserDialog(false);
       setNewUser({ email: '', password: '', fullName: '' });
       
-      // Wait a bit for the trigger to create profile and role
-      setTimeout(() => fetchUsers(), 1000);
+      // Refresh users list
+      setTimeout(() => fetchUsers(), 500);
     } catch (error: any) {
       console.error('Error creating user:', error);
       toast.error(error.message || 'Error al crear usuario');
