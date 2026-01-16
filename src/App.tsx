@@ -14,6 +14,7 @@ import TimeLogs from "./pages/TimeLogs";
 import Notifications from "./pages/Notifications";
 import AdminAttendance from "./pages/AdminAttendance";
 import AdminData from "./pages/AdminData";
+import Productivity from "./pages/Productivity";
 import UserManagement from "./pages/UserManagement";
 import InstallApp from "./pages/InstallApp";
 import Settings from "./pages/Settings";
@@ -39,6 +40,7 @@ const App = () => (
               <Route path="/time-logs" element={<TimeLogs />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/admin/attendance" element={<AdminAttendance />} />
+              <Route path="/admin/productivity" element={<Productivity />} />
               <Route path="/admin/data" element={<AdminData />} />
               <Route path="/users" element={<UserManagement />} />
               <Route path="/install" element={<InstallApp />} />
