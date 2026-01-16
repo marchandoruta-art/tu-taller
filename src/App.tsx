@@ -31,6 +31,7 @@ import PoliticaCookies from "./pages/legal/PoliticaCookies";
 import TerminosCondiciones from "./pages/legal/TerminosCondiciones";
 import ContratoEncargado from "./pages/legal/ContratoEncargado";
 import TextosLegales from "./pages/legal/TextosLegales";
+import LegalIndex from "./pages/legal/LegalIndex";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ const App = () => (
                 <Route path="/install" element={<InstallApp />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/repair-history" element={<RepairHistory />} />
+                <Route path="/legal" element={<LegalIndex />} />
                 <Route path="/aviso-legal" element={<AvisoLegal />} />
                 <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
                 <Route path="/politica-cookies" element={<PoliticaCookies />} />
