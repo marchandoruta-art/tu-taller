@@ -8,6 +8,7 @@ import { WorkTimer } from '@/components/timer/WorkTimer';
 import { VehicleChat } from '@/components/chat/VehicleChat';
 import { AssignUserDialog } from '@/components/vehicles/AssignUserDialog';
 import { ViewDepositReceipt } from '@/components/vehicles/reception/ViewDepositReceipt';
+import { VehiclePhotos } from '@/components/vehicles/VehiclePhotos';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -495,6 +496,9 @@ export default function VehicleDetail() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Vehicle Photos */}
+            <VehiclePhotos vehicleId={vehicle.id} />
 
             {/* Parts */}
             <Card>

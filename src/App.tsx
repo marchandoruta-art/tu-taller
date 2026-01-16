@@ -15,6 +15,8 @@ import Notifications from "./pages/Notifications";
 import AdminAttendance from "./pages/AdminAttendance";
 import AdminData from "./pages/AdminData";
 import Productivity from "./pages/Productivity";
+import Alerts from "./pages/Alerts";
+import CalendarPage from "./pages/Calendar";
 import UserManagement from "./pages/UserManagement";
 import InstallApp from "./pages/InstallApp";
 import Settings from "./pages/Settings";
@@ -39,8 +41,10 @@ const App = () => (
               <Route path="/vehicles/:id" element={<VehicleDetail />} />
               <Route path="/time-logs" element={<TimeLogs />} />
               <Route path="/notifications" element={<Notifications />} />
+              <Route path="/calendar" element={<CalendarPage />} />
               <Route path="/admin/attendance" element={<AdminAttendance />} />
               <Route path="/admin/productivity" element={<Productivity />} />
+              <Route path="/admin/alerts" element={<Alerts />} />
               <Route path="/admin/data" element={<AdminData />} />
               <Route path="/users" element={<UserManagement />} />
               <Route path="/install" element={<InstallApp />} />

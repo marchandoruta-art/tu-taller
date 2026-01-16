@@ -17,6 +17,8 @@ import {
   Settings,
   History,
   BarChart3,
+  AlertTriangle,
+  Calendar,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -25,6 +27,7 @@ import { cn } from '@/lib/utils';
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Vehículos', href: '/vehicles', icon: Car },
+  { name: 'Calendario', href: '/calendar', icon: Calendar },
   { name: 'Historial', href: '/repair-history', icon: History },
   { name: 'Registro Tiempo', href: '/time-logs', icon: Clock },
   { name: 'Notificaciones', href: '/notifications', icon: Bell },
@@ -35,6 +38,7 @@ const adminNavigation = [
   { name: 'Usuarios', href: '/users', icon: Users },
   { name: 'Control Horario', href: '/admin/attendance', icon: CalendarClock },
   { name: 'Productividad', href: '/admin/productivity', icon: BarChart3 },
+  { name: 'Alertas', href: '/admin/alerts', icon: AlertTriangle },
   { name: 'Gestión Datos', href: '/admin/data', icon: Database },
   { name: 'Ajustes', href: '/settings', icon: Settings },
 ];
