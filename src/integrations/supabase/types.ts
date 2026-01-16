@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           id: string
           key: string
+          organization_id: string | null
           updated_at: string
           value: string | null
         }
@@ -26,6 +27,7 @@ export type Database = {
           created_at?: string
           id?: string
           key: string
+          organization_id?: string | null
           updated_at?: string
           value?: string | null
         }
@@ -33,10 +35,19 @@ export type Database = {
           created_at?: string
           id?: string
           key?: string
+          organization_id?: string | null
           updated_at?: string
           value?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "app_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       attendance_logs: {
         Row: {
@@ -45,6 +56,7 @@ export type Database = {
           created_at: string
           exit_type: string | null
           id: string
+          organization_id: string | null
           total_minutes: number | null
           user_id: string
         }
@@ -54,6 +66,7 @@ export type Database = {
           created_at?: string
           exit_type?: string | null
           id?: string
+          organization_id?: string | null
           total_minutes?: number | null
           user_id: string
         }
@@ -63,16 +76,26 @@ export type Database = {
           created_at?: string
           exit_type?: string | null
           id?: string
+          organization_id?: string | null
           total_minutes?: number | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "attendance_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
           created_at: string
           id: string
           message: string
+          organization_id: string | null
           read: boolean | null
           type: string
           user_id: string | null
@@ -82,6 +105,7 @@ export type Database = {
           created_at?: string
           id?: string
           message: string
+          organization_id?: string | null
           read?: boolean | null
           type: string
           user_id?: string | null
@@ -91,12 +115,20 @@ export type Database = {
           created_at?: string
           id?: string
           message?: string
+          organization_id?: string | null
           read?: boolean | null
           type?: string
           user_id?: string | null
           vehicle_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "notifications_vehicle_id_fkey"
             columns: ["vehicle_id"]
@@ -106,6 +138,36 @@ export type Database = {
           },
         ]
       }
+      organizations: {
+        Row: {
+          created_at: string
+          id: string
+          logo_url: string | null
+          name: string
+          owner_id: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          owner_id: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          owner_id?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       owners: {
         Row: {
           address: string | null
@@ -114,6 +176,7 @@ export type Database = {
           email: string | null
           id: string
           name: string
+          organization_id: string | null
           phone: string | null
           updated_at: string
         }
@@ -124,6 +187,7 @@ export type Database = {
           email?: string | null
           id?: string
           name: string
+          organization_id?: string | null
           phone?: string | null
           updated_at?: string
         }
@@ -134,10 +198,19 @@ export type Database = {
           email?: string | null
           id?: string
           name?: string
+          organization_id?: string | null
           phone?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "owners_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       parts: {
         Row: {
@@ -146,6 +219,7 @@ export type Database = {
           id: string
           name: string
           notes: string | null
+          organization_id: string | null
           quantity: number
           reference: string | null
           unit_price: number | null
@@ -157,6 +231,7 @@ export type Database = {
           id?: string
           name: string
           notes?: string | null
+          organization_id?: string | null
           quantity?: number
           reference?: string | null
           unit_price?: number | null
@@ -168,12 +243,20 @@ export type Database = {
           id?: string
           name?: string
           notes?: string | null
+          organization_id?: string | null
           quantity?: number
           reference?: string | null
           unit_price?: number | null
           vehicle_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "parts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "parts_vehicle_id_fkey"
             columns: ["vehicle_id"]
@@ -189,6 +272,7 @@ export type Database = {
           created_at: string
           full_name: string
           id: string
+          organization_id: string | null
           updated_at: string
           user_id: string
         }
@@ -197,6 +281,7 @@ export type Database = {
           created_at?: string
           full_name: string
           id?: string
+          organization_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -205,10 +290,19 @@ export type Database = {
           created_at?: string
           full_name?: string
           id?: string
+          organization_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       scheduled_deliveries: {
         Row: {
@@ -216,6 +310,7 @@ export type Database = {
           created_by: string | null
           id: string
           notes: string | null
+          organization_id: string | null
           scheduled_date: string
           scheduled_time: string | null
           updated_at: string
@@ -226,6 +321,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           notes?: string | null
+          organization_id?: string | null
           scheduled_date: string
           scheduled_time?: string | null
           updated_at?: string
@@ -236,12 +332,20 @@ export type Database = {
           created_by?: string | null
           id?: string
           notes?: string | null
+          organization_id?: string | null
           scheduled_date?: string
           scheduled_time?: string | null
           updated_at?: string
           vehicle_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "scheduled_deliveries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "scheduled_deliveries_vehicle_id_fkey"
             columns: ["vehicle_id"]
@@ -256,6 +360,7 @@ export type Database = {
           ended_at: string | null
           id: string
           notes: string | null
+          organization_id: string | null
           started_at: string
           total_minutes: number | null
           user_id: string
@@ -265,6 +370,7 @@ export type Database = {
           ended_at?: string | null
           id?: string
           notes?: string | null
+          organization_id?: string | null
           started_at?: string
           total_minutes?: number | null
           user_id: string
@@ -274,12 +380,20 @@ export type Database = {
           ended_at?: string | null
           id?: string
           notes?: string | null
+          organization_id?: string | null
           started_at?: string
           total_minutes?: number | null
           user_id?: string
           vehicle_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "time_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "time_logs_vehicle_id_fkey"
             columns: ["vehicle_id"]
@@ -292,20 +406,31 @@ export type Database = {
       user_roles: {
         Row: {
           id: string
+          organization_id: string | null
           role: Database["public"]["Enums"]["user_role"]
           user_id: string
         }
         Insert: {
           id?: string
+          organization_id?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           user_id: string
         }
         Update: {
           id?: string
+          organization_id?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vehicle_anomalies: {
         Row: {
@@ -313,6 +438,7 @@ export type Database = {
           created_by: string | null
           description: string
           id: string
+          organization_id: string | null
           vehicle_id: string
         }
         Insert: {
@@ -320,6 +446,7 @@ export type Database = {
           created_by?: string | null
           description: string
           id?: string
+          organization_id?: string | null
           vehicle_id: string
         }
         Update: {
@@ -327,9 +454,17 @@ export type Database = {
           created_by?: string | null
           description?: string
           id?: string
+          organization_id?: string | null
           vehicle_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vehicle_anomalies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vehicle_anomalies_vehicle_id_fkey"
             columns: ["vehicle_id"]
@@ -346,6 +481,7 @@ export type Database = {
           file_path: string
           file_type: string | null
           id: string
+          organization_id: string | null
           uploaded_by: string | null
           vehicle_id: string
         }
@@ -355,6 +491,7 @@ export type Database = {
           file_path: string
           file_type?: string | null
           id?: string
+          organization_id?: string | null
           uploaded_by?: string | null
           vehicle_id: string
         }
@@ -364,10 +501,18 @@ export type Database = {
           file_path?: string
           file_type?: string | null
           id?: string
+          organization_id?: string | null
           uploaded_by?: string | null
           vehicle_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vehicle_files_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vehicle_files_vehicle_id_fkey"
             columns: ["vehicle_id"]
@@ -382,6 +527,7 @@ export type Database = {
           created_at: string
           id: string
           message: string
+          organization_id: string | null
           user_id: string
           vehicle_id: string
         }
@@ -389,6 +535,7 @@ export type Database = {
           created_at?: string
           id?: string
           message: string
+          organization_id?: string | null
           user_id: string
           vehicle_id: string
         }
@@ -396,10 +543,18 @@ export type Database = {
           created_at?: string
           id?: string
           message?: string
+          organization_id?: string | null
           user_id?: string
           vehicle_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vehicle_messages_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vehicle_messages_vehicle_id_fkey"
             columns: ["vehicle_id"]
@@ -414,6 +569,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          organization_id: string | null
           photo_type: string
           photo_url: string
           uploaded_by: string | null
@@ -423,6 +579,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          organization_id?: string | null
           photo_type: string
           photo_url: string
           uploaded_by?: string | null
@@ -432,12 +589,20 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          organization_id?: string | null
           photo_type?: string
           photo_url?: string
           uploaded_by?: string | null
           vehicle_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vehicle_photos_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vehicle_photos_vehicle_id_fkey"
             columns: ["vehicle_id"]
@@ -466,6 +631,7 @@ export type Database = {
           interior_check: Json | null
           mileage: number | null
           model: string
+          organization_id: string | null
           owner_id: string | null
           plate: string
           reception_date: string | null
@@ -494,6 +660,7 @@ export type Database = {
           interior_check?: Json | null
           mileage?: number | null
           model: string
+          organization_id?: string | null
           owner_id?: string | null
           plate: string
           reception_date?: string | null
@@ -522,6 +689,7 @@ export type Database = {
           interior_check?: Json | null
           mileage?: number | null
           model?: string
+          organization_id?: string | null
           owner_id?: string | null
           plate?: string
           reception_date?: string | null
@@ -533,6 +701,13 @@ export type Database = {
           year?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "vehicles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vehicles_owner_id_fkey"
             columns: ["owner_id"]
@@ -548,6 +723,7 @@ export type Database = {
     }
     Functions: {
       archive_old_delivered_vehicles: { Args: never; Returns: undefined }
+      get_user_organization_id: { Args: { _user_id?: string }; Returns: string }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
@@ -557,6 +733,11 @@ export type Database = {
           _role: Database["public"]["Enums"]["user_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_org_admin: { Args: { _user_id?: string }; Returns: boolean }
+      user_belongs_to_org: {
+        Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
     }
