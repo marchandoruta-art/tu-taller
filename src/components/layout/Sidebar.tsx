@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { ROLE_LABELS } from '@/lib/types';
 import {
   Car,
@@ -19,6 +20,7 @@ import {
   BarChart3,
   AlertTriangle,
   Calendar,
+  Building2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -36,6 +38,7 @@ const navigation = [
 
 const adminNavigation = [
   { name: 'Usuarios', href: '/users', icon: Users },
+  { name: 'Mi Taller', href: '/organization', icon: Building2 },
   { name: 'Control Horario', href: '/admin/attendance', icon: CalendarClock },
   { name: 'Productividad', href: '/admin/productivity', icon: BarChart3 },
   { name: 'Alertas', href: '/admin/alerts', icon: AlertTriangle },
@@ -50,6 +53,7 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { profile, role, signOut } = useAuth();
+  const { organization } = useOrganization();
   const location = useLocation();
 
   const getInitials = (name: string) => {
@@ -76,7 +80,9 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </div>
           {!collapsed && (
             <div className="min-w-0">
-              <h1 className="font-bold text-sm leading-tight">Autos Formentera</h1>
+              <h1 className="font-bold text-sm leading-tight truncate">
+                {organization?.name || 'TallerPro'}
+              </h1>
               <p className="text-xs text-muted-foreground">Gestión</p>
             </div>
           )}

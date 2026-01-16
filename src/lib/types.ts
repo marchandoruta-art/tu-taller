@@ -107,6 +107,17 @@ export interface Profile {
   user_id: string;
   full_name: string;
   avatar_url?: string;
+  organization_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  logo_url?: string;
+  owner_id: string;
   created_at: string;
   updated_at: string;
 }

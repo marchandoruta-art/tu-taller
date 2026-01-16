@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { supabase } from '@/integrations/supabase/client';
 import {
   Dialog,
@@ -39,6 +40,7 @@ const STEP_ORDER: Step[] = ['owner', 'vehicle', 'inspection', 'review'];
 
 export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
   const { user } = useAuth();
+  const { organizationId } = useOrganization();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<Step>('owner');
@@ -136,7 +138,7 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
       if (!skipOwner && ownerData.name.trim()) {
         const { data: owner, error: ownerError } = await supabase
           .from('owners')
-          .insert([ownerData])
+          .insert([{ ...ownerData, organization_id: organizationId }])
           .select()
           .single();
 
@@ -156,6 +158,7 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
           client_description: vehicleData.client_description || null,
           owner_id: ownerId,
           created_by: user?.id,
+          organization_id: organizationId,
           fuel_level: inspectionData.fuel_level,
           mileage: inspectionData.mileage ? parseInt(inspectionData.mileage) : null,
           exterior_damages: JSON.parse(JSON.stringify(inspectionData.exterior_damages)),
