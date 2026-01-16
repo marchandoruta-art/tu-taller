@@ -83,18 +83,17 @@ export default function Onboarding() {
 
     setLoading(true);
     try {
-      // Find organization by slug (invite code)
-      const { data: org, error: findError } = await supabase
-        .from('organizations')
-        .select('*')
-        .eq('slug', inviteCode.trim().toLowerCase())
-        .single();
+      // Find organization by slug (invite code) using secure RPC function
+      const { data: orgs, error: findError } = await supabase
+        .rpc('lookup_organization_by_slug', { _slug: inviteCode.trim() });
 
-      if (findError || !org) {
+      if (findError || !orgs || orgs.length === 0) {
         toast.error('Código de invitación no válido');
         setLoading(false);
         return;
       }
+
+      const org = orgs[0];
 
       // Update profile with organization_id
       const { error: profileError } = await supabase
