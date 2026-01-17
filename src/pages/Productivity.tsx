@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { supabase } from '@/integrations/supabase/client';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -42,18 +43,21 @@ interface UserProductivity {
 
 export default function Productivity() {
   const { role, loading: authLoading } = useAuth();
+  const { organizationId, loading: orgLoading } = useOrganization();
   const [productivityData, setProductivityData] = useState<UserProductivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPeriod, setCurrentPeriod] = useState(new Date());
   const [periodType, setPeriodType] = useState<'week' | 'month'>('week');
 
   useEffect(() => {
-    if (role === 'admin') {
+    if (role === 'admin' && organizationId) {
       fetchProductivityData();
     }
-  }, [role, currentPeriod, periodType]);
+  }, [role, organizationId, currentPeriod, periodType]);
 
   const fetchProductivityData = async () => {
+    if (!organizationId) return;
+    
     setLoading(true);
     
     let startDate: Date;
@@ -67,25 +71,14 @@ export default function Productivity() {
       endDate = endOfMonth(currentPeriod);
     }
 
-    // Fetch attendance logs
-    const { data: attendanceLogs } = await supabase
-      .from('attendance_logs')
-      .select('*')
-      .gte('clock_in', startDate.toISOString())
-      .lte('clock_in', endDate.toISOString());
+    // Fetch ALL users from the organization (operarios: mecanico, chapista)
+    const { data: allUsersRoles } = await supabase
+      .from('user_roles')
+      .select('user_id, role')
+      .eq('organization_id', organizationId)
+      .in('role', ['mecanico', 'chapista']);
 
-    // Fetch work time logs
-    const { data: timeLogs } = await supabase
-      .from('time_logs')
-      .select('*')
-      .gte('started_at', startDate.toISOString())
-      .lte('started_at', endDate.toISOString())
-      .not('ended_at', 'is', null);
-
-    // Get all unique user IDs
-    const attendanceUserIds = attendanceLogs?.map(l => l.user_id) || [];
-    const timeLogUserIds = timeLogs?.map(l => l.user_id) || [];
-    const allUserIds = [...new Set([...attendanceUserIds, ...timeLogUserIds])];
+    const allUserIds = allUsersRoles?.map(u => u.user_id) || [];
 
     if (allUserIds.length === 0) {
       setProductivityData([]);
@@ -93,24 +86,35 @@ export default function Productivity() {
       return;
     }
 
-    // Fetch profiles
+    // Fetch profiles for all users
     const { data: profiles } = await supabase
       .from('profiles')
       .select('user_id, full_name, avatar_url')
       .in('user_id', allUserIds);
 
-    // Fetch roles
-    const { data: roles } = await supabase
-      .from('user_roles')
-      .select('user_id, role')
-      .in('user_id', allUserIds);
+    // Fetch attendance logs for these users in the period
+    const { data: attendanceLogs } = await supabase
+      .from('attendance_logs')
+      .select('*')
+      .in('user_id', allUserIds)
+      .gte('clock_in', startDate.toISOString())
+      .lte('clock_in', endDate.toISOString());
 
-    // Calculate productivity per user
+    // Fetch work time logs for these users in the period
+    const { data: timeLogs } = await supabase
+      .from('time_logs')
+      .select('*')
+      .in('user_id', allUserIds)
+      .gte('started_at', startDate.toISOString())
+      .lte('started_at', endDate.toISOString())
+      .not('ended_at', 'is', null);
+
+    // Calculate productivity per user (all operarios, even without logs)
     const userMap = new Map<string, UserProductivity>();
 
     allUserIds.forEach(userId => {
       const profile = profiles?.find(p => p.user_id === userId);
-      const userRole = roles?.find(r => r.user_id === userId)?.role as UserRole;
+      const userRole = allUsersRoles?.find(r => r.user_id === userId)?.role as UserRole;
       
       // Sum attendance minutes
       const userAttendance = attendanceLogs?.filter(l => l.user_id === userId) || [];
@@ -200,7 +204,7 @@ export default function Productivity() {
     ? Math.round(productivityData.reduce((sum, u) => sum + u.productivity, 0) / productivityData.length)
     : 0;
 
-  if (authLoading) {
+  if (authLoading || orgLoading) {
     return (
       <MainLayout>
         <div className="flex items-center justify-center h-[50vh]">
