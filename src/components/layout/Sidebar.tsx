@@ -16,12 +16,12 @@ import {
   CalendarClock,
   Database,
   Settings,
-  History,
   BarChart3,
   AlertTriangle,
   Calendar,
   Building2,
   Scale,
+  Archive,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -30,8 +30,8 @@ import { cn } from '@/lib/utils';
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Vehículos', href: '/vehicles', icon: Car },
+  { name: 'Archivados', href: '/repair-history', icon: Archive },
   { name: 'Calendario', href: '/calendar', icon: Calendar },
-  { name: 'Historial', href: '/repair-history', icon: History },
   { name: 'Registro Tiempo', href: '/time-logs', icon: Clock },
   { name: 'Notificaciones', href: '/notifications', icon: Bell },
   { name: 'Instalar App', href: '/install', icon: Download },
