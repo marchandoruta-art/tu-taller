@@ -93,6 +93,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
+      // Pause any active timers before signing out
+      if (user) {
+        const { data: activeTimers } = await supabase
+          .from('time_logs')
+          .select('id, started_at')
+          .eq('user_id', user.id)
+          .is('ended_at', null);
+
+        if (activeTimers && activeTimers.length > 0) {
+          for (const timer of activeTimers) {
+            const startedAt = new Date(timer.started_at);
+            const now = new Date();
+            const totalMinutes = Math.floor((now.getTime() - startedAt.getTime()) / 60000);
+            await supabase
+              .from('time_logs')
+              .update({ ended_at: now.toISOString(), total_minutes: totalMinutes })
+              .eq('id', timer.id);
+          }
+        }
+      }
+
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Error signing out:', error);
@@ -102,7 +123,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(null);
       setProfile(null);
       setRole(null);
-      // Force reload to clear all state
       window.location.href = '/';
     } catch (error) {
       console.error('SignOut error:', error);

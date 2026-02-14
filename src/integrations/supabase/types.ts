@@ -612,6 +612,51 @@ export type Database = {
           },
         ]
       }
+      vehicle_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_status: Database["public"]["Enums"]["vehicle_status"]
+          old_status: Database["public"]["Enums"]["vehicle_status"] | null
+          organization_id: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status: Database["public"]["Enums"]["vehicle_status"]
+          old_status?: Database["public"]["Enums"]["vehicle_status"] | null
+          organization_id?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status?: Database["public"]["Enums"]["vehicle_status"]
+          old_status?: Database["public"]["Enums"]["vehicle_status"] | null
+          organization_id?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_status_history_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_status_history_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicles: {
         Row: {
           archived: boolean | null
