@@ -100,7 +100,23 @@ export default function VehicleDetail() {
     if (partsRes.data) setParts(partsRes.data as Part[]);
     if (timeLogsRes.data) setTimeLogs(timeLogsRes.data);
     if (anomaliesRes.data) setAnomalies(anomaliesRes.data as VehicleAnomaly[]);
-    if (filesRes.data) setVehicleFiles(filesRes.data as VehicleFile[]);
+    if (filesRes.data) {
+      const files = filesRes.data as VehicleFile[];
+      // Generate signed URLs for private bucket files
+      const paths = files.map(f => {
+        const marker = '/vehicle-files/';
+        const idx = f.file_path.indexOf(marker);
+        return idx !== -1 ? decodeURIComponent(f.file_path.substring(idx + marker.length)) : f.file_path;
+      });
+      const { data: signedData } = await supabase.storage
+        .from('vehicle-files')
+        .createSignedUrls(paths, 3600);
+      const filesWithUrls = files.map((f, i) => ({
+        ...f,
+        file_path: signedData?.[i]?.signedUrl || f.file_path,
+      }));
+      setVehicleFiles(filesWithUrls);
+    }
     setLoading(false);
   };
 
@@ -222,15 +238,12 @@ export default function VehicleDetail() {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('vehicle-files')
-        .getPublicUrl(fileName);
-
+      // Store the storage path, not a public URL
       const { error: dbError } = await supabase.from('vehicle_files').insert([
         {
           vehicle_id: vehicle.id,
           file_name: file.name,
-          file_path: publicUrl,
+          file_path: fileName,
           file_type: file.type,
           uploaded_by: user.id,
         },
@@ -252,10 +265,11 @@ export default function VehicleDetail() {
   const deleteFile = async (fileId: string, filePath: string) => {
     try {
       // Extract the path from the full URL
-      const pathParts = filePath.split('/vehicle-files/');
-      if (pathParts.length > 1) {
-        await supabase.storage.from('vehicle-files').remove([pathParts[1]]);
-      }
+      // Extract storage path from URL or use directly
+      const marker = '/vehicle-files/';
+      const idx = filePath.indexOf(marker);
+      const storagePath = idx !== -1 ? decodeURIComponent(filePath.substring(idx + marker.length)) : filePath;
+      await supabase.storage.from('vehicle-files').remove([storagePath]);
 
       const { error } = await supabase.from('vehicle_files').delete().eq('id', fileId);
       if (error) throw error;
