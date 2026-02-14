@@ -72,11 +72,11 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
 
       if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage
+      const { data } = await supabase.storage
         .from('vehicle-files')
-        .getPublicUrl(filePath);
+        .createSignedUrl(filePath, 3600);
 
-      return data.publicUrl;
+      return data?.signedUrl || null;
     } catch (error) {
       console.error('Error uploading photo:', error);
       toast.error('Error al subir la foto');

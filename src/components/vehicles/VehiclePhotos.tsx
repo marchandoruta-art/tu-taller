@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ interface VehiclePhoto {
   description: string | null;
   uploaded_by: string | null;
   created_at: string;
+  signed_url?: string;
 }
 
 interface VehiclePhotosProps {
@@ -28,6 +29,16 @@ const PHOTO_TYPE_LABELS = {
   after: 'Después',
 };
 
+// Extract storage path from a full public URL or return as-is if already a path
+function extractStoragePath(url: string, bucket: string): string {
+  const marker = `/${bucket}/`;
+  const idx = url.indexOf(marker);
+  if (idx !== -1) {
+    return decodeURIComponent(url.substring(idx + marker.length));
+  }
+  return url;
+}
+
 export function VehiclePhotos({ vehicleId }: VehiclePhotosProps) {
   const { user, role } = useAuth();
   const [photos, setPhotos] = useState<VehiclePhoto[]>([]);
@@ -35,6 +46,21 @@ export function VehiclePhotos({ vehicleId }: VehiclePhotosProps) {
   const [uploading, setUploading] = useState(false);
   const [selectedType, setSelectedType] = useState<'before' | 'during' | 'after'>('before');
   const [selectedPhoto, setSelectedPhoto] = useState<VehiclePhoto | null>(null);
+
+  const generateSignedUrls = useCallback(async (photoList: VehiclePhoto[]) => {
+    const paths = photoList.map(p => extractStoragePath(p.photo_url, 'vehicle-photos'));
+    const { data } = await supabase.storage
+      .from('vehicle-photos')
+      .createSignedUrls(paths, 3600);
+
+    if (data) {
+      return photoList.map((photo, i) => ({
+        ...photo,
+        signed_url: data[i]?.signedUrl || photo.photo_url,
+      }));
+    }
+    return photoList;
+  }, []);
 
   useEffect(() => {
     fetchPhotos();
@@ -48,7 +74,8 @@ export function VehiclePhotos({ vehicleId }: VehiclePhotosProps) {
       .order('created_at', { ascending: false });
 
     if (data) {
-      setPhotos(data as VehiclePhoto[]);
+      const withUrls = await generateSignedUrls(data as VehiclePhoto[]);
+      setPhotos(withUrls);
     }
     setLoading(false);
   };
@@ -82,13 +109,10 @@ export function VehiclePhotos({ vehicleId }: VehiclePhotosProps) {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('vehicle-photos')
-        .getPublicUrl(fileName);
-
+      // Store the storage path, not a public URL
       const { error: dbError } = await supabase.from('vehicle_photos').insert({
         vehicle_id: vehicleId,
-        photo_url: publicUrl,
+        photo_url: fileName,
         photo_type: type,
         uploaded_by: user.id,
       });
@@ -108,11 +132,8 @@ export function VehiclePhotos({ vehicleId }: VehiclePhotosProps) {
 
   const handleDelete = async (photo: VehiclePhoto) => {
     try {
-      // Extract path from URL
-      const urlParts = photo.photo_url.split('/vehicle-photos/');
-      if (urlParts.length > 1) {
-        await supabase.storage.from('vehicle-photos').remove([urlParts[1]]);
-      }
+      const storagePath = extractStoragePath(photo.photo_url, 'vehicle-photos');
+      await supabase.storage.from('vehicle-photos').remove([storagePath]);
 
       const { error } = await supabase.from('vehicle_photos').delete().eq('id', photo.id);
       if (error) throw error;
@@ -206,7 +227,7 @@ export function VehiclePhotos({ vehicleId }: VehiclePhotosProps) {
                   {getPhotosByType(type).map(photo => (
                     <div key={photo.id} className="relative group">
                       <img
-                        src={photo.photo_url}
+                        src={photo.signed_url || photo.photo_url}
                         alt={`Foto ${PHOTO_TYPE_LABELS[type]}`}
                         className="w-full h-32 object-cover rounded-lg border cursor-pointer"
                         onClick={() => setSelectedPhoto(photo)}
@@ -253,7 +274,7 @@ export function VehiclePhotos({ vehicleId }: VehiclePhotosProps) {
                   <X className="h-4 w-4" />
                 </Button>
                 <img
-                  src={selectedPhoto.photo_url}
+                  src={selectedPhoto.signed_url || selectedPhoto.photo_url}
                   alt="Foto ampliada"
                   className="w-full max-h-[80vh] object-contain rounded-lg"
                 />
