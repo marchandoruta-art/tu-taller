@@ -90,6 +90,11 @@ export function AuthForm() {
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Entrar
                 </Button>
+                <div className="text-center">
+                  <a href="/forgot-password" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    ¿Olvidaste tu contraseña?
+                  </a>
+                </div>
               </form>
             </TabsContent>
 

@@ -25,6 +25,8 @@ import RepairHistory from "./pages/RepairHistory";
 import Onboarding from "./pages/Onboarding";
 import OrganizationSettings from "./pages/OrganizationSettings";
 import NotFound from "./pages/NotFound";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import AvisoLegal from "./pages/legal/AvisoLegal";
 import PoliticaPrivacidad from "./pages/legal/PoliticaPrivacidad";
 import PoliticaCookies from "./pages/legal/PoliticaCookies";
@@ -47,6 +49,8 @@ const App = () => (
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="/organization" element={<OrganizationSettings />} />
                 <Route path="/vehicles" element={<Vehicles />} />
