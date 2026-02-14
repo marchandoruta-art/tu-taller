@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useOfflineOperation } from '@/hooks/useOfflineOperation';
+import { useOrganization } from '@/hooks/useOrganization';
 import { Button } from '@/components/ui/button';
 import { Play, StopCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -14,6 +15,7 @@ interface WorkTimerProps {
 
 export function WorkTimer({ vehicleId, onUpdate }: WorkTimerProps) {
   const { user } = useAuth();
+  const { organizationId } = useOrganization();
   const { executeInsert, executeUpdate, isOnline } = useOfflineOperation();
   const [isRunning, setIsRunning] = useState(false);
   const [elapsed, setElapsed] = useState(0);
@@ -99,6 +101,7 @@ export function WorkTimer({ vehicleId, onUpdate }: WorkTimerProps) {
         vehicle_id: vehicleId,
         user_id: user.id,
         started_at: now.toISOString(),
+        organization_id: organizationId,
       });
 
       if (result.success && result.data) {
