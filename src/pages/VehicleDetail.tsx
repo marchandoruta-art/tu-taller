@@ -113,7 +113,7 @@ export default function VehicleDetail() {
         .createSignedUrls(paths, 3600);
       const filesWithUrls = files.map((f, i) => ({
         ...f,
-        file_path: signedData?.[i]?.signedUrl || f.file_path,
+        _displayUrl: signedData?.[i]?.signedUrl || f.file_path,
       }));
       setVehicleFiles(filesWithUrls);
     }
@@ -264,12 +264,14 @@ export default function VehicleDetail() {
 
   const deleteFile = async (fileId: string, filePath: string) => {
     try {
-      // Extract the path from the full URL
-      // Extract storage path from URL or use directly
+      // Look up the original storage path from the DB record
+      const fileRecord = vehicleFiles.find(f => f.id === fileId);
+      const originalPath = fileRecord?.file_path || filePath;
+      // Extract clean storage path (no signed URL tokens)
       const marker = '/vehicle-files/';
-      const idx = filePath.indexOf(marker);
-      const storagePath = idx !== -1 ? decodeURIComponent(filePath.substring(idx + marker.length)) : filePath;
-      await supabase.storage.from('vehicle-files').remove([storagePath]);
+      const idx = originalPath.indexOf(marker);
+      const cleanPath = idx !== -1 ? decodeURIComponent(originalPath.substring(idx + marker.length).split('?')[0]) : originalPath;
+      await supabase.storage.from('vehicle-files').remove([cleanPath]);
 
       const { error } = await supabase.from('vehicle_files').delete().eq('id', fileId);
       if (error) throw error;
