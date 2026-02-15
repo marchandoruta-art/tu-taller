@@ -72,16 +72,53 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
 
       if (uploadError) throw uploadError;
 
-      const { data } = await supabase.storage
-        .from('vehicle-files')
-        .createSignedUrl(filePath, 3600);
-
-      return data?.signedUrl || null;
+      // Return storage path, NOT a signed URL (signed URLs expire)
+      return filePath;
     } catch (error) {
       console.error('Error uploading photo:', error);
       toast.error('Error al subir la foto');
       return null;
     }
+  };
+
+  const getSignedUrl = async (storagePath: string): Promise<string> => {
+    // If it's already a full URL (legacy data), return as-is
+    if (storagePath.startsWith('http')) return storagePath;
+    const { data } = await supabase.storage
+      .from('vehicle-files')
+      .createSignedUrl(storagePath, 3600);
+    return data?.signedUrl || storagePath;
+  };
+
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+
+  // Generate signed URLs for display of all damage photos
+  useEffect(() => {
+    const allPhotos = [
+      ...damages.flatMap(d => d.photos || []),
+      ...newDamage.photos,
+    ];
+    const pathsToSign = allPhotos.filter(p => !p.startsWith('http') && !signedUrls[p]);
+    if (pathsToSign.length === 0) return;
+
+    const fetchUrls = async () => {
+      const { data } = await supabase.storage
+        .from('vehicle-files')
+        .createSignedUrls(pathsToSign, 3600);
+      if (data) {
+        const newUrls: Record<string, string> = {};
+        data.forEach((item, i) => {
+          if (item.signedUrl) newUrls[pathsToSign[i]] = item.signedUrl;
+        });
+        setSignedUrls(prev => ({ ...prev, ...newUrls }));
+      }
+    };
+    fetchUrls();
+  }, [damages, newDamage.photos]);
+
+  const getDisplayUrl = (path: string) => {
+    if (path.startsWith('http')) return path;
+    return signedUrls[path] || '';
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
