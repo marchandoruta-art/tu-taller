@@ -320,19 +320,10 @@ export default function VehicleDetail() {
     setNotifyingClient(true);
     
     try {
-      const ownerName = vehicle.owner?.name || 'Cliente';
-      const ownerEmail = vehicle.owner?.email;
-      const ownerPhone = vehicle.owner?.phone;
-
-      // Call edge function
+      // Call edge function with vehicle ID only — server fetches data securely
       const { data, error } = await supabase.functions.invoke('notify-client', {
         body: {
-          ownerName,
-          ownerEmail,
-          ownerPhone,
-          vehiclePlate: vehicle.plate,
-          vehicleBrand: vehicle.brand,
-          vehicleModel: vehicle.model,
+          vehicleId: vehicle.id,
           notificationType: 'completed',
         },
       });
