@@ -16,6 +16,9 @@ interface NotifyClientRequest {
   notificationType: 'completed' | 'ready_pickup';
 }
 
+const escapeHtml = (str: string): string =>
+  str.replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m] || m));
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
