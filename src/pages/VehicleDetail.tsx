@@ -702,16 +702,16 @@ export default function VehicleDetail() {
                         className="relative group rounded-lg overflow-hidden border bg-muted/30"
                       >
                         {file.file_type?.startsWith('image/') ? (
-                          <a href={file.file_path} target="_blank" rel="noopener noreferrer">
+                          <a href={(file as any)._displayUrl || file.file_path} target="_blank" rel="noopener noreferrer">
                             <img
-                              src={file.file_path}
+                              src={(file as any)._displayUrl || file.file_path}
                               alt={file.file_name}
                               className="w-full h-24 object-cover hover:opacity-80 transition-opacity"
                             />
                           </a>
                         ) : (
                           <a
-                            href={file.file_path}
+                            href={(file as any)._displayUrl || file.file_path}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center justify-center h-24 hover:bg-muted/50 transition-colors"
