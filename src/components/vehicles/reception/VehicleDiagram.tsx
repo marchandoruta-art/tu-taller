@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -355,7 +355,7 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
                 {newDamage.photos.map((photo, index) => (
                   <div key={index} className="relative group">
                     <img
-                      src={photo}
+                      src={getDisplayUrl(photo)}
                       alt={`Daño ${index + 1}`}
                       className="h-16 w-16 object-cover rounded-md border"
                     />
@@ -417,15 +417,18 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
                 </div>
                 {damage.photos && damage.photos.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {damage.photos.map((photo, index) => (
-                      <img
-                        key={index}
-                        src={photo}
-                        alt={`Daño ${index + 1}`}
-                        className="h-12 w-12 object-cover rounded-md border cursor-pointer hover:opacity-80"
-                        onClick={() => window.open(photo, '_blank')}
-                      />
-                    ))}
+                    {damage.photos.map((photo, index) => {
+                      const displayUrl = getDisplayUrl(photo);
+                      return (
+                        <img
+                          key={index}
+                          src={displayUrl}
+                          alt={`Daño ${index + 1}`}
+                          className="h-12 w-12 object-cover rounded-md border cursor-pointer hover:opacity-80"
+                          onClick={() => displayUrl && window.open(displayUrl, '_blank')}
+                        />
+                      );
+                    })}
                   </div>
                 )}
               </div>
