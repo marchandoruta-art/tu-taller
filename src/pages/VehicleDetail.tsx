@@ -373,6 +373,7 @@ export default function VehicleDetail() {
   };
 
   const isAdmin = role === 'admin';
+  const canViewOwner = role === 'admin' || role === 'oficina';
 
 
   if (loading) {
@@ -784,7 +785,7 @@ export default function VehicleDetail() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {vehicle.owner && isAdmin ? (
+                {vehicle.owner && canViewOwner ? (
                   <>
                     <div className="font-medium">{vehicle.owner.name}</div>
                     {vehicle.owner.phone && (
