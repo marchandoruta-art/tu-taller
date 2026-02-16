@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { supabase } from '@/integrations/supabase/client';
 import { VehicleMessage } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,7 @@ interface VehicleChatProps {
 
 export function VehicleChat({ vehicleId }: VehicleChatProps) {
   const { user, profile } = useAuth();
+  const { organizationId } = useOrganization();
   const [messages, setMessages] = useState<VehicleMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -118,6 +120,7 @@ export function VehicleChat({ vehicleId }: VehicleChatProps) {
         vehicle_id: vehicleId,
         user_id: user.id,
         message: newMessage.trim(),
+        organization_id: organizationId,
       },
     ]);
 

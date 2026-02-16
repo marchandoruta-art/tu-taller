@@ -39,11 +39,13 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 
 export default function VehicleDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, role } = useAuth();
+  const { organizationId } = useOrganization();
   const [vehicle, setVehicle] = useState<VehicleWithOwner | null>(null);
   const [parts, setParts] = useState<Part[]>([]);
   const [timeLogs, setTimeLogs] = useState<TimeLog[]>([]);
@@ -102,20 +104,24 @@ export default function VehicleDetail() {
     if (anomaliesRes.data) setAnomalies(anomaliesRes.data as VehicleAnomaly[]);
     if (filesRes.data) {
       const files = filesRes.data as VehicleFile[];
-      // Generate signed URLs for private bucket files
-      const paths = files.map(f => {
-        const marker = '/vehicle-files/';
-        const idx = f.file_path.indexOf(marker);
-        return idx !== -1 ? decodeURIComponent(f.file_path.substring(idx + marker.length)) : f.file_path;
-      });
-      const { data: signedData } = await supabase.storage
-        .from('vehicle-files')
-        .createSignedUrls(paths, 3600);
-      const filesWithUrls = files.map((f, i) => ({
-        ...f,
-        _displayUrl: signedData?.[i]?.signedUrl || f.file_path,
-      }));
-      setVehicleFiles(filesWithUrls);
+      if (files.length > 0) {
+        // Generate signed URLs for private bucket files
+        const paths = files.map(f => {
+          const marker = '/vehicle-files/';
+          const idx = f.file_path.indexOf(marker);
+          return idx !== -1 ? decodeURIComponent(f.file_path.substring(idx + marker.length)) : f.file_path;
+        });
+        const { data: signedData } = await supabase.storage
+          .from('vehicle-files')
+          .createSignedUrls(paths, 3600);
+        const filesWithUrls = files.map((f, i) => ({
+          ...f,
+          _displayUrl: signedData?.[i]?.signedUrl || f.file_path,
+        }));
+        setVehicleFiles(filesWithUrls);
+      } else {
+        setVehicleFiles([]);
+      }
     }
     setLoading(false);
   };
@@ -158,6 +164,7 @@ export default function VehicleDetail() {
           type: 'vehicle_finished',
           message: `Vehículo ${vehicle.plate} (${vehicle.brand} ${vehicle.model}) ha sido marcado como TERMINADO`,
           read: false,
+          organization_id: organizationId,
         }));
 
         await supabase.from('notifications').insert(notifications);
@@ -179,6 +186,7 @@ export default function VehicleDetail() {
         quantity: newPart.quantity,
         reference: newPart.reference || null,
         added_by: user.id,
+        organization_id: organizationId,
       },
     ]);
 
@@ -200,6 +208,7 @@ export default function VehicleDetail() {
         vehicle_id: vehicle.id,
         description: newAnomaly.trim(),
         created_by: user.id,
+        organization_id: organizationId,
       },
     ]);
 
@@ -246,6 +255,7 @@ export default function VehicleDetail() {
           file_path: fileName,
           file_type: file.type,
           uploaded_by: user.id,
+          organization_id: organizationId,
         },
       ]);
 

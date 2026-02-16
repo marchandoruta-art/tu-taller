@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { Camera, Upload, Trash2, Loader2, Image, X, ZoomIn } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -41,6 +42,7 @@ function extractStoragePath(url: string, bucket: string): string {
 
 export function VehiclePhotos({ vehicleId }: VehiclePhotosProps) {
   const { user, role } = useAuth();
+  const { organizationId } = useOrganization();
   const [photos, setPhotos] = useState<VehiclePhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -48,6 +50,7 @@ export function VehiclePhotos({ vehicleId }: VehiclePhotosProps) {
   const [selectedPhoto, setSelectedPhoto] = useState<VehiclePhoto | null>(null);
 
   const generateSignedUrls = useCallback(async (photoList: VehiclePhoto[]) => {
+    if (photoList.length === 0) return photoList;
     const paths = photoList.map(p => extractStoragePath(p.photo_url, 'vehicle-photos'));
     const { data } = await supabase.storage
       .from('vehicle-photos')
@@ -115,6 +118,7 @@ export function VehiclePhotos({ vehicleId }: VehiclePhotosProps) {
         photo_url: fileName,
         photo_type: type,
         uploaded_by: user.id,
+        organization_id: organizationId,
       });
 
       if (dbError) throw dbError;
