@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { VehicleWithOwner, VehicleStatus } from '@/lib/types';
+import { VehicleWithOwner, VehicleStatus, Profile } from '@/lib/types';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { StatusColumn } from '@/components/dashboard/StatusColumn';
 import { VehicleCard } from '@/components/vehicles/VehicleCard';
@@ -21,6 +21,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { role } = useAuth();
   const [vehicles, setVehicles] = useState<VehicleWithOwner[]>([]);
+  const [profiles, setProfiles] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('kanban');
 
@@ -36,6 +37,19 @@ export default function Dashboard() {
 
     if (data) {
       setVehicles(data as any);
+      // Fetch profiles for assigned users
+      const assignedIds = [...new Set(data.filter((v: any) => v.assigned_to).map((v: any) => v.assigned_to))];
+      if (assignedIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('user_id, full_name')
+          .in('user_id', assignedIds);
+        if (profilesData) {
+          const map: Record<string, string> = {};
+          profilesData.forEach((p) => { map[p.user_id] = p.full_name; });
+          setProfiles(map);
+        }
+      }
     }
     setLoading(false);
   };
@@ -159,7 +173,7 @@ export default function Dashboard() {
                   <TableHead>Matrícula</TableHead>
                   <TableHead>Vehículo</TableHead>
                   <TableHead>Estado</TableHead>
-                  <TableHead>Propietario</TableHead>
+                  <TableHead>Asignado a</TableHead>
                   <TableHead className="hidden md:table-cell">Descripción</TableHead>
                 </TableRow>
               </TableHeader>
@@ -173,7 +187,7 @@ export default function Dashboard() {
                     <TableCell className="font-semibold">{vehicle.plate}</TableCell>
                     <TableCell className="text-muted-foreground">{vehicle.brand} {vehicle.model}</TableCell>
                     <TableCell><VehicleStatusBadge status={vehicle.status} /></TableCell>
-                    <TableCell>{vehicle.owner?.name || '—'}</TableCell>
+                    <TableCell>{vehicle.assigned_to ? profiles[vehicle.assigned_to] || '—' : <span className="text-muted-foreground italic">Sin asignar</span>}</TableCell>
                     <TableCell className="hidden md:table-cell text-muted-foreground text-xs max-w-[200px] truncate">
                       {vehicle.client_description || '—'}
                     </TableCell>
