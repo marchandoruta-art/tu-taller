@@ -6,17 +6,23 @@ import { StatusColumn } from '@/components/dashboard/StatusColumn';
 import { VehicleCard } from '@/components/vehicles/VehicleCard';
 import { NewVehicleDialog } from '@/components/vehicles/NewVehicleDialog';
 import { DashboardCharts } from '@/components/dashboard/DashboardCharts';
-import { Loader2, Car, Clock, Wrench, CheckCircle, PackageCheck, BarChart2, LayoutGrid } from 'lucide-react';
+import { Loader2, Car, Clock, Wrench, CheckCircle, PackageCheck, BarChart2, LayoutGrid, List } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { VehicleStatusBadge } from '@/components/vehicles/VehicleStatusBadge';
 import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import { STATUS_LABELS } from '@/lib/types';
 
 const statusOrder: VehicleStatus[] = ['recibido', 'en_reparacion', 'pendiente_piezas', 'terminado', 'entregado'];
+type ViewMode = 'kanban' | 'charts' | 'list';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { role } = useAuth();
   const [vehicles, setVehicles] = useState<VehicleWithOwner[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCharts, setShowCharts] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('kanban');
 
   const fetchVehicles = async () => {
     // First, archive old delivered vehicles
@@ -99,15 +105,24 @@ export default function Dashboard() {
           <div className="flex gap-2">
             {isAdmin && (
               <Button 
-                variant={showCharts ? "default" : "outline"} 
+                variant={viewMode === 'charts' ? "default" : "outline"} 
                 size="sm"
-                onClick={() => setShowCharts(!showCharts)}
+                onClick={() => setViewMode(viewMode === 'charts' ? 'kanban' : 'charts')}
                 className="gap-2"
               >
-                {showCharts ? <LayoutGrid className="h-4 w-4" /> : <BarChart2 className="h-4 w-4" />}
-                {showCharts ? 'Kanban' : 'Gráficos'}
+                <BarChart2 className="h-4 w-4" />
+                Gráficos
               </Button>
             )}
+            <Button 
+              variant={viewMode === 'list' ? "default" : "outline"} 
+              size="sm"
+              onClick={() => setViewMode(viewMode === 'list' ? 'kanban' : 'list')}
+              className="gap-2"
+            >
+              {viewMode === 'list' ? <LayoutGrid className="h-4 w-4" /> : <List className="h-4 w-4" />}
+              {viewMode === 'list' ? 'Kanban' : 'Lista'}
+            </Button>
             <NewVehicleDialog onSuccess={fetchVehicles} />
           </div>
         </div>
@@ -131,12 +146,46 @@ export default function Dashboard() {
         </div>
 
         {/* Charts View */}
-        {showCharts && isAdmin && (
+        {viewMode === 'charts' && isAdmin && (
           <DashboardCharts vehicles={vehicles} />
         )}
 
+        {/* List View */}
+        {viewMode === 'list' && (
+          <div className="bg-card rounded-xl border border-border overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Matrícula</TableHead>
+                  <TableHead>Vehículo</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Propietario</TableHead>
+                  <TableHead className="hidden md:table-cell">Descripción</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {vehicles.map((vehicle) => (
+                  <TableRow 
+                    key={vehicle.id} 
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => navigate(`/vehicles/${vehicle.id}`)}
+                  >
+                    <TableCell className="font-semibold">{vehicle.plate}</TableCell>
+                    <TableCell className="text-muted-foreground">{vehicle.brand} {vehicle.model}</TableCell>
+                    <TableCell><VehicleStatusBadge status={vehicle.status} /></TableCell>
+                    <TableCell>{vehicle.owner?.name || '—'}</TableCell>
+                    <TableCell className="hidden md:table-cell text-muted-foreground text-xs max-w-[200px] truncate">
+                      {vehicle.client_description || '—'}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+
         {/* Kanban Board - horizontal scroll on mobile, grid on larger screens */}
-        {!showCharts && (
+        {viewMode === 'kanban' && (
           <>
             <div className="lg:hidden overflow-x-auto pb-4 -mx-4 px-4">
               <div className="flex gap-4 min-w-max">
