@@ -154,9 +154,9 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
           )}
         </div>
 
-        {/* Assigned user */}
-        <div className="flex items-center gap-2 text-sm">
-          <UserCheck className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+        {/* Assigned user - highlighted */}
+        <div className={`flex items-center gap-2 text-sm rounded-lg p-1.5 -mx-1.5 ${assignedUser ? 'bg-primary/10 border border-primary/20' : ''}`}>
+          <UserCheck className={`w-4 h-4 flex-shrink-0 ${assignedUser ? 'text-primary' : 'text-muted-foreground'}`} />
           {assignedUser ? (
             <div className="flex items-center gap-2 min-w-0">
               <Avatar className="h-5 w-5">
@@ -165,7 +165,7 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
                   {getInitials(assignedUser.full_name)}
                 </AvatarFallback>
               </Avatar>
-              <span className="truncate text-xs">{assignedUser.full_name}</span>
+              <span className="truncate text-xs font-medium text-primary">{assignedUser.full_name}</span>
             </div>
           ) : (
             <span className="text-xs text-muted-foreground">Sin asignar</span>

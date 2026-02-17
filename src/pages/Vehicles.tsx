@@ -6,13 +6,17 @@ import { VehicleCard } from '@/components/vehicles/VehicleCard';
 import { NewVehicleDialog } from '@/components/vehicles/NewVehicleDialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Search } from 'lucide-react';
+import { Loader2, Search, UserCheck } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Vehicles() {
+  const { user } = useAuth();
   const [vehicles, setVehicles] = useState<VehicleWithOwner[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [showOnlyMine, setShowOnlyMine] = useState(false);
 
   const fetchVehicles = async () => {
     const { data } = await supabase
@@ -31,6 +35,8 @@ export default function Vehicles() {
     fetchVehicles();
   }, []);
 
+  const myVehiclesCount = vehicles.filter((v) => v.assigned_to === user?.id).length;
+
   const filteredVehicles = vehicles.filter((v) => {
     const ownerName = v.owner?.name?.toLowerCase() || '';
     const matchesSearch =
@@ -40,8 +46,9 @@ export default function Vehicles() {
       ownerName.includes(search.toLowerCase());
 
     const matchesStatus = statusFilter === 'all' || v.status === statusFilter;
+    const matchesMine = !showOnlyMine || v.assigned_to === user?.id;
 
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesMine;
   });
 
   if (loading) {
@@ -69,7 +76,7 @@ export default function Vehicles() {
         </div>
 
         {/* Filters */}
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -92,6 +99,15 @@ export default function Vehicles() {
               ))}
             </SelectContent>
           </Select>
+          <Button
+            variant={showOnlyMine ? "default" : "outline"}
+            size="sm"
+            onClick={() => setShowOnlyMine(!showOnlyMine)}
+            className="gap-2 h-10"
+          >
+            <UserCheck className="h-4 w-4" />
+            Mis vehículos {myVehiclesCount > 0 && `(${myVehiclesCount})`}
+          </Button>
         </div>
 
         {/* Grid */}
