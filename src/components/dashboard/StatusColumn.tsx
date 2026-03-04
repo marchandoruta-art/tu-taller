@@ -13,6 +13,7 @@ const statusColors: Record<VehicleStatus, string> = {
   en_reparacion: 'border-t-status-in-progress',
   pendiente_piezas: 'border-t-status-pending-parts',
   terminado: 'border-t-status-completed',
+  facturado: 'border-t-status-invoiced',
   entregado: 'border-t-status-delivered',
 };
 

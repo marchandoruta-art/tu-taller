@@ -29,13 +29,14 @@ interface VehicleCardProps {
   onStatusChange?: () => void;
 }
 
-const statusOrder: VehicleStatus[] = ['recibido', 'en_reparacion', 'pendiente_piezas', 'terminado', 'entregado'];
+const statusOrder: VehicleStatus[] = ['recibido', 'en_reparacion', 'pendiente_piezas', 'terminado', 'facturado', 'entregado'];
 
 const nextStatusLabels: Record<VehicleStatus, string> = {
   recibido: 'Iniciar Reparación',
   en_reparacion: 'Pend. Piezas',
   pendiente_piezas: 'Terminado',
-  terminado: 'Entregar',
+  terminado: 'Facturar',
+  facturado: 'Entregar',
   entregado: '',
 };
 

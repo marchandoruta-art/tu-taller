@@ -1,0 +1,1 @@
+ALTER TYPE public.vehicle_status ADD VALUE 'facturado' BEFORE 'entregado';
