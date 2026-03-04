@@ -41,6 +41,7 @@
     --status-in-progress: 35 92% 50%;
     --status-pending-parts: 0 72% 51%;
     --status-completed: 142 72% 40%;
+    --status-invoiced: 270 60% 50%;
     --status-delivered: 215 80% 45%;
 
     /* Role colors */
@@ -146,6 +147,11 @@
   .status-completed {
     background-color: hsl(var(--status-completed) / 0.15);
     color: hsl(var(--status-completed));
+  }
+
+  .status-invoiced {
+    background-color: hsl(var(--status-invoiced) / 0.15);
+    color: hsl(var(--status-invoiced));
   }
 
   .status-delivered {

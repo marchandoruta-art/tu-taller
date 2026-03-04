@@ -12,6 +12,7 @@ export function VehicleStatusBadge({ status, className }: VehicleStatusBadgeProp
     en_reparacion: 'status-in-progress',
     pendiente_piezas: 'status-pending-parts',
     terminado: 'status-completed',
+    facturado: 'status-invoiced',
     entregado: 'status-delivered',
   };
 

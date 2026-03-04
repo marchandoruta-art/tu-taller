@@ -66,6 +66,7 @@ export default {
           "in-progress": "hsl(var(--status-in-progress))",
           "pending-parts": "hsl(var(--status-pending-parts))",
           completed: "hsl(var(--status-completed))",
+          invoiced: "hsl(var(--status-invoiced))",
           delivered: "hsl(var(--status-delivered))",
         },
         role: {

@@ -806,6 +806,7 @@ export type Database = {
         | "en_reparacion"
         | "pendiente_piezas"
         | "terminado"
+        | "facturado"
         | "entregado"
     }
     CompositeTypes: {
@@ -940,6 +941,7 @@ export const Constants = {
         "en_reparacion",
         "pendiente_piezas",
         "terminado",
+        "facturado",
         "entregado",
       ],
     },

@@ -14,7 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { STATUS_LABELS } from '@/lib/types';
 
-const statusOrder: VehicleStatus[] = ['recibido', 'en_reparacion', 'pendiente_piezas', 'terminado', 'entregado'];
+const statusOrder: VehicleStatus[] = ['recibido', 'en_reparacion', 'pendiente_piezas', 'terminado', 'facturado', 'entregado'];
 type ViewMode = 'kanban' | 'charts' | 'list';
 
 export default function Dashboard() {
@@ -88,6 +88,12 @@ export default function Dashboard() {
       color: 'text-status-completed',
     },
     {
+      label: 'Facturados',
+      value: vehicles.filter((v) => v.status === 'facturado').length,
+      icon: CheckCircle,
+      color: 'text-status-invoiced',
+    },
+    {
       label: 'Entregados',
       value: vehicles.filter((v) => v.status === 'entregado').length,
       icon: PackageCheck,
@@ -142,7 +148,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 md:gap-4">
           {stats.map((stat) => (
             <div
               key={stat.label}
@@ -223,7 +229,7 @@ export default function Dashboard() {
             </div>
 
             {/* Kanban Board - grid layout on desktop */}
-            <div className="hidden lg:grid lg:grid-cols-5 gap-4">
+            <div className="hidden lg:grid lg:grid-cols-6 gap-4">
               {statusOrder.map((status) => {
                 const statusVehicles = getVehiclesByStatus(status);
                 return (

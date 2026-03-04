@@ -3,7 +3,7 @@ export type UserRole = 'mecanico' | 'chapista' | 'oficina' | 'admin';
 // Owner can be null for non-admin users due to RLS
 export type VehicleWithOwner = Vehicle & { owner: Owner | null };
 
-export type VehicleStatus = 'recibido' | 'en_reparacion' | 'pendiente_piezas' | 'terminado' | 'entregado';
+export type VehicleStatus = 'recibido' | 'en_reparacion' | 'pendiente_piezas' | 'terminado' | 'facturado' | 'entregado';
 
 export interface Owner {
   id: string;
@@ -137,6 +137,7 @@ export const STATUS_LABELS: Record<VehicleStatus, string> = {
   en_reparacion: 'En Reparación',
   pendiente_piezas: 'Pendiente Piezas',
   terminado: 'Terminado',
+  facturado: 'Facturado',
   entregado: 'Entregado',
 };
 
