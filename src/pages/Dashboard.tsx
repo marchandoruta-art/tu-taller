@@ -22,6 +22,7 @@ export default function Dashboard() {
   const { role } = useAuth();
   const [vehicles, setVehicles] = useState<VehicleWithOwner[]>([]);
   const [profiles, setProfiles] = useState<Record<string, string>>({});
+  const [vehicleTimes, setVehicleTimes] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('kanban');
 
