@@ -26,20 +26,29 @@ export function WorkTimer({ vehicleId, onUpdate }: WorkTimerProps) {
   // Check for active timer on mount
   useEffect(() => {
     const checkActiveTimer = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
-      const { data } = await supabase
-        .from('time_logs')
-        .select('*')
-        .eq('vehicle_id', vehicleId)
-        .eq('user_id', user.id)
-        .is('ended_at', null)
-        .maybeSingle();
+      try {
+        const { data } = await supabase
+          .from('time_logs')
+          .select('*')
+          .eq('vehicle_id', vehicleId)
+          .eq('user_id', user.id)
+          .is('ended_at', null)
+          .maybeSingle();
 
-      if (data) {
-        setActiveLogId(data.id);
-        setStartTime(new Date(data.started_at));
-        setIsRunning(true);
+        if (data) {
+          setActiveLogId(data.id);
+          setStartTime(new Date(data.started_at));
+          setIsRunning(true);
+        }
+      } catch (error) {
+        console.error('Error checking active timer:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
