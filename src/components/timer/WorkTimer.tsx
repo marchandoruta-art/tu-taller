@@ -161,6 +161,15 @@ export function WorkTimer({ vehicleId, onUpdate }: WorkTimerProps) {
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border">
+        <div className="timer-display text-muted-foreground">--:--:--</div>
+        <div className="text-sm text-muted-foreground">Cargando...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border">
       <div className={cn('timer-display', isRunning && 'text-primary')}>
