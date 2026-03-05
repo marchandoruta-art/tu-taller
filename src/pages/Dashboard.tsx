@@ -51,6 +51,21 @@ export default function Dashboard() {
           setProfiles(map);
         }
       }
+      // Fetch time totals per vehicle
+      const vehicleIds = data.map((v: any) => v.id);
+      if (vehicleIds.length > 0) {
+        const { data: timeLogs } = await supabase
+          .from('time_logs')
+          .select('vehicle_id, total_minutes')
+          .in('vehicle_id', vehicleIds);
+        if (timeLogs) {
+          const timeMap: Record<string, number> = {};
+          timeLogs.forEach((t) => {
+            timeMap[t.vehicle_id] = (timeMap[t.vehicle_id] || 0) + (t.total_minutes || 0);
+          });
+          setVehicleTimes(timeMap);
+        }
+      }
     }
     setLoading(false);
   };
