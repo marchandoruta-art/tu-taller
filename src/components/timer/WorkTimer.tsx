@@ -21,24 +21,34 @@ export function WorkTimer({ vehicleId, onUpdate }: WorkTimerProps) {
   const [elapsed, setElapsed] = useState(0);
   const [activeLogId, setActiveLogId] = useState<string | null>(null);
   const [startTime, setStartTime] = useState<Date | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Check for active timer on mount
   useEffect(() => {
     const checkActiveTimer = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
-      const { data } = await supabase
-        .from('time_logs')
-        .select('*')
-        .eq('vehicle_id', vehicleId)
-        .eq('user_id', user.id)
-        .is('ended_at', null)
-        .maybeSingle();
+      try {
+        const { data } = await supabase
+          .from('time_logs')
+          .select('*')
+          .eq('vehicle_id', vehicleId)
+          .eq('user_id', user.id)
+          .is('ended_at', null)
+          .maybeSingle();
 
-      if (data) {
-        setActiveLogId(data.id);
-        setStartTime(new Date(data.started_at));
-        setIsRunning(true);
+        if (data) {
+          setActiveLogId(data.id);
+          setStartTime(new Date(data.started_at));
+          setIsRunning(true);
+        }
+      } catch (error) {
+        console.error('Error checking active timer:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -150,6 +160,15 @@ export function WorkTimer({ vehicleId, onUpdate }: WorkTimerProps) {
     const secs = seconds % 60;
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border">
+        <div className="timer-display text-muted-foreground">--:--:--</div>
+        <div className="text-sm text-muted-foreground">Cargando...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border">

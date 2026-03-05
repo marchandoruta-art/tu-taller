@@ -66,18 +66,34 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const { data } = await supabase
-      .from('attendance_logs')
-      .select('*')
-      .eq('user_id', user.id)
-      .gte('clock_in', today.toISOString())
-      .order('clock_in', { ascending: false });
+    // First: find any active session (no clock_out) regardless of date
+    // This ensures sessions that span midnight or app restarts are found
+    const [activeRes, todayRes] = await Promise.all([
+      supabase
+        .from('attendance_logs')
+        .select('*')
+        .eq('user_id', user.id)
+        .is('clock_out', null)
+        .order('clock_in', { ascending: false })
+        .limit(1),
+      supabase
+        .from('attendance_logs')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('clock_in', today.toISOString())
+        .order('clock_in', { ascending: false }),
+    ]);
 
-    if (data) {
-      setTodayLogs(data as AttendanceLog[]);
-      const active = data.find(log => !log.clock_out);
-      setActiveSession(active as AttendanceLog || null);
+    const activeSession = activeRes.data?.[0] as AttendanceLog | undefined;
+    const todayData = (todayRes.data || []) as AttendanceLog[];
+
+    // If there's an active session from a previous day, include it in today's logs
+    if (activeSession && !todayData.find(log => log.id === activeSession.id)) {
+      todayData.unshift(activeSession);
     }
+
+    setTodayLogs(todayData);
+    setActiveSession(activeSession || null);
     setLoading(false);
   };
 
