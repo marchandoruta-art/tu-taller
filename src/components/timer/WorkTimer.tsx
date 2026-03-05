@@ -21,6 +21,7 @@ export function WorkTimer({ vehicleId, onUpdate }: WorkTimerProps) {
   const [elapsed, setElapsed] = useState(0);
   const [activeLogId, setActiveLogId] = useState<string | null>(null);
   const [startTime, setStartTime] = useState<Date | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Check for active timer on mount
   useEffect(() => {
