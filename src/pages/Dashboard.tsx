@@ -22,6 +22,7 @@ export default function Dashboard() {
   const { role } = useAuth();
   const [vehicles, setVehicles] = useState<VehicleWithOwner[]>([]);
   const [profiles, setProfiles] = useState<Record<string, string>>({});
+  const [vehicleTimes, setVehicleTimes] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('kanban');
 
@@ -48,6 +49,21 @@ export default function Dashboard() {
           const map: Record<string, string> = {};
           profilesData.forEach((p) => { map[p.user_id] = p.full_name; });
           setProfiles(map);
+        }
+      }
+      // Fetch time totals per vehicle
+      const vehicleIds = data.map((v: any) => v.id);
+      if (vehicleIds.length > 0) {
+        const { data: timeLogs } = await supabase
+          .from('time_logs')
+          .select('vehicle_id, total_minutes')
+          .in('vehicle_id', vehicleIds);
+        if (timeLogs) {
+          const timeMap: Record<string, number> = {};
+          timeLogs.forEach((t) => {
+            timeMap[t.vehicle_id] = (timeMap[t.vehicle_id] || 0) + (t.total_minutes || 0);
+          });
+          setVehicleTimes(timeMap);
         }
       }
     }
@@ -219,7 +235,7 @@ export default function Dashboard() {
                         </p>
                       ) : (
                         statusVehicles.map((vehicle) => (
-                          <VehicleCard key={vehicle.id} vehicle={vehicle} showNextAction onStatusChange={fetchVehicles} />
+                          <VehicleCard key={vehicle.id} vehicle={vehicle} totalTime={vehicleTimes[vehicle.id] || 0} showNextAction onStatusChange={fetchVehicles} />
                         ))
                       )}
                     </StatusColumn>
@@ -240,7 +256,7 @@ export default function Dashboard() {
                       </p>
                     ) : (
                       statusVehicles.map((vehicle) => (
-                        <VehicleCard key={vehicle.id} vehicle={vehicle} showNextAction onStatusChange={fetchVehicles} />
+                        <VehicleCard key={vehicle.id} vehicle={vehicle} totalTime={vehicleTimes[vehicle.id] || 0} showNextAction onStatusChange={fetchVehicles} />
                       ))
                     )}
                   </StatusColumn>
