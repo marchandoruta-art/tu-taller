@@ -235,7 +235,7 @@ export default function Dashboard() {
                         </p>
                       ) : (
                         statusVehicles.map((vehicle) => (
-                          <VehicleCard key={vehicle.id} vehicle={vehicle} showNextAction onStatusChange={fetchVehicles} />
+                          <VehicleCard key={vehicle.id} vehicle={vehicle} totalTime={vehicleTimes[vehicle.id] || 0} showNextAction onStatusChange={fetchVehicles} />
                         ))
                       )}
                     </StatusColumn>
@@ -256,7 +256,7 @@ export default function Dashboard() {
                       </p>
                     ) : (
                       statusVehicles.map((vehicle) => (
-                        <VehicleCard key={vehicle.id} vehicle={vehicle} showNextAction onStatusChange={fetchVehicles} />
+                        <VehicleCard key={vehicle.id} vehicle={vehicle} totalTime={vehicleTimes[vehicle.id] || 0} showNextAction onStatusChange={fetchVehicles} />
                       ))
                     )}
                   </StatusColumn>
