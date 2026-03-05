@@ -1,7 +1,9 @@
 import { useState, useEffect, forwardRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { supabase } from '@/integrations/supabase/client';
 import { useOfflineOperation } from '@/hooks/useOfflineOperation';
+import { cacheData, getCachedData, addToCachedData } from '@/lib/offlineStorage';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogIn, LogOut, Clock, Stethoscope, Coffee, UtensilsCrossed } from 'lucide-react';
@@ -22,6 +24,7 @@ interface AttendanceLog {
   total_minutes: number | null;
   exit_type: string | null;
   user_id: string;
+  organization_id: string | null;
 }
 
 const EXIT_TYPES = {
@@ -33,6 +36,7 @@ const EXIT_TYPES = {
 
 export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClock(_, ref) {
   const { user } = useAuth();
+  const { organizationId } = useOrganization();
   const { executeInsert, executeUpdate, isOnline } = useOfflineOperation();
   const [activeSession, setActiveSession] = useState<AttendanceLog | null>(null);
   const [todayLogs, setTodayLogs] = useState<AttendanceLog[]>([]);
@@ -66,43 +70,73 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // First: find any active session (no clock_out) regardless of date
-    // This ensures sessions that span midnight or app restarts are found
-    const [activeRes, todayRes] = await Promise.all([
-      supabase
-        .from('attendance_logs')
-        .select('*')
-        .eq('user_id', user.id)
-        .is('clock_out', null)
-        .order('clock_in', { ascending: false })
-        .limit(1),
-      supabase
-        .from('attendance_logs')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('clock_in', today.toISOString())
-        .order('clock_in', { ascending: false }),
-    ]);
+    try {
+      // First: find any active session (no clock_out) regardless of date
+      // This ensures sessions that span midnight or app restarts are found
+      const [activeRes, todayRes] = await Promise.all([
+        supabase
+          .from('attendance_logs')
+          .select('*')
+          .eq('user_id', user.id)
+          .is('clock_out', null)
+          .order('clock_in', { ascending: false })
+          .limit(1),
+        supabase
+          .from('attendance_logs')
+          .select('*')
+          .eq('user_id', user.id)
+          .gte('clock_in', today.toISOString())
+          .order('clock_in', { ascending: false }),
+      ]);
 
-    const activeSession = activeRes.data?.[0] as AttendanceLog | undefined;
-    const todayData = (todayRes.data || []) as AttendanceLog[];
+      if (activeRes.error || todayRes.error) {
+        throw activeRes.error || todayRes.error;
+      }
 
-    // If there's an active session from a previous day, include it in today's logs
-    if (activeSession && !todayData.find(log => log.id === activeSession.id)) {
-      todayData.unshift(activeSession);
+      const activeSession = activeRes.data?.[0] as AttendanceLog | undefined;
+      const todayData = (todayRes.data || []) as AttendanceLog[];
+
+      // If there's an active session from a previous day, include it in today's logs
+      if (activeSession && !todayData.find(log => log.id === activeSession.id)) {
+        todayData.unshift(activeSession);
+      }
+
+      setTodayLogs(todayData);
+      setActiveSession(activeSession || null);
+      await cacheData('attendance_logs', todayData);
+    } catch (error) {
+      console.error('Error fetching attendance logs, using cache:', error);
+      try {
+        const cachedLogs = await getCachedData<AttendanceLog>('attendance_logs');
+        const filteredLogs = cachedLogs
+          .filter(log => log.user_id === user.id)
+          .filter(log => !log.clock_out || new Date(log.clock_in) >= today)
+          .sort((a, b) => new Date(b.clock_in).getTime() - new Date(a.clock_in).getTime());
+
+        setTodayLogs(filteredLogs);
+        setActiveSession(filteredLogs.find(log => !log.clock_out) || null);
+      } catch (cacheError) {
+        console.error('Error loading cached attendance logs:', cacheError);
+        setTodayLogs([]);
+        setActiveSession(null);
+      }
+    } finally {
+      setLoading(false);
     }
-
-    setTodayLogs(todayData);
-    setActiveSession(activeSession || null);
-    setLoading(false);
   };
 
   const clockIn = async () => {
     if (!user) return;
 
+    if (!organizationId) {
+      toast.error('No se pudo detectar tu organización. Vuelve a iniciar sesión.');
+      return;
+    }
+
     try {
       const newLog = {
         user_id: user.id,
+        organization_id: organizationId,
         clock_in: new Date().toISOString(),
       };
 
@@ -112,6 +146,7 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
         const logData = result.data as unknown as AttendanceLog;
         setActiveSession(logData);
         setTodayLogs(prev => [logData, ...prev]);
+        await addToCachedData('attendance_logs', logData);
         toast.success(result.offline ? 'Entrada registrada (offline)' : 'Entrada registrada');
       }
     } catch (error) {
@@ -124,28 +159,37 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
 
     try {
       const totalMinutes = Math.floor(elapsed / 60);
+      const nowIso = new Date().toISOString();
 
       const result = await executeUpdate('attendance_logs', activeSession.id, {
-        clock_out: new Date().toISOString(),
+        clock_out: nowIso,
         total_minutes: totalMinutes,
         exit_type: exitType,
       });
 
       if (result.success) {
+        const updatedLog: AttendanceLog = {
+          ...activeSession,
+          clock_out: nowIso,
+          total_minutes: totalMinutes,
+          exit_type: exitType,
+        };
+
         setActiveSession(null);
         setElapsed(0);
+
         if (!result.offline) {
           fetchTodayLogs();
         } else {
           // Update local state for offline mode
-          setTodayLogs(prev => prev.map(log => 
-            log.id === activeSession.id 
-              ? { ...log, clock_out: new Date().toISOString(), total_minutes: totalMinutes, exit_type: exitType }
-              : log
+          setTodayLogs(prev => prev.map(log =>
+            log.id === activeSession.id ? updatedLog : log
           ));
+          await addToCachedData('attendance_logs', updatedLog);
         }
-        toast.success(result.offline 
-          ? `${EXIT_TYPES[exitType as keyof typeof EXIT_TYPES]?.label || 'Salida'} registrada (offline)` 
+
+        toast.success(result.offline
+          ? `${EXIT_TYPES[exitType as keyof typeof EXIT_TYPES]?.label || 'Salida'} registrada (offline)`
           : `${EXIT_TYPES[exitType as keyof typeof EXIT_TYPES]?.label || 'Salida'} registrada`
         );
       }

@@ -132,13 +132,29 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
 
     setLoading(true);
     try {
+      if (!user) throw new Error('Sesión no válida. Vuelve a iniciar sesión.');
+
+      const { data: profileOrg } = organizationId
+        ? { data: { organization_id: organizationId } }
+        : await supabase
+            .from('profiles')
+            .select('organization_id')
+            .eq('user_id', user.id)
+            .single();
+
+      const resolvedOrganizationId = profileOrg?.organization_id ?? null;
+
+      if (!resolvedOrganizationId) {
+        throw new Error('Tu usuario no está asociado a ningún taller.');
+      }
+
       let ownerId: string | null = null;
 
       // Only create owner if we have owner data and not skipping
       if (!skipOwner && ownerData.name.trim()) {
         const { data: owner, error: ownerError } = await supabase
           .from('owners')
-          .insert([{ ...ownerData, organization_id: organizationId }])
+          .insert([{ ...ownerData, organization_id: resolvedOrganizationId }])
           .select()
           .single();
 
@@ -158,7 +174,7 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
           client_description: vehicleData.client_description || null,
           owner_id: ownerId,
           created_by: user?.id,
-          organization_id: organizationId,
+          organization_id: resolvedOrganizationId,
           fuel_level: inspectionData.fuel_level,
           mileage: inspectionData.mileage ? parseInt(inspectionData.mileage) : null,
           exterior_damages: JSON.parse(JSON.stringify(inspectionData.exterior_damages)),
