@@ -63,6 +63,7 @@ export default function VehicleDetail() {
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     fetchVehicleData();
   }, [id]);
 
