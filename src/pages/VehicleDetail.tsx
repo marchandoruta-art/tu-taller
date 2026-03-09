@@ -55,8 +55,11 @@ export default function VehicleDetail() {
   const [newPart, setNewPart] = useState({ name: '', quantity: 1, reference: '' });
   const [newAnomaly, setNewAnomaly] = useState('');
   const [uploadingFile, setUploadingFile] = useState(false);
-  const [workSummary, setWorkSummary] = useState('');
-  const [savingSummary, setSavingSummary] = useState(false);
+   const [workSummary, setWorkSummary] = useState('');
+   const [savingSummary, setSavingSummary] = useState(false);
+   const [clientDescription, setClientDescription] = useState('');
+   const [savingDescription, setSavingDescription] = useState(false);
+   const [editingDescription, setEditingDescription] = useState(false);
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
 
   useEffect(() => {
@@ -77,6 +80,7 @@ export default function VehicleDetail() {
     if (vehicleRes.data) {
       setVehicle(vehicleRes.data as VehicleWithOwner);
       setWorkSummary(vehicleRes.data.work_summary || '');
+      setClientDescription(vehicleRes.data.client_description || '');
       
       // Fetch assigned user
       if (vehicleRes.data.assigned_to) {
@@ -504,16 +508,53 @@ export default function VehicleDetail() {
             </Card>
 
             {/* Description */}
-            {vehicle.client_description && (
-              <Card>
-                <CardHeader className="pb-3">
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">Descripción del Cliente</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">{vehicle.client_description}</p>
-                </CardContent>
-              </Card>
-            )}
+                  {!editingDescription && (
+                    <Button variant="ghost" size="sm" onClick={() => setEditingDescription(true)}>
+                      Editar
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                {editingDescription ? (
+                  <div className="space-y-2">
+                    <Textarea
+                      value={clientDescription}
+                      onChange={(e) => setClientDescription(e.target.value)}
+                      placeholder="Descripción del cliente sobre el problema o trabajo a realizar..."
+                      rows={4}
+                    />
+                    <div className="flex gap-2 justify-end">
+                      <Button variant="outline" size="sm" onClick={() => {
+                        setClientDescription(vehicle.client_description || '');
+                        setEditingDescription(false);
+                      }}>
+                        Cancelar
+                      </Button>
+                      <Button size="sm" disabled={savingDescription} onClick={async () => {
+                        setSavingDescription(true);
+                        const { error } = await supabase.from('vehicles').update({ client_description: clientDescription }).eq('id', vehicle.id);
+                        setSavingDescription(false);
+                        if (error) { toast.error('Error al guardar'); return; }
+                        setVehicle({ ...vehicle, client_description: clientDescription });
+                        setEditingDescription(false);
+                        toast.success('Descripción guardada');
+                      }}>
+                        {savingDescription ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Guardar'}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">
+                    {vehicle.client_description || 'Sin descripción. Pulsa Editar para añadir.'}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
 
             {/* Vehicle Photos */}
             <VehiclePhotos vehicleId={vehicle.id} />

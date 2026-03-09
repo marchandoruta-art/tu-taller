@@ -49,6 +49,8 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
     }
   }, [user]);
 
+  const [eightHourAlertShown, setEightHourAlertShown] = useState(false);
+
   // Update elapsed time for active session
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -61,6 +63,43 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
       updateElapsed();
       interval = setInterval(updateElapsed, 1000);
     }
+    return () => clearInterval(interval);
+  }, [activeSession]);
+
+  // 8-hour alarm: check total accumulated today + active session
+  useEffect(() => {
+    if (eightHourAlertShown) return;
+    const completedMinutes = todayLogs.reduce((acc, log) => acc + (log.total_minutes || 0), 0);
+    const activeMinutes = Math.floor(elapsed / 60);
+    const totalMinutes = completedMinutes + activeMinutes;
+    if (totalMinutes >= 480) {
+      setEightHourAlertShown(true);
+      toast.warning('⏰ ¡Llevas más de 8 horas fichadas hoy!', {
+        description: 'Recuerda registrar tu salida.',
+        duration: 15000,
+      });
+    }
+  }, [elapsed, todayLogs, eightHourAlertShown]);
+
+  // Reset 8h alert when session changes (new day)
+  useEffect(() => {
+    setEightHourAlertShown(false);
+  }, [activeSession?.id]);
+
+  // Daily 7:55 reminder to clock in
+  useEffect(() => {
+    const checkReminder = () => {
+      const now = new Date();
+      if (now.getHours() === 7 && now.getMinutes() === 55 && !activeSession) {
+        toast.info('🕗 Recuerda fichar tu entrada', {
+          description: 'Son las 7:55, ¡empieza tu jornada!',
+          duration: 30000,
+        });
+      }
+    };
+    // Check every 30 seconds
+    const interval = setInterval(checkReminder, 30000);
+    checkReminder();
     return () => clearInterval(interval);
   }, [activeSession]);
 
