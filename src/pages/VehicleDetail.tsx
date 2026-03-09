@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { VehicleWithOwner, Part, TimeLog, VehicleStatus, STATUS_LABELS, Profile, ROLE_LABELS, UserRole, VehicleAnomaly, VehicleFile } from '@/lib/types';
@@ -63,6 +63,7 @@ export default function VehicleDetail() {
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     fetchVehicleData();
   }, [id]);
 
