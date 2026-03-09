@@ -80,6 +80,7 @@ export default function VehicleDetail() {
     if (vehicleRes.data) {
       setVehicle(vehicleRes.data as VehicleWithOwner);
       setWorkSummary(vehicleRes.data.work_summary || '');
+      setClientDescription(vehicleRes.data.client_description || '');
       
       // Fetch assigned user
       if (vehicleRes.data.assigned_to) {
