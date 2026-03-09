@@ -55,8 +55,11 @@ export default function VehicleDetail() {
   const [newPart, setNewPart] = useState({ name: '', quantity: 1, reference: '' });
   const [newAnomaly, setNewAnomaly] = useState('');
   const [uploadingFile, setUploadingFile] = useState(false);
-  const [workSummary, setWorkSummary] = useState('');
-  const [savingSummary, setSavingSummary] = useState(false);
+   const [workSummary, setWorkSummary] = useState('');
+   const [savingSummary, setSavingSummary] = useState(false);
+   const [clientDescription, setClientDescription] = useState('');
+   const [savingDescription, setSavingDescription] = useState(false);
+   const [editingDescription, setEditingDescription] = useState(false);
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
 
   useEffect(() => {
