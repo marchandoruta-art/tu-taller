@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { VehicleWithOwner, Part, TimeLog, VehicleStatus, STATUS_LABELS, Profile, ROLE_LABELS, UserRole, VehicleAnomaly, VehicleFile } from '@/lib/types';
@@ -61,11 +61,25 @@ export default function VehicleDetail() {
    const [savingDescription, setSavingDescription] = useState(false);
    const [editingDescription, setEditingDescription] = useState(false);
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
+  const topRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to top on mount/id change
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [id]);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
     fetchVehicleData();
   }, [id]);
+
+  // Scroll to top after render completes
+  useEffect(() => {
+    if (!loading && topRef.current) {
+      topRef.current.scrollIntoView({ block: 'start' });
+    }
+  }, [loading, id]);
 
   const fetchVehicleData = async () => {
     if (!id) return;
@@ -415,7 +429,7 @@ export default function VehicleDetail() {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <div ref={topRef} className="space-y-6">
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-start gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="self-start">
