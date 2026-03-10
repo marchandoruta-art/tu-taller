@@ -61,8 +61,9 @@ export default function VehicleDetail() {
    const [savingDescription, setSavingDescription] = useState(false);
    const [editingDescription, setEditingDescription] = useState(false);
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
+  const topRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to top immediately on mount/id change
+  // Scroll to top on mount/id change
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
     document.documentElement.scrollTop = 0;
@@ -72,6 +73,13 @@ export default function VehicleDetail() {
   useEffect(() => {
     fetchVehicleData();
   }, [id]);
+
+  // Scroll to top after render completes
+  useEffect(() => {
+    if (!loading && topRef.current) {
+      topRef.current.scrollIntoView({ block: 'start' });
+    }
+  }, [loading, id]);
 
   const fetchVehicleData = async () => {
     if (!id) return;
