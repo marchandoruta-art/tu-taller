@@ -183,23 +183,44 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Stats - clickable filters */}
         <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 md:gap-4">
-          {stats.map((stat) => (
-            <div
-              key={stat.label}
-              className="bg-card rounded-xl border border-border p-3 md:p-4 flex items-center gap-3"
-            >
-              <div className={`p-2 md:p-3 rounded-lg bg-muted ${stat.color}`}>
-                <stat.icon className="h-4 w-4 md:h-5 md:w-5" />
-              </div>
-              <div>
-                <p className="text-xl md:text-2xl font-bold">{stat.value}</p>
-                <p className="text-xs md:text-sm text-muted-foreground">{stat.label}</p>
-              </div>
-            </div>
-          ))}
+          {stats.map((stat) => {
+            const isActive = statusFilter === stat.filter;
+            return (
+              <button
+                key={stat.label}
+                onClick={() => setStatusFilter(isActive ? 'all' : stat.filter)}
+                className={cn(
+                  "bg-card rounded-xl border p-3 md:p-4 flex items-center gap-3 transition-all text-left",
+                  isActive
+                    ? "border-primary ring-2 ring-primary/20 shadow-md"
+                    : "border-border hover:border-primary/50 hover:shadow-sm"
+                )}
+              >
+                <div className={cn("p-2 md:p-3 rounded-lg", isActive ? "bg-primary/10" : "bg-muted", stat.color)}>
+                  <stat.icon className="h-4 w-4 md:h-5 md:w-5" />
+                </div>
+                <div>
+                  <p className="text-xl md:text-2xl font-bold">{stat.value}</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">{stat.label}</p>
+                </div>
+              </button>
+            );
+          })}
         </div>
+
+        {/* Active filter indicator */}
+        {statusFilter !== 'all' && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">
+              Filtrando por: <strong>{stats.find(s => s.filter === statusFilter)?.label}</strong>
+            </span>
+            <Button variant="ghost" size="sm" onClick={() => setStatusFilter('all')} className="text-xs h-7">
+              Mostrar todos
+            </Button>
+          </div>
+        )}
 
         {/* Charts View */}
         {viewMode === 'charts' && isAdmin && (
@@ -220,7 +241,7 @@ export default function Dashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {vehicles.map((vehicle) => (
+                {filteredVehicles.map((vehicle) => (
                   <TableRow 
                     key={vehicle.id} 
                     className="cursor-pointer hover:bg-muted/50"
@@ -245,7 +266,7 @@ export default function Dashboard() {
           <>
             <div className="lg:hidden overflow-x-auto pb-4 -mx-4 px-4">
               <div className="flex gap-4 min-w-max">
-                {statusOrder.map((status) => {
+                {filteredStatusOrder.map((status) => {
                   const statusVehicles = getVehiclesByStatus(status);
                   return (
                     <StatusColumn key={status} status={status} count={statusVehicles.length}>
@@ -265,8 +286,8 @@ export default function Dashboard() {
             </div>
 
             {/* Kanban Board - grid layout on desktop */}
-            <div className="hidden lg:grid lg:grid-cols-6 gap-4">
-              {statusOrder.map((status) => {
+            <div className={cn("hidden lg:grid gap-4", `lg:grid-cols-${filteredStatusOrder.length}`)}>
+              {filteredStatusOrder.map((status) => {
                 const statusVehicles = getVehiclesByStatus(status);
                 return (
                   <StatusColumn key={status} status={status} count={statusVehicles.length}>
