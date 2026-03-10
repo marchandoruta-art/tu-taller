@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Dialog,
   DialogContent,
@@ -13,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Pencil, Loader2, Car, ClipboardCheck } from 'lucide-react';
+import { Pencil, Loader2, Car, ClipboardCheck, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { FuelGauge } from './reception/FuelGauge';
 import { VehicleDiagram, ExteriorDamage } from './reception/VehicleDiagram';
@@ -42,8 +43,19 @@ const DEFAULT_INTERIOR: InteriorCheckData = {
 };
 
 export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDataDialogProps) {
+  const { role } = useAuth();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const canEditOwner = role === 'admin' || role === 'oficina';
+
+  const [ownerFields, setOwnerFields] = useState({
+    name: vehicle.owner?.name || '',
+    phone: vehicle.owner?.phone || '',
+    email: vehicle.owner?.email || '',
+    dni: vehicle.owner?.dni || '',
+    address: vehicle.owner?.address || '',
+  });
 
   const [vehicleFields, setVehicleFields] = useState({
     plate: vehicle.plate,
@@ -66,6 +78,13 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
   });
 
   const resetFields = () => {
+    setOwnerFields({
+      name: vehicle.owner?.name || '',
+      phone: vehicle.owner?.phone || '',
+      email: vehicle.owner?.email || '',
+      dni: vehicle.owner?.dni || '',
+      address: vehicle.owner?.address || '',
+    });
     setVehicleFields({
       plate: vehicle.plate,
       brand: vehicle.brand,
@@ -94,6 +113,7 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
 
     setLoading(true);
     try {
+      // Update vehicle data
       const { error } = await supabase
         .from('vehicles')
         .update({
@@ -116,6 +136,22 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
 
       if (error) throw error;
 
+      // Update owner data if allowed and owner exists
+      if (canEditOwner && vehicle.owner_id) {
+        const { error: ownerError } = await supabase
+          .from('owners')
+          .update({
+            name: ownerFields.name,
+            phone: ownerFields.phone || null,
+            email: ownerFields.email || null,
+            dni: ownerFields.dni || null,
+            address: ownerFields.address || null,
+          })
+          .eq('id', vehicle.owner_id);
+
+        if (ownerError) throw ownerError;
+      }
+
       toast.success('Datos actualizados correctamente');
       setOpen(false);
       onSuccess();
@@ -126,6 +162,8 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
       setLoading(false);
     }
   };
+
+  const tabCount = canEditOwner && vehicle.owner ? 3 : 2;
 
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) resetFields(); }}>
@@ -145,7 +183,13 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
 
         <ScrollArea className="max-h-[65vh] pr-4">
           <Tabs defaultValue="vehicle" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className={`grid w-full ${tabCount === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+              {canEditOwner && vehicle.owner && (
+                <TabsTrigger value="owner" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Propietario
+                </TabsTrigger>
+              )}
               <TabsTrigger value="vehicle" className="flex items-center gap-2">
                 <Car className="h-4 w-4" />
                 Vehículo
@@ -155,6 +199,55 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
                 Inspección
               </TabsTrigger>
             </TabsList>
+
+            {canEditOwner && vehicle.owner && (
+              <TabsContent value="owner" className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Nombre *</Label>
+                  <Input
+                    value={ownerFields.name}
+                    onChange={(e) => setOwnerFields({ ...ownerFields, name: e.target.value })}
+                    placeholder="Juan Pérez"
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Teléfono</Label>
+                    <Input
+                      value={ownerFields.phone}
+                      onChange={(e) => setOwnerFields({ ...ownerFields, phone: e.target.value })}
+                      placeholder="612 345 678"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>DNI/NIF</Label>
+                    <Input
+                      value={ownerFields.dni}
+                      onChange={(e) => setOwnerFields({ ...ownerFields, dni: e.target.value })}
+                      placeholder="12345678A"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Email</Label>
+                  <Input
+                    type="email"
+                    value={ownerFields.email}
+                    onChange={(e) => setOwnerFields({ ...ownerFields, email: e.target.value })}
+                    placeholder="cliente@email.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Dirección</Label>
+                  <Input
+                    value={ownerFields.address}
+                    onChange={(e) => setOwnerFields({ ...ownerFields, address: e.target.value })}
+                    placeholder="Calle Principal, 123"
+                  />
+                </div>
+              </TabsContent>
+            )}
 
             <TabsContent value="vehicle" className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
