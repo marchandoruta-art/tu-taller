@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { VehicleWithOwner, VehicleStatus, Profile } from '@/lib/types';
 import { MainLayout } from '@/components/layout/MainLayout';
