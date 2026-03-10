@@ -429,7 +429,7 @@ export default function VehicleDetail() {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <div ref={topRef} className="space-y-6">
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-start gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate('/')} className="self-start">
