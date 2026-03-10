@@ -80,44 +80,62 @@ export default function Dashboard() {
     return vehicles.filter((v) => v.status === status);
   };
 
-  const stats = [
+  const stats: { label: string; value: number; icon: any; color: string; filter: StatusFilter }[] = [
     {
       label: 'En Taller',
       value: vehicles.filter((v) => v.status !== 'terminado' && v.status !== 'entregado').length,
       icon: Car,
       color: 'text-primary',
+      filter: 'en_taller',
     },
     {
       label: 'En Reparación',
       value: vehicles.filter((v) => v.status === 'en_reparacion').length,
       icon: Wrench,
       color: 'text-status-in-progress',
+      filter: 'en_reparacion' as VehicleStatus,
     },
     {
       label: 'Pendiente Piezas',
       value: vehicles.filter((v) => v.status === 'pendiente_piezas').length,
       icon: Clock,
       color: 'text-status-pending-parts',
+      filter: 'pendiente_piezas' as VehicleStatus,
     },
     {
       label: 'Terminados',
       value: vehicles.filter((v) => v.status === 'terminado').length,
       icon: CheckCircle,
       color: 'text-status-completed',
+      filter: 'terminado' as VehicleStatus,
     },
     {
       label: 'Facturados',
       value: vehicles.filter((v) => v.status === 'facturado').length,
       icon: CheckCircle,
       color: 'text-status-invoiced',
+      filter: 'facturado' as VehicleStatus,
     },
     {
       label: 'Entregados',
       value: vehicles.filter((v) => v.status === 'entregado').length,
       icon: PackageCheck,
       color: 'text-status-delivered',
+      filter: 'entregado' as VehicleStatus,
     },
   ];
+
+  const filteredVehicles = statusFilter === 'all'
+    ? vehicles
+    : statusFilter === 'en_taller'
+    ? vehicles.filter(v => v.status !== 'terminado' && v.status !== 'entregado')
+    : vehicles.filter(v => v.status === statusFilter);
+
+  const filteredStatusOrder = statusFilter === 'all'
+    ? statusOrder
+    : statusFilter === 'en_taller'
+    ? statusOrder.filter(s => s !== 'terminado' && s !== 'entregado')
+    : statusOrder.filter(s => s === statusFilter);
 
   const isAdmin = role === 'admin';
 
