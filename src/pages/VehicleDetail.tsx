@@ -473,6 +473,7 @@ export default function VehicleDetail() {
           </div>
           
           <div className="flex flex-wrap gap-2">
+            <EditReceptionDataDialog vehicle={vehicle} onSuccess={fetchVehicleData} />
             <AssignUserDialog 
               vehicleId={vehicle.id} 
               currentAssignedTo={vehicle.assigned_to} 
