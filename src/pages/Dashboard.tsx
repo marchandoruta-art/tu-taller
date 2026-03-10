@@ -16,6 +16,7 @@ import { STATUS_LABELS } from '@/lib/types';
 
 const statusOrder: VehicleStatus[] = ['recibido', 'en_reparacion', 'pendiente_piezas', 'terminado', 'facturado', 'entregado'];
 type ViewMode = 'kanban' | 'charts' | 'list';
+type StatusFilter = 'all' | 'en_taller' | VehicleStatus;
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ export default function Dashboard() {
   const [vehicleTimes, setVehicleTimes] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('kanban');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
   const fetchVehicles = async () => {
     // First, archive old delivered vehicles
