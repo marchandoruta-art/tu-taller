@@ -8,6 +8,7 @@ import { WorkTimer } from '@/components/timer/WorkTimer';
 import { VehicleChat } from '@/components/chat/VehicleChat';
 import { AssignUserDialog } from '@/components/vehicles/AssignUserDialog';
 import { ViewDepositReceipt } from '@/components/vehicles/reception/ViewDepositReceipt';
+import { EditReceptionDataDialog } from '@/components/vehicles/EditReceptionDataDialog';
 import { VehiclePhotos } from '@/components/vehicles/VehiclePhotos';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -472,6 +473,7 @@ export default function VehicleDetail() {
           </div>
           
           <div className="flex flex-wrap gap-2">
+            <EditReceptionDataDialog vehicle={vehicle} onSuccess={fetchVehicleData} />
             <AssignUserDialog 
               vehicleId={vehicle.id} 
               currentAssignedTo={vehicle.assigned_to} 
