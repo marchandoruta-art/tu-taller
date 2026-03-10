@@ -287,7 +287,15 @@ export default function Dashboard() {
             </div>
 
             {/* Kanban Board - grid layout on desktop */}
-            <div className={cn("hidden lg:grid gap-4", `lg:grid-cols-${filteredStatusOrder.length}`)}>
+            <div className={cn(
+              "hidden lg:grid gap-4",
+              filteredStatusOrder.length === 1 && "lg:grid-cols-1",
+              filteredStatusOrder.length === 2 && "lg:grid-cols-2",
+              filteredStatusOrder.length === 3 && "lg:grid-cols-3",
+              filteredStatusOrder.length === 4 && "lg:grid-cols-4",
+              filteredStatusOrder.length === 5 && "lg:grid-cols-5",
+              filteredStatusOrder.length === 6 && "lg:grid-cols-6",
+            )}>
               {filteredStatusOrder.map((status) => {
                 const statusVehicles = getVehiclesByStatus(status);
                 return (

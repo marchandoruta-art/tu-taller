@@ -95,37 +95,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       // Pause any active timers before signing out
       if (user) {
-        const { data: activeTimers } = await supabase
-          .from('time_logs')
-          .select('id, started_at')
-          .eq('user_id', user.id)
-          .is('ended_at', null);
+        try {
+          const { data: activeTimers } = await supabase
+            .from('time_logs')
+            .select('id, started_at')
+            .eq('user_id', user.id)
+            .is('ended_at', null);
 
-        if (activeTimers && activeTimers.length > 0) {
-          for (const timer of activeTimers) {
-            const startedAt = new Date(timer.started_at);
-            const now = new Date();
-            const totalMinutes = Math.floor((now.getTime() - startedAt.getTime()) / 60000);
-            await supabase
-              .from('time_logs')
-              .update({ ended_at: now.toISOString(), total_minutes: totalMinutes })
-              .eq('id', timer.id);
+          if (activeTimers && activeTimers.length > 0) {
+            for (const timer of activeTimers) {
+              const startedAt = new Date(timer.started_at);
+              const now = new Date();
+              const totalMinutes = Math.floor((now.getTime() - startedAt.getTime()) / 60000);
+              await supabase
+                .from('time_logs')
+                .update({ ended_at: now.toISOString(), total_minutes: totalMinutes })
+                .eq('id', timer.id);
+            }
           }
+        } catch (timerError) {
+          console.error('Error closing timers:', timerError);
         }
       }
 
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Error signing out:', error);
-        throw error;
-      }
       setUser(null);
       setSession(null);
       setProfile(null);
       setRole(null);
-      window.location.href = '/';
+
+      await supabase.auth.signOut();
     } catch (error) {
       console.error('SignOut error:', error);
+    } finally {
+      // Always redirect, even if signOut throws
+      window.location.replace('/');
     }
   };
 
