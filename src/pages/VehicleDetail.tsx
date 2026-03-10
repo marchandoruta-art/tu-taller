@@ -63,8 +63,17 @@ export default function VehicleDetail() {
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-    fetchVehicleData();
+    // Reset scroll immediately and after data loads
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    fetchVehicleData().then(() => {
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      });
+    });
   }, [id]);
 
   const fetchVehicleData = async () => {
