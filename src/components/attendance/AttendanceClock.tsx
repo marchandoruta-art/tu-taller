@@ -75,6 +75,7 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
     const totalMinutes = completedMinutes + activeMinutes;
     if (totalMinutes >= 480) {
       setEightHourAlertShown(true);
+      playNotificationSound(true);
       toast.warning('⏰ ¡Llevas más de 8 horas fichadas hoy!', {
         description: 'Recuerda registrar tu salida.',
         duration: 15000,
