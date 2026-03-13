@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 import { playNotificationSound } from '@/lib/notificationSound';
+import { requestNotificationPermission, sendBrowserNotification } from '@/lib/browserNotification';
 
 interface RealtimeNotification {
   type: 'message' | 'vehicle_completed';
@@ -79,7 +80,7 @@ export function useRealtimeNotifications() {
 
   useEffect(() => {
     if (!user) return;
-
+    requestNotificationPermission();
     // Subscribe to new messages
     const messagesChannel = supabase
       .channel('global-messages-notifications')
@@ -112,6 +113,12 @@ export function useRealtimeNotifications() {
             message: `${senderName}: ${newMessage.message.slice(0, 50)}${newMessage.message.length > 50 ? '...' : ''}`,
             vehicleId: newMessage.vehicle_id,
             vehiclePlate: vehicleInfo.plate,
+          });
+
+          sendBrowserNotification(`💬 Mensaje en ${vehicleInfo.plate}`, {
+            body: `${senderName}: ${newMessage.message.slice(0, 80)}`,
+            tag: `msg-${newMessage.id}`,
+            url: `/vehicles/${newMessage.vehicle_id}`,
           });
         }
       )
@@ -154,6 +161,12 @@ export function useRealtimeNotifications() {
                 message: `${newVehicle.plate} - ${newVehicle.brand} ${newVehicle.model} está listo para entregar`,
                 vehicleId: newVehicle.id,
                 vehiclePlate: newVehicle.plate,
+              });
+
+              sendBrowserNotification('🔔 ¡Vehículo Terminado!', {
+                body: `${newVehicle.plate} - ${newVehicle.brand} ${newVehicle.model} está listo para entregar`,
+                tag: `vehicle-done-${newVehicle.id}`,
+                url: `/vehicles/${newVehicle.id}`,
               });
             }
           }

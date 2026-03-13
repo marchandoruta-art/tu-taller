@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogIn, LogOut, Clock, Stethoscope, Coffee, UtensilsCrossed } from 'lucide-react';
 import { toast } from 'sonner';
 import { playNotificationSound } from '@/lib/notificationSound';
+import { requestNotificationPermission, sendBrowserNotification } from '@/lib/browserNotification';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
@@ -47,10 +48,12 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
   useEffect(() => {
     if (user) {
       fetchTodayLogs();
+      requestNotificationPermission();
     }
   }, [user]);
 
   const [eightHourAlertShown, setEightHourAlertShown] = useState(false);
+  const [autoStoppedAt8h, setAutoStoppedAt8h] = useState(false);
 
   // Update elapsed time for active session
   useEffect(() => {
@@ -67,7 +70,7 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
     return () => clearInterval(interval);
   }, [activeSession]);
 
-  // 8-hour alarm: check total accumulated today + active session
+  // 8-hour alarm: check total accumulated today + active session, auto clock-out
   useEffect(() => {
     if (eightHourAlertShown) return;
     const completedMinutes = todayLogs.reduce((acc, log) => acc + (log.total_minutes || 0), 0);
@@ -76,12 +79,21 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
     if (totalMinutes >= 480) {
       setEightHourAlertShown(true);
       playNotificationSound(true);
-      toast.warning('⏰ ¡Llevas más de 8 horas fichadas hoy!', {
-        description: 'Recuerda registrar tu salida.',
+      toast.warning('⏰ ¡Jornada de 8 horas completada!', {
+        description: 'Se ha registrado tu salida automáticamente.',
         duration: 15000,
       });
+      sendBrowserNotification('⏰ Jornada completada', {
+        body: '¡Has cumplido 8 horas! Se registró tu salida automáticamente.',
+        tag: 'attendance-8h',
+      });
+      // Auto clock-out
+      if (activeSession && !autoStoppedAt8h) {
+        setAutoStoppedAt8h(true);
+        clockOut('normal');
+      }
     }
-  }, [elapsed, todayLogs, eightHourAlertShown]);
+  }, [elapsed, todayLogs, eightHourAlertShown, activeSession, autoStoppedAt8h]);
 
   // Reset 8h alert when session changes (new day)
   useEffect(() => {
