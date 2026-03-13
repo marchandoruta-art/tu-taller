@@ -162,6 +162,12 @@ export function useRealtimeNotifications() {
                 vehicleId: newVehicle.id,
                 vehiclePlate: newVehicle.plate,
               });
+
+              sendBrowserNotification('🔔 ¡Vehículo Terminado!', {
+                body: `${newVehicle.plate} - ${newVehicle.brand} ${newVehicle.model} está listo para entregar`,
+                tag: `vehicle-done-${newVehicle.id}`,
+                url: `/vehicles/${newVehicle.id}`,
+              });
             }
           }
         }
