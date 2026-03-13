@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogIn, LogOut, Clock, Stethoscope, Coffee, UtensilsCrossed } from 'lucide-react';
 import { toast } from 'sonner';
 import { playNotificationSound } from '@/lib/notificationSound';
+import { requestNotificationPermission, sendBrowserNotification } from '@/lib/browserNotification';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
