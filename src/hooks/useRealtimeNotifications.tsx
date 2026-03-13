@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 import { playNotificationSound } from '@/lib/notificationSound';
+import { requestNotificationPermission, sendBrowserNotification } from '@/lib/browserNotification';
 
 interface RealtimeNotification {
   type: 'message' | 'vehicle_completed';
