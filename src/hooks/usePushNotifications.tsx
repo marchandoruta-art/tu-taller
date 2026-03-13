@@ -60,7 +60,7 @@ export function usePushNotifications() {
 
       // Subscribe to push
       const subscription = await registration.pushManager.subscribe({
-        userVisibilityOnly: true,
+        userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(data.publicKey) as BufferSource,
       });
 
