@@ -48,10 +48,12 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
   useEffect(() => {
     if (user) {
       fetchTodayLogs();
+      requestNotificationPermission();
     }
   }, [user]);
 
   const [eightHourAlertShown, setEightHourAlertShown] = useState(false);
+  const [autoStoppedAt8h, setAutoStoppedAt8h] = useState(false);
 
   // Update elapsed time for active session
   useEffect(() => {
