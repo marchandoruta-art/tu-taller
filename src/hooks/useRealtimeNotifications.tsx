@@ -80,7 +80,7 @@ export function useRealtimeNotifications() {
 
   useEffect(() => {
     if (!user) return;
-
+    requestNotificationPermission();
     // Subscribe to new messages
     const messagesChannel = supabase
       .channel('global-messages-notifications')
