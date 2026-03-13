@@ -114,6 +114,12 @@ export function useRealtimeNotifications() {
             vehicleId: newMessage.vehicle_id,
             vehiclePlate: vehicleInfo.plate,
           });
+
+          sendBrowserNotification(`💬 Mensaje en ${vehicleInfo.plate}`, {
+            body: `${senderName}: ${newMessage.message.slice(0, 80)}`,
+            tag: `msg-${newMessage.id}`,
+            url: `/vehicles/${newMessage.vehicle_id}`,
+          });
         }
       )
       .subscribe();
