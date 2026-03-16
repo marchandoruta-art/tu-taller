@@ -6,7 +6,7 @@ import { useOfflineOperation } from '@/hooks/useOfflineOperation';
 import { cacheData, getCachedData, addToCachedData } from '@/lib/offlineStorage';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogIn, LogOut, Clock, Stethoscope, Coffee, UtensilsCrossed } from 'lucide-react';
+import { LogIn, LogOut, Clock, Stethoscope, Coffee, UtensilsCrossed, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { playNotificationSound } from '@/lib/notificationSound';
 import { requestNotificationPermission, sendBrowserNotification } from '@/lib/browserNotification';
@@ -44,11 +44,16 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
   const [todayLogs, setTodayLogs] = useState<AttendanceLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [elapsed, setElapsed] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
       fetchTodayLogs();
-      requestNotificationPermission();
+      try {
+        requestNotificationPermission();
+      } catch (e) {
+        console.warn('Notification permission request failed:', e);
+      }
     }
   }, [user]);
 
@@ -57,41 +62,56 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
 
   // Update elapsed time for active session
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (activeSession) {
       const updateElapsed = () => {
-        const start = new Date(activeSession.clock_in);
-        const now = new Date();
-        setElapsed(Math.floor((now.getTime() - start.getTime()) / 1000));
+        try {
+          const start = new Date(activeSession.clock_in);
+          const now = new Date();
+          const diff = Math.floor((now.getTime() - start.getTime()) / 1000);
+          setElapsed(Math.max(0, diff));
+        } catch (e) {
+          console.error('Error calculating elapsed time:', e);
+        }
       };
       updateElapsed();
       interval = setInterval(updateElapsed, 1000);
     }
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [activeSession]);
 
   // 8-hour alarm: check total accumulated today + active session, auto clock-out
   useEffect(() => {
     if (eightHourAlertShown) return;
-    const completedMinutes = todayLogs.reduce((acc, log) => acc + (log.total_minutes || 0), 0);
-    const activeMinutes = Math.floor(elapsed / 60);
-    const totalMinutes = completedMinutes + activeMinutes;
-    if (totalMinutes >= 480) {
-      setEightHourAlertShown(true);
-      playNotificationSound(true);
-      toast.warning('⏰ ¡Jornada de 8 horas completada!', {
-        description: 'Se ha registrado tu salida automáticamente.',
-        duration: 15000,
-      });
-      sendBrowserNotification('⏰ Jornada completada', {
-        body: '¡Has cumplido 8 horas! Se registró tu salida automáticamente.',
-        tag: 'attendance-8h',
-      });
-      // Auto clock-out
-      if (activeSession && !autoStoppedAt8h) {
-        setAutoStoppedAt8h(true);
-        clockOut('normal');
+    try {
+      const completedMinutes = todayLogs.reduce((acc, log) => acc + (log.total_minutes || 0), 0);
+      const activeMinutes = Math.floor(elapsed / 60);
+      const totalMinutes = completedMinutes + activeMinutes;
+      if (totalMinutes >= 480) {
+        setEightHourAlertShown(true);
+        playNotificationSound(true);
+        toast.warning('⏰ ¡Jornada de 8 horas completada!', {
+          description: 'Se ha registrado tu salida automáticamente.',
+          duration: 15000,
+        });
+        try {
+          sendBrowserNotification('⏰ Jornada completada', {
+            body: '¡Has cumplido 8 horas! Se registró tu salida automáticamente.',
+            tag: 'attendance-8h',
+          });
+        } catch (e) {
+          console.warn('Browser notification failed:', e);
+        }
+        // Auto clock-out
+        if (activeSession && !autoStoppedAt8h) {
+          setAutoStoppedAt8h(true);
+          clockOut('normal');
+        }
       }
+    } catch (e) {
+      console.error('Error in 8h check:', e);
     }
   }, [elapsed, todayLogs, eightHourAlertShown, activeSession, autoStoppedAt8h]);
 
@@ -103,15 +123,18 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
   // Daily 7:55 reminder to clock in
   useEffect(() => {
     const checkReminder = () => {
-      const now = new Date();
-      if (now.getHours() === 7 && now.getMinutes() === 55 && !activeSession) {
-        toast.info('🕗 Recuerda fichar tu entrada', {
-          description: 'Son las 7:55, ¡empieza tu jornada!',
-          duration: 30000,
-        });
+      try {
+        const now = new Date();
+        if (now.getHours() === 7 && now.getMinutes() === 55 && !activeSession) {
+          toast.info('🕗 Recuerda fichar tu entrada', {
+            description: 'Son las 7:55, ¡empieza tu jornada!',
+            duration: 30000,
+          });
+        }
+      } catch (e) {
+        console.warn('Reminder check failed:', e);
       }
     };
-    // Check every 30 seconds
     const interval = setInterval(checkReminder, 30000);
     checkReminder();
     return () => clearInterval(interval);
@@ -124,8 +147,6 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
     today.setHours(0, 0, 0, 0);
 
     try {
-      // First: find any active session (no clock_out) regardless of date
-      // This ensures sessions that span midnight or app restarts are found
       const [activeRes, todayRes] = await Promise.all([
         supabase
           .from('attendance_logs')
@@ -146,19 +167,25 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
         throw activeRes.error || todayRes.error;
       }
 
-      const activeSession = activeRes.data?.[0] as AttendanceLog | undefined;
+      const activeSessionData = activeRes.data?.[0] as AttendanceLog | undefined;
       const todayData = (todayRes.data || []) as AttendanceLog[];
 
-      // If there's an active session from a previous day, include it in today's logs
-      if (activeSession && !todayData.find(log => log.id === activeSession.id)) {
-        todayData.unshift(activeSession);
+      if (activeSessionData && !todayData.find(log => log.id === activeSessionData.id)) {
+        todayData.unshift(activeSessionData);
       }
 
       setTodayLogs(todayData);
-      setActiveSession(activeSession || null);
-      await cacheData('attendance_logs', todayData);
-    } catch (error) {
-      console.error('Error fetching attendance logs, using cache:', error);
+      setActiveSession(activeSessionData || null);
+      setError(null);
+
+      try {
+        await cacheData('attendance_logs', todayData);
+      } catch (cacheErr) {
+        console.warn('Failed to cache attendance data:', cacheErr);
+      }
+    } catch (fetchError) {
+      console.error('Error fetching attendance logs:', fetchError);
+      // Try loading from cache
       try {
         const cachedLogs = await getCachedData<AttendanceLog>('attendance_logs');
         const filteredLogs = cachedLogs
@@ -170,8 +197,10 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
         setActiveSession(filteredLogs.find(log => !log.clock_out) || null);
       } catch (cacheError) {
         console.error('Error loading cached attendance logs:', cacheError);
+        // Still show the component, just empty
         setTodayLogs([]);
         setActiveSession(null);
+        setError('No se pudieron cargar los registros. Comprueba tu conexión.');
       }
     } finally {
       setLoading(false);
@@ -199,11 +228,17 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
         const logData = result.data as unknown as AttendanceLog;
         setActiveSession(logData);
         setTodayLogs(prev => [logData, ...prev]);
-        await addToCachedData('attendance_logs', logData);
+        setError(null);
+        try {
+          await addToCachedData('attendance_logs', logData);
+        } catch (e) {
+          console.warn('Failed to cache new log:', e);
+        }
         toast.success(result.offline ? 'Entrada registrada (offline)' : 'Entrada registrada');
       }
-    } catch (error) {
-      toast.error('Error al registrar entrada');
+    } catch (err) {
+      console.error('Clock in error:', err);
+      toast.error('Error al registrar entrada. Inténtalo de nuevo.');
     }
   };
 
@@ -234,11 +269,14 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
         if (!result.offline) {
           fetchTodayLogs();
         } else {
-          // Update local state for offline mode
           setTodayLogs(prev => prev.map(log =>
             log.id === activeSession.id ? updatedLog : log
           ));
-          await addToCachedData('attendance_logs', updatedLog);
+          try {
+            await addToCachedData('attendance_logs', updatedLog);
+          } catch (e) {
+            console.warn('Failed to cache updated log:', e);
+          }
         }
 
         toast.success(result.offline
@@ -246,8 +284,9 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
           : `${EXIT_TYPES[exitType as keyof typeof EXIT_TYPES]?.label || 'Salida'} registrada`
         );
       }
-    } catch (error) {
-      toast.error('Error al registrar salida');
+    } catch (err) {
+      console.error('Clock out error:', err);
+      toast.error('Error al registrar salida. Inténtalo de nuevo.');
     }
   };
 
@@ -290,6 +329,22 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Error message */}
+        {error && (
+          <div className="flex items-center gap-2 p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <span>{error}</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { setLoading(true); setError(null); fetchTodayLogs(); }}
+              className="ml-auto text-xs"
+            >
+              Reintentar
+            </Button>
+          </div>
+        )}
+
         {/* Clock In/Out Button */}
         <div className="flex flex-col items-center gap-4 p-4 bg-muted/50 rounded-xl">
           {activeSession ? (

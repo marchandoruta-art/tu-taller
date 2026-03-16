@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useOnlineStatus } from './useOnlineStatus';
 import { addPendingOperation, addToCachedData } from '@/lib/offlineStorage';
 import { toast } from 'sonner';
+import { safeUUID } from '@/lib/uuid';
 
 type ValidTable = 'time_logs' | 'vehicles' | 'vehicle_messages' | 'parts' | 'vehicle_anomalies' | 'attendance_logs';
 
@@ -14,7 +15,7 @@ export function useOfflineOperation() {
     data: T,
     options?: { showToast?: boolean }
   ): Promise<{ success: boolean; data?: T & { id: string }; offline?: boolean }> => {
-    const id = (data.id as string) || crypto.randomUUID();
+    const id = (data.id as string) || safeUUID();
     const dataWithId = { ...data, id } as T & { id: string };
 
     if (isOnline) {
