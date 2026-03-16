@@ -15,7 +15,7 @@ export function useOfflineOperation() {
     data: T,
     options?: { showToast?: boolean }
   ): Promise<{ success: boolean; data?: T & { id: string }; offline?: boolean }> => {
-    const id = (data.id as string) || crypto.randomUUID();
+    const id = (data.id as string) || safeUUID();
     const dataWithId = { ...data, id } as T & { id: string };
 
     if (isOnline) {

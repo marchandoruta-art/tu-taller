@@ -50,7 +50,7 @@ export async function initDB(): Promise<IDBDatabase> {
 
 export async function addPendingOperation(operation: Omit<PendingOperation, 'id' | 'timestamp' | 'retries'>): Promise<string> {
   const database = await initDB();
-  const id = crypto.randomUUID();
+  const id = safeUUID();
   const pendingOp: PendingOperation = {
     ...operation,
     id,
