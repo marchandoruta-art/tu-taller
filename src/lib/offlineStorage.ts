@@ -1,4 +1,5 @@
 // IndexedDB wrapper for offline storage
+import { safeUUID } from './uuid';
 
 const DB_NAME = 'autosFormentera';
 const DB_VERSION = 1;
