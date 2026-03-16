@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useOnlineStatus } from './useOnlineStatus';
 import { addPendingOperation, addToCachedData } from '@/lib/offlineStorage';
 import { toast } from 'sonner';
+import { safeUUID } from '@/lib/uuid';
 
 type ValidTable = 'time_logs' | 'vehicles' | 'vehicle_messages' | 'parts' | 'vehicle_anomalies' | 'attendance_logs';
 
