@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { PanelLeft, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
+import { ActiveTimerBanner } from '@/components/timer/ActiveTimerBanner';
 
 interface MainLayoutProps {
   children: ReactNode;
