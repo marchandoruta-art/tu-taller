@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { PanelLeft, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
+import { ActiveTimerBanner } from '@/components/timer/ActiveTimerBanner';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -100,8 +101,9 @@ export function MainLayout({ children }: MainLayoutProps) {
           </header>
         )}
         
-        <div className="p-4 md:p-6">{children}</div>
+        <div className="p-4 md:p-6 pb-20">{children}</div>
       </main>
+      <ActiveTimerBanner />
     </div>
   );
 }
