@@ -57,7 +57,7 @@ export function VehicleChat({ vehicleId }: VehicleChatProps) {
               ...messageData,
               profile: profileData
             };
-            setMessages((prev) => [...prev, messageWithProfile as any]);
+            setMessages((prev) => [...prev, messageWithProfile as VehicleMessage]);
           }
         }
       )
@@ -109,7 +109,7 @@ export function VehicleChat({ vehicleId }: VehicleChatProps) {
         profile: profilesMap.get(msg.user_id) || null
       }));
 
-      setMessages(messagesWithProfiles as any);
+      setMessages(messagesWithProfiles as VehicleMessage[]);
     } else {
       setMessages([]);
     }
@@ -167,7 +167,7 @@ export function VehicleChat({ vehicleId }: VehicleChatProps) {
         ) : (
           messages.map((msg) => {
             const isOwn = msg.user_id === user?.id;
-            const profileData = (msg as any).profile;
+            const profileData = msg.profile;
 
             return (
               <div
