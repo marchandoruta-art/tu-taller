@@ -19,6 +19,7 @@ import {
   BarChart3,
   AlertTriangle,
   Calendar,
+  CalendarCheck,
   Building2,
   Scale,
   Archive,
