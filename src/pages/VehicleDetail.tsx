@@ -593,9 +593,10 @@ export default function VehicleDetail() {
                       type="number"
                       placeholder="Cant."
                       value={newPart.quantity}
-                      onChange={(e) => setNewPart({ ...newPart, quantity: parseInt(e.target.value) || 1 })}
+                      onChange={(e) => setNewPart({ ...newPart, quantity: parseFloat(e.target.value) || 1 })}
                       className="w-20"
-                      min={1}
+                      min={0.01}
+                      step="any"
                     />
                     <Input
                       placeholder="Descripción de la pieza"
