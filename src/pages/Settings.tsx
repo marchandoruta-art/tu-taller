@@ -149,6 +149,39 @@ export default function Settings() {
           </CardContent>
         </Card>
 
+        {/* WhatsApp Message */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5" />
+              Mensaje de WhatsApp
+            </CardTitle>
+            <CardDescription>
+              Personaliza el mensaje que se envía al cliente cuando su vehículo está terminado.
+              Variables disponibles: <code className="text-xs bg-muted px-1 rounded">{'{matricula}'}</code>{' '}
+              <code className="text-xs bg-muted px-1 rounded">{'{marca}'}</code>{' '}
+              <code className="text-xs bg-muted px-1 rounded">{'{modelo}'}</code>{' '}
+              <code className="text-xs bg-muted px-1 rounded">{'{nombre_taller}'}</code>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Textarea
+              value={whatsappMessage}
+              onChange={(e) => setWhatsappMessage(e.target.value)}
+              rows={8}
+              placeholder="Escribe aquí el mensaje de WhatsApp..."
+              className="font-mono text-sm"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setWhatsappMessage(DEFAULT_WHATSAPP_MESSAGE)}
+            >
+              Restaurar mensaje por defecto
+            </Button>
+          </CardContent>
+        </Card>
+
         {/* Archive Settings */}
         <Card>
           <CardHeader>
