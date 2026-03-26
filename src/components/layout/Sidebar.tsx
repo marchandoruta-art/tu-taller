@@ -2,6 +2,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
 import { ROLE_LABELS } from '@/lib/types';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import {
   Car,
   LayoutDashboard,
