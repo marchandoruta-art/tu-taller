@@ -65,6 +65,7 @@ export type Database = {
           organization_id: string | null
           updated_at: string
           vehicle_brand: string | null
+          vehicle_id: string | null
           vehicle_model: string | null
           vehicle_plate: string | null
         }
@@ -83,6 +84,7 @@ export type Database = {
           organization_id?: string | null
           updated_at?: string
           vehicle_brand?: string | null
+          vehicle_id?: string | null
           vehicle_model?: string | null
           vehicle_plate?: string | null
         }
@@ -101,6 +103,7 @@ export type Database = {
           organization_id?: string | null
           updated_at?: string
           vehicle_brand?: string | null
+          vehicle_id?: string | null
           vehicle_model?: string | null
           vehicle_plate?: string | null
         }
@@ -110,6 +113,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]
