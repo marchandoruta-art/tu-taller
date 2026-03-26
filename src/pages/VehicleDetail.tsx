@@ -54,6 +54,8 @@ export default function VehicleDetail() {
   const [vehicleFiles, setVehicleFiles] = useState<VehicleFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [newPart, setNewPart] = useState({ name: '', quantity: 1, reference: '' });
+  const [editingPartId, setEditingPartId] = useState<string | null>(null);
+  const [editPart, setEditPart] = useState({ name: '', quantity: 1, reference: '' });
   const [newAnomaly, setNewAnomaly] = useState('');
   const [uploadingFile, setUploadingFile] = useState(false);
    const [workSummary, setWorkSummary] = useState('');
