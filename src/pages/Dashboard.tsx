@@ -144,7 +144,11 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetchVehicles();
+    const init = async () => {
+      await convertTodayAppointments();
+      await fetchVehicles();
+    };
+    init();
   }, []);
 
   const getVehiclesByStatus = (status: VehicleStatus) => {
