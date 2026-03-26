@@ -5,12 +5,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Settings as SettingsIcon, Save, Loader2, Trash2, AlertTriangle } from 'lucide-react';
+import { Settings as SettingsIcon, Save, Loader2, Trash2, AlertTriangle, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { DEFAULT_WHATSAPP_MESSAGE } from '@/hooks/useWhatsAppMessage';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +33,7 @@ export default function Settings() {
   const [appName, setAppName] = useState('');
   const [archiveHours, setArchiveHours] = useState('24');
   const [autoArchive, setAutoArchive] = useState(true);
+  const [whatsappMessage, setWhatsappMessage] = useState(DEFAULT_WHATSAPP_MESSAGE);
 
   useEffect(() => {
     if (role !== 'admin') {
@@ -56,6 +59,7 @@ export default function Settings() {
       setAppName(settings?.app_name || 'Gestión Autos Formentera');
       setArchiveHours(settings?.archive_hours || '24');
       setAutoArchive(settings?.auto_archive !== 'false');
+      setWhatsappMessage(settings?.whatsapp_message || DEFAULT_WHATSAPP_MESSAGE);
     } catch (error) {
       console.error('Error fetching settings:', error);
     } finally {
@@ -77,6 +81,7 @@ export default function Settings() {
       await saveSetting('app_name', appName);
       await saveSetting('archive_hours', archiveHours);
       await saveSetting('auto_archive', autoArchive.toString());
+      await saveSetting('whatsapp_message', whatsappMessage);
       toast.success('Configuración guardada correctamente');
     } catch (error) {
       console.error('Error saving settings:', error);
@@ -141,6 +146,39 @@ export default function Settings() {
                 placeholder="Nombre de tu taller"
               />
             </div>
+          </CardContent>
+        </Card>
+
+        {/* WhatsApp Message */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5" />
+              Mensaje de WhatsApp
+            </CardTitle>
+            <CardDescription>
+              Personaliza el mensaje que se envía al cliente cuando su vehículo está terminado.
+              Variables disponibles: <code className="text-xs bg-muted px-1 rounded">{'{matricula}'}</code>{' '}
+              <code className="text-xs bg-muted px-1 rounded">{'{marca}'}</code>{' '}
+              <code className="text-xs bg-muted px-1 rounded">{'{modelo}'}</code>{' '}
+              <code className="text-xs bg-muted px-1 rounded">{'{nombre_taller}'}</code>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Textarea
+              value={whatsappMessage}
+              onChange={(e) => setWhatsappMessage(e.target.value)}
+              rows={8}
+              placeholder="Escribe aquí el mensaje de WhatsApp..."
+              className="font-mono text-sm"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setWhatsappMessage(DEFAULT_WHATSAPP_MESSAGE)}
+            >
+              Restaurar mensaje por defecto
+            </Button>
           </CardContent>
         </Card>
 

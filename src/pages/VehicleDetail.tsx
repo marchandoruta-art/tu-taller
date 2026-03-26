@@ -42,12 +42,14 @@ import {
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
+import { useWhatsAppMessage } from '@/hooks/useWhatsAppMessage';
 
 export default function VehicleDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, role } = useAuth();
   const { organizationId } = useOrganization();
+  const { openWhatsApp } = useWhatsAppMessage();
   const [vehicle, setVehicle] = useState<VehicleWithOwner | null>(null);
   const [parts, setParts] = useState<Part[]>([]);
   const [timeLogs, setTimeLogs] = useState<TimeLog[]>([]);
@@ -516,14 +518,7 @@ export default function VehicleDetail() {
                   <Button
                     variant="outline"
                     className="gap-2 border-green-500/30 text-green-600 hover:bg-green-500/10 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
-                    onClick={() => {
-                      const phone = vehicle.owner!.phone!.replace(/[\s\-\(\)]/g, '');
-                      const phoneWithCode = phone.startsWith('+') ? phone : `+34${phone}`;
-                      const message = encodeURIComponent(
-                        `Estimado/a ${vehicle.owner!.name},\n\nLe informamos de que su vehículo ${vehicle.plate} (${vehicle.brand} ${vehicle.model}) ya se encuentra terminado y disponible para su recogida en nuestras instalaciones.\n\nPuede pasar a retirarlo dentro de nuestro horario habitual.\n\nQuedamos a su disposición para cualquier aclaración.\n\nAtentamente,\nTaller`
-                      );
-                      window.open(`https://wa.me/${phoneWithCode.replace('+', '')}?text=${message}`, '_blank');
-                    }}
+                    onClick={() => openWhatsApp(vehicle.owner!.phone!, vehicle)}
                   >
                     <MessageSquare className="h-4 w-4" />
                     <span className="hidden sm:inline">WhatsApp</span>
