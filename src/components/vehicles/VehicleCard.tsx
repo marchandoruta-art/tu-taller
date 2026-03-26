@@ -123,18 +123,13 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
           onClick={() => navigate(`/vehicles/${vehicle.id}`)}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <Car className="w-5 h-5 md:w-6 md:h-6 text-primary" />
-            </div>
-            <div className="min-w-0">
-              <h3 className="font-semibold text-base md:text-lg group-hover:text-primary transition-colors truncate">
-                {vehicle.plate}
-              </h3>
-              <p className="text-xs md:text-sm text-muted-foreground truncate">
-                {vehicle.brand} {vehicle.model}
-              </p>
-            </div>
+          <div className="min-w-0">
+            <h3 className="font-bold text-lg lg:text-xl tracking-wide group-hover:text-primary transition-colors truncate">
+              {vehicle.plate}
+            </h3>
+            <p className="text-xs md:text-sm text-muted-foreground truncate">
+              {vehicle.brand} {vehicle.model}
+            </p>
           </div>
           <VehicleStatusBadge status={vehicle.status} />
         </div>
