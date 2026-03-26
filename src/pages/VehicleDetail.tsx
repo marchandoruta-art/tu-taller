@@ -511,14 +511,33 @@ export default function VehicleDetail() {
               </SelectContent>
             </Select>
             {vehicle.status === 'terminado' && (
-              <Button onClick={notifyClient} className="gap-2" disabled={notifyingClient}>
-                {notifyingClient ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Bell className="h-4 w-4" />
+              <div className="flex gap-2">
+                {vehicle.owner?.phone && (
+                  <Button
+                    variant="outline"
+                    className="gap-2 border-green-500/30 text-green-600 hover:bg-green-500/10 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                    onClick={() => {
+                      const phone = vehicle.owner!.phone!.replace(/[\s\-\(\)]/g, '');
+                      const phoneWithCode = phone.startsWith('+') ? phone : `+34${phone}`;
+                      const message = encodeURIComponent(
+                        `Estimado/a ${vehicle.owner!.name},\n\nLe informamos de que su vehículo ${vehicle.plate} (${vehicle.brand} ${vehicle.model}) ya se encuentra terminado y disponible para su recogida en nuestras instalaciones.\n\nPuede pasar a retirarlo dentro de nuestro horario habitual.\n\nQuedamos a su disposición para cualquier aclaración.\n\nAtentamente,\nTaller`
+                      );
+                      window.open(`https://wa.me/${phoneWithCode.replace('+', '')}?text=${message}`, '_blank');
+                    }}
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    <span className="hidden sm:inline">WhatsApp</span>
+                  </Button>
                 )}
-                <span className="hidden sm:inline">Avisar Cliente</span>
-              </Button>
+                <Button onClick={notifyClient} className="gap-2" disabled={notifyingClient}>
+                  {notifyingClient ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Bell className="h-4 w-4" />
+                  )}
+                  <span className="hidden sm:inline">Avisar Cliente</span>
+                </Button>
+              </div>
             )}
           </div>
         </div>
