@@ -183,14 +183,17 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   </p>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-muted-foreground hover:text-destructive"
-                onClick={signOut}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Cerrar sesión
-              </Button>
+              <div className="flex items-center gap-1">
+                <ThemeToggle />
+                <Button
+                  variant="ghost"
+                  className="flex-1 justify-start text-muted-foreground hover:text-destructive"
+                  onClick={signOut}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Cerrar sesión
+                </Button>
+              </div>
             </>
           ) : (
             <div className="flex flex-col items-center gap-2">
