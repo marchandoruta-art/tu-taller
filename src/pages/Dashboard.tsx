@@ -152,6 +152,25 @@ export default function Dashboard() {
     init();
   }, []);
 
+  const handleDragEnd = async (result: DropResult) => {
+    if (!result.destination) return;
+    const newStatus = result.destination.droppableId as VehicleStatus;
+    const vehicleId = result.draggableId;
+    const vehicle = vehicles.find((v) => v.id === vehicleId);
+    if (!vehicle || vehicle.status === newStatus) return;
+
+    // Optimistic update
+    setVehicles((prev) => prev.map((v) => v.id === vehicleId ? { ...v, status: newStatus } : v));
+
+    const { error } = await supabase.from('vehicles').update({ status: newStatus }).eq('id', vehicleId);
+    if (error) {
+      toast.error('Error al mover vehículo');
+      fetchVehicles();
+    } else {
+      toast.success(`${vehicle.plate} → ${STATUS_LABELS[newStatus]}`);
+    }
+  };
+
   const getVehiclesByStatus = (status: VehicleStatus) => {
     return vehicles.filter((v) => v.status === status);
   };
