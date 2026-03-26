@@ -65,6 +65,8 @@ export default function VehicleDetail() {
    const [savingDescription, setSavingDescription] = useState(false);
    const [editingDescription, setEditingDescription] = useState(false);
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
+  const [estimatedCost, setEstimatedCost] = useState('');
+  const [savingCost, setSavingCost] = useState(false);
   const topRef = useRef<HTMLDivElement>(null);
 
   // Scroll to top on mount/id change
