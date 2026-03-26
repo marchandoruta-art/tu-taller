@@ -593,6 +593,51 @@ export default function VehicleDetail() {
             </Card>
 
             {/* Vehicle Photos */}
+            {/* Estimated Cost */}
+            {(role === 'admin' || role === 'oficina') && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    💰 Presupuesto Estimado
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={estimatedCost}
+                      onChange={(e) => setEstimatedCost(e.target.value)}
+                      className="flex-1"
+                    />
+                    <span className="text-sm text-muted-foreground">€</span>
+                    <Button
+                      size="sm"
+                      disabled={savingCost}
+                      onClick={async () => {
+                        setSavingCost(true);
+                        const { error } = await supabase
+                          .from('vehicles')
+                          .update({ estimated_cost: estimatedCost ? parseFloat(estimatedCost) : null } as any)
+                          .eq('id', vehicle.id);
+                        if (error) toast.error('Error al guardar');
+                        else toast.success('Presupuesto guardado');
+                        setSavingCost(false);
+                      }}
+                    >
+                      {savingCost ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  {estimatedCost && (
+                    <p className="text-2xl font-bold mt-3 text-primary">
+                      {parseFloat(estimatedCost).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             <VehiclePhotos vehicleId={vehicle.id} />
 
             {/* Parts */}
