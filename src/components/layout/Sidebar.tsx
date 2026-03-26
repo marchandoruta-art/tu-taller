@@ -43,6 +43,7 @@ const navigation = [
 const adminNavigation = [
   { name: 'Usuarios', href: '/users', icon: Users },
   { name: 'Mi Taller', href: '/organization', icon: Building2 },
+  { name: 'Carga Trabajo', href: '/admin/workload', icon: Users },
   { name: 'Control Horario', href: '/admin/attendance', icon: CalendarClock },
   { name: 'Productividad', href: '/admin/productivity', icon: BarChart3 },
   { name: 'Alertas', href: '/admin/alerts', icon: AlertTriangle },
