@@ -49,6 +49,71 @@ export type Database = {
           },
         ]
       }
+      appointments: {
+        Row: {
+          appointment_date: string
+          appointment_time: string | null
+          appointment_type: Database["public"]["Enums"]["appointment_type"]
+          assigned_to: string | null
+          client_name: string
+          client_phone: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          issue_description: string | null
+          notes: string | null
+          organization_id: string | null
+          updated_at: string
+          vehicle_brand: string | null
+          vehicle_model: string | null
+          vehicle_plate: string | null
+        }
+        Insert: {
+          appointment_date: string
+          appointment_time?: string | null
+          appointment_type?: Database["public"]["Enums"]["appointment_type"]
+          assigned_to?: string | null
+          client_name: string
+          client_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          issue_description?: string | null
+          notes?: string | null
+          organization_id?: string | null
+          updated_at?: string
+          vehicle_brand?: string | null
+          vehicle_model?: string | null
+          vehicle_plate?: string | null
+        }
+        Update: {
+          appointment_date?: string
+          appointment_time?: string | null
+          appointment_type?: Database["public"]["Enums"]["appointment_type"]
+          assigned_to?: string | null
+          client_name?: string
+          client_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          issue_description?: string | null
+          notes?: string | null
+          organization_id?: string | null
+          updated_at?: string
+          vehicle_brand?: string | null
+          vehicle_model?: string | null
+          vehicle_plate?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_logs: {
         Row: {
           clock_in: string
@@ -838,6 +903,7 @@ export type Database = {
       }
     }
     Enums: {
+      appointment_type: "mecanica" | "chapa_pintura"
       user_role: "mecanico" | "chapista" | "oficina" | "admin"
       vehicle_status:
         | "recibido"
@@ -973,6 +1039,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      appointment_type: ["mecanica", "chapa_pintura"],
       user_role: ["mecanico", "chapista", "oficina", "admin"],
       vehicle_status: [
         "recibido",
