@@ -102,6 +102,7 @@ export default function VehicleDetail() {
       setVehicle(vehicleRes.data as VehicleWithOwner);
       setWorkSummary(vehicleRes.data.work_summary || '');
       setClientDescription(vehicleRes.data.client_description || '');
+      setEstimatedCost((vehicleRes.data as any).estimated_cost?.toString() || '');
       
       // Fetch assigned user
       if (vehicleRes.data.assigned_to) {
