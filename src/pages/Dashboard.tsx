@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { STATUS_LABELS } from '@/lib/types';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 
 const statusOrder: VehicleStatus[] = ['recibido', 'en_reparacion', 'pendiente_piezas', 'terminado', 'facturado', 'entregado'];
 type ViewMode = 'kanban' | 'charts' | 'list';
@@ -338,29 +339,43 @@ export default function Dashboard() {
 
         {/* Kanban Board - horizontal scroll on mobile, grid on larger screens */}
         {viewMode === 'kanban' && (
-          <>
+          <DragDropContext onDragEnd={handleDragEnd}>
+            {/* Mobile */}
             <div className="lg:hidden overflow-x-auto pb-4 -mx-4 px-4">
               <div className="flex gap-4 min-w-max">
                 {filteredStatusOrder.map((status) => {
                   const statusVehicles = getVehiclesByStatus(status);
                   return (
-                    <StatusColumn key={status} status={status} count={statusVehicles.length}>
-                      {statusVehicles.length === 0 ? (
-                        <p className="text-center text-sm text-muted-foreground py-8">
-                          Sin vehículos
-                        </p>
-                      ) : (
-                        statusVehicles.map((vehicle) => (
-                          <VehicleCard key={vehicle.id} vehicle={vehicle} totalTime={vehicleTimes[vehicle.id] || 0} showNextAction onStatusChange={fetchVehicles} />
-                        ))
+                    <Droppable key={status} droppableId={status}>
+                      {(provided, snapshot) => (
+                        <div ref={provided.innerRef} {...provided.droppableProps}>
+                          <StatusColumn status={status} count={statusVehicles.length}>
+                            <div className={cn("min-h-[60px] transition-colors rounded-lg", snapshot.isDraggingOver && "bg-primary/10")}>
+                              {statusVehicles.length === 0 ? (
+                                <p className="text-center text-sm text-muted-foreground py-8">Sin vehículos</p>
+                              ) : (
+                                statusVehicles.map((vehicle, index) => (
+                                  <Draggable key={vehicle.id} draggableId={vehicle.id} index={index}>
+                                    {(provided) => (
+                                      <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="mb-2">
+                                        <VehicleCard vehicle={vehicle} totalTime={vehicleTimes[vehicle.id] || 0} showNextAction onStatusChange={fetchVehicles} />
+                                      </div>
+                                    )}
+                                  </Draggable>
+                                ))
+                              )}
+                              {provided.placeholder}
+                            </div>
+                          </StatusColumn>
+                        </div>
                       )}
-                    </StatusColumn>
+                    </Droppable>
                   );
                 })}
               </div>
             </div>
 
-            {/* Kanban Board - grid layout on desktop */}
+            {/* Desktop */}
             <div className={cn(
               "hidden lg:grid gap-4",
               filteredStatusOrder.length === 1 && "lg:grid-cols-1",
@@ -373,21 +388,34 @@ export default function Dashboard() {
               {filteredStatusOrder.map((status) => {
                 const statusVehicles = getVehiclesByStatus(status);
                 return (
-                  <StatusColumn key={status} status={status} count={statusVehicles.length}>
-                    {statusVehicles.length === 0 ? (
-                      <p className="text-center text-sm text-muted-foreground py-8">
-                        Sin vehículos
-                      </p>
-                    ) : (
-                      statusVehicles.map((vehicle) => (
-                        <VehicleCard key={vehicle.id} vehicle={vehicle} totalTime={vehicleTimes[vehicle.id] || 0} showNextAction onStatusChange={fetchVehicles} />
-                      ))
+                  <Droppable key={status} droppableId={status}>
+                    {(provided, snapshot) => (
+                      <div ref={provided.innerRef} {...provided.droppableProps}>
+                        <StatusColumn status={status} count={statusVehicles.length}>
+                          <div className={cn("min-h-[60px] transition-colors rounded-lg", snapshot.isDraggingOver && "bg-primary/10")}>
+                            {statusVehicles.length === 0 ? (
+                              <p className="text-center text-sm text-muted-foreground py-8">Sin vehículos</p>
+                            ) : (
+                              statusVehicles.map((vehicle, index) => (
+                                <Draggable key={vehicle.id} draggableId={vehicle.id} index={index}>
+                                  {(provided) => (
+                                    <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="mb-2">
+                                      <VehicleCard vehicle={vehicle} totalTime={vehicleTimes[vehicle.id] || 0} showNextAction onStatusChange={fetchVehicles} />
+                                    </div>
+                                  )}
+                                </Draggable>
+                              ))
+                            )}
+                            {provided.placeholder}
+                          </div>
+                        </StatusColumn>
+                      </div>
                     )}
-                  </StatusColumn>
+                  </Droppable>
                 );
               })}
             </div>
-          </>
+          </DragDropContext>
         )}
       </div>
     </MainLayout>
