@@ -783,6 +783,7 @@ export type Database = {
           created_by: string | null
           delivered_at: string | null
           deposit_receipt_generated: boolean | null
+          estimated_cost: number | null
           exterior_damages: Json | null
           fuel_level: number | null
           id: string
@@ -812,6 +813,7 @@ export type Database = {
           created_by?: string | null
           delivered_at?: string | null
           deposit_receipt_generated?: boolean | null
+          estimated_cost?: number | null
           exterior_damages?: Json | null
           fuel_level?: number | null
           id?: string
@@ -841,6 +843,7 @@ export type Database = {
           created_by?: string | null
           delivered_at?: string | null
           deposit_receipt_generated?: boolean | null
+          estimated_cost?: number | null
           exterior_damages?: Json | null
           fuel_level?: number | null
           id?: string

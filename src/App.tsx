@@ -24,6 +24,7 @@ import InstallApp from "./pages/InstallApp";
 import Settings from "./pages/Settings";
 import RepairHistory from "./pages/RepairHistory";
 import Appointments from "./pages/Appointments";
+import Workload from "./pages/Workload";
 import Onboarding from "./pages/Onboarding";
 import OrganizationSettings from "./pages/OrganizationSettings";
 import NotFound from "./pages/NotFound";
@@ -84,6 +85,7 @@ const App = () => (
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/repair-history" element={<RepairHistory />} />
                 <Route path="/appointments" element={<Appointments />} />
+                <Route path="/admin/workload" element={<Workload />} />
                 <Route path="/legal" element={<LegalIndex />} />
                 <Route path="/aviso-legal" element={<AvisoLegal />} />
                 <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />

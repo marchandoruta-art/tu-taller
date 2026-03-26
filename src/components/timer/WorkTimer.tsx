@@ -10,10 +10,11 @@ import { cn } from '@/lib/utils';
 
 interface WorkTimerProps {
   vehicleId: string;
+  vehicleStatus?: string;
   onUpdate?: () => void;
 }
 
-export function WorkTimer({ vehicleId, onUpdate }: WorkTimerProps) {
+export function WorkTimer({ vehicleId, vehicleStatus, onUpdate }: WorkTimerProps) {
   const { user } = useAuth();
   const { organizationId } = useOrganization();
   const { executeInsert, executeUpdate, isOnline } = useOfflineOperation();
@@ -120,6 +121,16 @@ export function WorkTimer({ vehicleId, onUpdate }: WorkTimerProps) {
         setIsRunning(true);
         setElapsed(0);
         toast.success(result.offline ? 'Cronómetro iniciado (offline)' : 'Cronómetro iniciado');
+
+        // Auto-change vehicle status from 'recibido' to 'en_reparacion'
+        if (vehicleStatus === 'recibido') {
+          await supabase
+            .from('vehicles')
+            .update({ status: 'en_reparacion' })
+            .eq('id', vehicleId);
+          toast.info('Vehículo pasado a "En Reparación" automáticamente');
+          onUpdate?.();
+        }
       }
     } catch (error) {
       toast.error('Error al iniciar el cronómetro');

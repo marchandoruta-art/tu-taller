@@ -2,6 +2,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
 import { ROLE_LABELS } from '@/lib/types';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import {
   Car,
   LayoutDashboard,
@@ -42,6 +43,7 @@ const navigation = [
 const adminNavigation = [
   { name: 'Usuarios', href: '/users', icon: Users },
   { name: 'Mi Taller', href: '/organization', icon: Building2 },
+  { name: 'Carga Trabajo', href: '/admin/workload', icon: Users },
   { name: 'Control Horario', href: '/admin/attendance', icon: CalendarClock },
   { name: 'Productividad', href: '/admin/productivity', icon: BarChart3 },
   { name: 'Alertas', href: '/admin/alerts', icon: AlertTriangle },
@@ -182,14 +184,17 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   </p>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-muted-foreground hover:text-destructive"
-                onClick={signOut}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Cerrar sesión
-              </Button>
+              <div className="flex items-center gap-1">
+                <ThemeToggle />
+                <Button
+                  variant="ghost"
+                  className="flex-1 justify-start text-muted-foreground hover:text-destructive"
+                  onClick={signOut}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Cerrar sesión
+                </Button>
+              </div>
             </>
           ) : (
             <div className="flex flex-col items-center gap-2">
