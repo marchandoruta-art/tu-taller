@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { VehicleWithOwner, Profile, ROLE_LABELS, UserRole, VehicleStatus } from '@/lib/types';
+import { useWhatsAppMessage } from '@/hooks/useWhatsAppMessage';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { VehicleStatusBadge } from './VehicleStatusBadge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -43,6 +44,7 @@ const nextStatusLabels: Record<VehicleStatus, string> = {
 export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, onStatusChange }: VehicleCardProps) {
   const navigate = useNavigate();
   const { role } = useAuth();
+  const { openWhatsApp } = useWhatsAppMessage();
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
   const [updating, setUpdating] = useState(false);
   const isAdmin = role === 'admin';
