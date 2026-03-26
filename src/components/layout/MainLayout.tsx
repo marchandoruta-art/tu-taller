@@ -1,10 +1,12 @@
 import { ReactNode, useState, useEffect } from 'react';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
-import { PanelLeft, LogOut } from 'lucide-react';
+import { PanelLeft, LogOut, Search } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { ActiveTimerBanner } from '@/components/timer/ActiveTimerBanner';
+import { CommandPalette } from '@/components/ui/CommandPalette';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -89,21 +91,36 @@ export function MainLayout({ children }: MainLayoutProps) {
               </Button>
               <span className="font-semibold">Autos Formentera</span>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={signOut}
-              className="text-muted-foreground hover:text-destructive"
-              title="Cerrar sesión"
-            >
-              <LogOut className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  const event = new KeyboardEvent('keydown', { key: 'k', metaKey: true });
+                  window.dispatchEvent(event);
+                }}
+                title="Buscar (Cmd+K)"
+              >
+                <Search className="h-5 w-5" />
+              </Button>
+              <ThemeToggle />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={signOut}
+                className="text-muted-foreground hover:text-destructive"
+                title="Cerrar sesión"
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </div>
           </header>
         )}
         
         <div className="p-4 md:p-6 pb-20">{children}</div>
       </main>
       <ActiveTimerBanner />
+      <CommandPalette />
     </div>
   );
 }
