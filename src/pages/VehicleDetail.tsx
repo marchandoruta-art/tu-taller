@@ -54,9 +54,9 @@ export default function VehicleDetail() {
   const [anomalies, setAnomalies] = useState<VehicleAnomaly[]>([]);
   const [vehicleFiles, setVehicleFiles] = useState<VehicleFile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newPart, setNewPart] = useState({ name: '', quantity: 1, reference: '' });
+  const [newPart, setNewPart] = useState({ name: '', quantity: '1', reference: '' });
   const [editingPartId, setEditingPartId] = useState<string | null>(null);
-  const [editPart, setEditPart] = useState({ name: '', quantity: 1, reference: '' });
+  const [editPart, setEditPart] = useState({ name: '', quantity: '1', reference: '' });
   const [newAnomaly, setNewAnomaly] = useState('');
   const [uploadingFile, setUploadingFile] = useState(false);
    const [workSummary, setWorkSummary] = useState('');
@@ -149,6 +149,13 @@ export default function VehicleDetail() {
     setLoading(false);
   };
 
+  const normalizeDecimalInput = (value: string) => value.replace(/,/g, '.').replace(/[^\d.]/g, '');
+
+  const parseDecimalQuantity = (value: string) => {
+    const parsed = Number.parseFloat(normalizeDecimalInput(value));
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+  };
+
   const updateStatus = async (newStatus: VehicleStatus) => {
     if (!vehicle) return;
 
@@ -202,11 +209,17 @@ export default function VehicleDetail() {
     e.preventDefault();
     if (!vehicle || !newPart.name || !user) return;
 
+    const quantity = parseDecimalQuantity(newPart.quantity);
+    if (quantity === null) {
+      toast.error('Introduce una cantidad válida, por ejemplo 1,5');
+      return;
+    }
+
     const { error } = await supabase.from('parts').insert([
       {
         vehicle_id: vehicle.id,
         name: newPart.name,
-        quantity: newPart.quantity,
+        quantity,
         reference: newPart.reference || null,
         added_by: user.id,
         organization_id: organizationId,
@@ -217,7 +230,7 @@ export default function VehicleDetail() {
       toast.error('Error al añadir la pieza');
     } else {
       toast.success('Pieza añadida');
-      setNewPart({ name: '', quantity: 1, reference: '' });
+      setNewPart({ name: '', quantity: '1', reference: '' });
       fetchVehicleData();
     }
   };
@@ -591,13 +604,12 @@ export default function VehicleDetail() {
                 <form onSubmit={addPart} className="space-y-2">
                   <div className="flex gap-2">
                     <Input
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
                       placeholder="Cant."
                       value={newPart.quantity}
-                      onChange={(e) => setNewPart({ ...newPart, quantity: parseFloat(e.target.value) || 1 })}
+                      onChange={(e) => setNewPart({ ...newPart, quantity: e.target.value })}
                       className="w-20"
-                      min={0.01}
-                      step="any"
                     />
                     <Input
                       placeholder="Descripción de la pieza"
@@ -634,12 +646,11 @@ export default function VehicleDetail() {
                           <div className="flex-1 space-y-2">
                             <div className="flex gap-2">
                               <Input
-                                type="number"
+                                type="text"
+                                inputMode="decimal"
                                 value={editPart.quantity}
-                                onChange={(e) => setEditPart({ ...editPart, quantity: parseFloat(e.target.value) || 1 })}
+                                onChange={(e) => setEditPart({ ...editPart, quantity: e.target.value })}
                                 className="w-20"
-                                min={0.01}
-                                step="any"
                               />
                               <Input
                                 value={editPart.name}
@@ -658,9 +669,15 @@ export default function VehicleDetail() {
                                 size="icon"
                                 className="h-8 w-8"
                                 onClick={async () => {
+                                   const quantity = parseDecimalQuantity(editPart.quantity);
+                                   if (quantity === null) {
+                                     toast.error('Introduce una cantidad válida, por ejemplo 1,5');
+                                     return;
+                                   }
+
                                   const { error } = await supabase
                                     .from('parts')
-                                    .update({ name: editPart.name, quantity: editPart.quantity, reference: editPart.reference || null })
+                                     .update({ name: editPart.name, quantity, reference: editPart.reference || null })
                                     .eq('id', part.id);
                                   if (error) {
                                     toast.error('Error al actualizar la pieza');
@@ -689,7 +706,7 @@ export default function VehicleDetail() {
                               className="flex-1 cursor-pointer"
                               onClick={() => {
                                 setEditingPartId(part.id);
-                                setEditPart({ name: part.name, quantity: part.quantity, reference: part.reference || '' });
+                                setEditPart({ name: part.name, quantity: String(part.quantity).replace('.', ','), reference: part.reference || '' });
                               }}
                             >
                               <div className="flex items-center gap-2">
