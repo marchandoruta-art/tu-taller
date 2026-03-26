@@ -157,7 +157,7 @@ const handler = async (req: Request): Promise<Response> => {
       const phoneWithCode = cleanPhone.startsWith('+') ? cleanPhone : `+34${cleanPhone}`;
       
       const message = encodeURIComponent(
-        `Estimado/a ${ownerName},\n\nLe informamos de que su vehículo ${vehiclePlate} (${vehicleBrand} ${vehicleModel}) ya se encuentra terminado y disponible para su recogida en nuestras instalaciones.\n\nPuede pasar a retirarlo dentro de nuestro horario habitual.\n\nQuedamos a su disposición para cualquier aclaración.\n\nAtentamente,\nTaller`
+        `Estimado cliente,\n\nLe informamos de que su vehículo ${vehiclePlate} (${vehicleBrand} ${vehicleModel}) ya se encuentra terminado y disponible para su recogida en nuestras instalaciones.\n\nPuede pasar a retirarlo dentro de nuestro horario habitual.\n\nQuedamos a su disposición para cualquier aclaración.\n\nAtentamente,\nTaller`
       );
       
       results.whatsapp = `https://wa.me/${phoneWithCode.replace('+', '')}?text=${message}`;
