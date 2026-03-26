@@ -186,12 +186,7 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
             className="w-full text-xs gap-2 border-green-500/30 text-green-600 hover:bg-green-500/10 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
             onClick={(e) => {
               e.stopPropagation();
-              const phone = vehicle.owner!.phone!.replace(/[\s\-\(\)]/g, '');
-              const phoneWithCode = phone.startsWith('+') ? phone : `+34${phone}`;
-              const message = encodeURIComponent(
-                `Estimado/a ${vehicle.owner!.name},\n\nLe informamos de que su vehículo ${vehicle.plate} (${vehicle.brand} ${vehicle.model}) ya se encuentra terminado y disponible para su recogida en nuestras instalaciones.\n\nPuede pasar a retirarlo dentro de nuestro horario habitual.\n\nQuedamos a su disposición para cualquier aclaración.\n\nAtentamente,\nTaller`
-              );
-              window.open(`https://wa.me/${phoneWithCode.replace('+', '')}?text=${message}`, '_blank');
+              openWhatsApp(vehicle.owner!.phone!, vehicle);
             }}
           >
             <MessageCircle className="w-3.5 h-3.5" />
