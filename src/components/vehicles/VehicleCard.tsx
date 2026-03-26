@@ -122,17 +122,15 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
     <Card className="glass-card hover:shadow-elevated transition-all duration-200 cursor-pointer group"
           onClick={() => navigate(`/vehicles/${vehicle.id}`)}>
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h3 className="font-bold text-lg lg:text-xl tracking-wide group-hover:text-primary transition-colors">
-              {vehicle.plate}
-            </h3>
-            <p className="text-xs md:text-sm text-muted-foreground truncate">
-              {vehicle.brand} {vehicle.model}
-            </p>
-          </div>
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="font-bold text-lg lg:text-xl tracking-wide group-hover:text-primary transition-colors truncate min-w-0">
+            {vehicle.plate}
+          </h3>
           <VehicleStatusBadge status={vehicle.status} />
         </div>
+        <p className="text-xs md:text-sm text-muted-foreground truncate">
+          {vehicle.brand} {vehicle.model}
+        </p>
       </CardHeader>
       <CardContent className="space-y-3">
         {/* Owner info */}
