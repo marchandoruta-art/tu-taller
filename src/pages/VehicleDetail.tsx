@@ -627,25 +627,88 @@ export default function VehicleDetail() {
                     {parts.map((part) => (
                       <div
                         key={part.id}
-                        className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                        className="flex items-center justify-between p-3 bg-muted/50 rounded-lg gap-2"
                       >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm text-muted-foreground">x{part.quantity}</span>
-                            <span className="font-medium">{part.name}</span>
+                        {editingPartId === part.id ? (
+                          <div className="flex-1 space-y-2">
+                            <div className="flex gap-2">
+                              <Input
+                                type="number"
+                                value={editPart.quantity}
+                                onChange={(e) => setEditPart({ ...editPart, quantity: parseFloat(e.target.value) || 1 })}
+                                className="w-20"
+                                min={0.01}
+                                step="any"
+                              />
+                              <Input
+                                value={editPart.name}
+                                onChange={(e) => setEditPart({ ...editPart, name: e.target.value })}
+                                className="flex-1"
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <Input
+                                placeholder="Referencia (opcional)"
+                                value={editPart.reference}
+                                onChange={(e) => setEditPart({ ...editPart, reference: e.target.value })}
+                                className="flex-1"
+                              />
+                              <Button
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={async () => {
+                                  const { error } = await supabase
+                                    .from('parts')
+                                    .update({ name: editPart.name, quantity: editPart.quantity, reference: editPart.reference || null })
+                                    .eq('id', part.id);
+                                  if (error) {
+                                    toast.error('Error al actualizar la pieza');
+                                  } else {
+                                    toast.success('Pieza actualizada');
+                                    setEditingPartId(null);
+                                    fetchVehicleData();
+                                  }
+                                }}
+                              >
+                                <Check className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => setEditingPartId(null)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
-                          {part.reference && (
-                            <p className="text-xs text-muted-foreground mt-1">Ref: {part.reference}</p>
-                          )}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive"
-                          onClick={() => deletePart(part.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        ) : (
+                          <>
+                            <div
+                              className="flex-1 cursor-pointer"
+                              onClick={() => {
+                                setEditingPartId(part.id);
+                                setEditPart({ name: part.name, quantity: part.quantity, reference: part.reference || '' });
+                              }}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-sm text-muted-foreground">x{part.quantity}</span>
+                                <span className="font-medium">{part.name}</span>
+                              </div>
+                              {part.reference && (
+                                <p className="text-xs text-muted-foreground mt-1">Ref: {part.reference}</p>
+                              )}
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive"
+                              onClick={() => deletePart(part.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     ))}
                   </div>
