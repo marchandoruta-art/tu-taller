@@ -1,0 +1,1 @@
+ALTER TABLE public.parts ALTER COLUMN quantity TYPE numeric USING quantity::numeric;
