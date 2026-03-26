@@ -5,11 +5,25 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Settings as SettingsIcon, Save, Loader2, Trash2, AlertTriangle } from 'lucide-react';
+import { Settings as SettingsIcon, Save, Loader2, Trash2, AlertTriangle, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+import { DEFAULT_WHATSAPP_MESSAGE } from '@/hooks/useWhatsAppMessage';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { useNavigate } from 'react-router-dom';
 import {
   AlertDialog,
@@ -31,6 +45,7 @@ export default function Settings() {
   const [appName, setAppName] = useState('');
   const [archiveHours, setArchiveHours] = useState('24');
   const [autoArchive, setAutoArchive] = useState(true);
+  const [whatsappMessage, setWhatsappMessage] = useState(DEFAULT_WHATSAPP_MESSAGE);
 
   useEffect(() => {
     if (role !== 'admin') {
@@ -56,6 +71,7 @@ export default function Settings() {
       setAppName(settings?.app_name || 'Gestión Autos Formentera');
       setArchiveHours(settings?.archive_hours || '24');
       setAutoArchive(settings?.auto_archive !== 'false');
+      setWhatsappMessage(settings?.whatsapp_message || DEFAULT_WHATSAPP_MESSAGE);
     } catch (error) {
       console.error('Error fetching settings:', error);
     } finally {
@@ -77,6 +93,7 @@ export default function Settings() {
       await saveSetting('app_name', appName);
       await saveSetting('archive_hours', archiveHours);
       await saveSetting('auto_archive', autoArchive.toString());
+      await saveSetting('whatsapp_message', whatsappMessage);
       toast.success('Configuración guardada correctamente');
     } catch (error) {
       console.error('Error saving settings:', error);
