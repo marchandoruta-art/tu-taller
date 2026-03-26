@@ -575,27 +575,30 @@ export default function AppointmentsPage() {
             {/* Vehicle Info */}
             <div className="grid grid-cols-3 gap-2">
               <div>
-                <label className="text-sm font-medium mb-2 block">Matrícula</label>
+                <label className="text-sm font-medium mb-2 block">Matrícula *</label>
                 <Input
                   value={form.vehicle_plate}
                   onChange={(e) => updateField('vehicle_plate', e.target.value.toUpperCase())}
                   placeholder="1234 ABC"
+                  required
                 />
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">Marca</label>
+                <label className="text-sm font-medium mb-2 block">Marca *</label>
                 <Input
                   value={form.vehicle_brand}
                   onChange={(e) => updateField('vehicle_brand', e.target.value)}
                   placeholder="Seat"
+                  required
                 />
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">Modelo</label>
+                <label className="text-sm font-medium mb-2 block">Modelo *</label>
                 <Input
                   value={form.vehicle_model}
                   onChange={(e) => updateField('vehicle_model', e.target.value)}
                   placeholder="León"
+                  required
                 />
               </div>
             </div>
