@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   ArrowLeft,
@@ -1011,6 +1012,16 @@ export default function VehicleDetail() {
                     {vehicle.owner.dni && (
                       <div className="text-sm text-muted-foreground">DNI: {vehicle.owner.dni}</div>
                     )}
+                    <Separator className="my-2" />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => navigate(`/clients/${vehicle.owner_id}`)}
+                    >
+                      <Clock className="h-4 w-4 mr-2" />
+                      Ver historial del cliente
+                    </Button>
                   </>
                 ) : (
                   <div className="flex items-center gap-2 text-muted-foreground">
