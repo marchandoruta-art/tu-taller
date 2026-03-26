@@ -49,6 +49,7 @@ interface Appointment {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  vehicle_id: string | null;
 }
 
 const APPOINTMENT_TYPE_LABELS: Record<string, string> = {
@@ -151,8 +152,8 @@ export default function AppointmentsPage() {
   };
 
   const handleSave = async () => {
-    if (!selectedDate || !form.client_name.trim() || !user) {
-      toast.error('El nombre del cliente y la fecha son obligatorios');
+    if (!selectedDate || !form.client_name.trim() || !form.vehicle_plate.trim() || !form.vehicle_brand.trim() || !form.vehicle_model.trim() || !user) {
+      toast.error('Nombre, matrícula, marca y modelo son obligatorios');
       return;
     }
 

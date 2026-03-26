@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { VehicleWithOwner, VehicleStatus, Profile } from '@/lib/types';
@@ -12,8 +12,11 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { VehicleStatusBadge } from '@/components/vehicles/VehicleStatusBadge';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { useNavigate } from 'react-router-dom';
 import { STATUS_LABELS } from '@/lib/types';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 const statusOrder: VehicleStatus[] = ['recibido', 'en_reparacion', 'pendiente_piezas', 'terminado', 'facturado', 'entregado'];
 type ViewMode = 'kanban' | 'charts' | 'list';
@@ -21,13 +24,80 @@ type StatusFilter = 'all' | 'en_taller' | VehicleStatus;
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { role } = useAuth();
+  const { user, role } = useAuth();
+  const { organizationId } = useOrganization();
   const [vehicles, setVehicles] = useState<VehicleWithOwner[]>([]);
   const [profiles, setProfiles] = useState<Record<string, string>>({});
   const [vehicleTimes, setVehicleTimes] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('kanban');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const appointmentsConverted = useRef(false);
+
+  // Auto-convert today's appointments into vehicles
+  const convertTodayAppointments = async () => {
+    if (appointmentsConverted.current || !user || !organizationId) return;
+    appointmentsConverted.current = true;
+
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const { data: todayAppointments } = await supabase
+      .from('appointments')
+      .select('*')
+      .eq('appointment_date', today)
+      .is('vehicle_id', null);
+
+    if (!todayAppointments || todayAppointments.length === 0) return;
+
+    let created = 0;
+    for (const apt of todayAppointments) {
+      if (!apt.vehicle_plate || !apt.vehicle_brand || !apt.vehicle_model) continue;
+
+      // Create owner if we have client data
+      let ownerId: string | null = null;
+      if (apt.client_name) {
+        const { data: owner } = await supabase
+          .from('owners')
+          .insert({
+            name: apt.client_name,
+            phone: apt.client_phone || null,
+            organization_id: organizationId,
+          })
+          .select('id')
+          .single();
+        if (owner) ownerId = owner.id;
+      }
+
+      // Create vehicle
+      const { data: vehicle, error } = await supabase
+        .from('vehicles')
+        .insert({
+          plate: apt.vehicle_plate,
+          brand: apt.vehicle_brand,
+          model: apt.vehicle_model,
+          client_description: apt.issue_description || null,
+          owner_id: ownerId,
+          assigned_to: apt.assigned_to || null,
+          created_by: apt.created_by || user.id,
+          organization_id: organizationId,
+          status: 'recibido' as const,
+        })
+        .select('id')
+        .single();
+
+      if (vehicle && !error) {
+        // Link appointment to vehicle
+        await supabase
+          .from('appointments')
+          .update({ vehicle_id: vehicle.id })
+          .eq('id', apt.id);
+        created++;
+      }
+    }
+
+    if (created > 0) {
+      toast.success(`${created} vehículo${created > 1 ? 's' : ''} creado${created > 1 ? 's' : ''} desde citas de hoy`);
+    }
+  };
 
   const fetchVehicles = async () => {
     // First, archive old delivered vehicles
