@@ -532,7 +532,7 @@ export default function VehicleDetail() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <WorkTimer vehicleId={vehicle.id} onUpdate={fetchVehicleData} />
+                <WorkTimer vehicleId={vehicle.id} vehicleStatus={vehicle.status} onUpdate={fetchVehicleData} />
                 <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
                   <span className="text-sm text-muted-foreground">Tiempo total acumulado</span>
                   <span className="font-mono font-medium text-lg">{formatTime(getTotalTime())}</span>
