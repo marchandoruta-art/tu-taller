@@ -209,7 +209,7 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
         <ScrollArea className="max-h-[65vh] pr-4">
           <Tabs defaultValue="vehicle" className="space-y-4">
             <TabsList className={`grid w-full ${tabCount === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
-              {canEditOwner && vehicle.owner && (
+              {canEditOwner && (
                 <TabsTrigger value="owner" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   Propietario
@@ -225,7 +225,7 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
               </TabsTrigger>
             </TabsList>
 
-            {canEditOwner && vehicle.owner && (
+            {canEditOwner && (
               <TabsContent value="owner" className="space-y-4">
                 <div className="space-y-2">
                   <Label>Nombre *</Label>
