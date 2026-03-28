@@ -137,20 +137,43 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
 
       if (error) throw error;
 
-      // Update owner data if allowed and owner exists
-      if (canEditOwner && vehicle.owner_id) {
-        const { error: ownerError } = await supabase
-          .from('owners')
-          .update({
-            name: ownerFields.name,
-            phone: ownerFields.phone || null,
-            email: ownerFields.email || null,
-            dni: ownerFields.dni || null,
-            address: ownerFields.address || null,
-          })
-          .eq('id', vehicle.owner_id);
-
-        if (ownerError) throw ownerError;
+      // Update or create owner data if allowed
+      if (canEditOwner && ownerFields.name.trim()) {
+        if (vehicle.owner_id) {
+          // Update existing owner
+          const { error: ownerError } = await supabase
+            .from('owners')
+            .update({
+              name: ownerFields.name,
+              phone: ownerFields.phone || null,
+              email: ownerFields.email || null,
+              dni: ownerFields.dni || null,
+              address: ownerFields.address || null,
+            })
+            .eq('id', vehicle.owner_id);
+          if (ownerError) throw ownerError;
+        } else {
+          // Create new owner and link to vehicle
+          const { data: newOwner, error: ownerError } = await supabase
+            .from('owners')
+            .insert({
+              name: ownerFields.name,
+              phone: ownerFields.phone || null,
+              email: ownerFields.email || null,
+              dni: ownerFields.dni || null,
+              address: ownerFields.address || null,
+              organization_id: organizationId,
+            })
+            .select('id')
+            .single();
+          if (ownerError) throw ownerError;
+          // Link owner to vehicle
+          const { error: linkError } = await supabase
+            .from('vehicles')
+            .update({ owner_id: newOwner.id })
+            .eq('id', vehicle.id);
+          if (linkError) throw linkError;
+        }
       }
 
       toast.success('Datos actualizados correctamente');
