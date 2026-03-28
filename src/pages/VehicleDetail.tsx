@@ -990,7 +990,24 @@ export default function VehicleDetail() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {vehicle.owner && canViewOwner ? (
+                {!vehicle.owner_id ? (
+                  <div className="text-center py-2 space-y-2">
+                    <p className="text-sm text-muted-foreground italic">Sin propietario asignado</p>
+                    {canViewOwner && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        onClick={() => {
+                          const editBtn = document.querySelector('[data-edit-reception]') as HTMLButtonElement;
+                          editBtn?.click();
+                        }}
+                      >
+                        Asignar propietario
+                      </Button>
+                    )}
+                  </div>
+                ) : vehicle.owner && canViewOwner ? (
                   <>
                     <div className="font-medium">{vehicle.owner.name}</div>
                     {vehicle.owner.phone && (

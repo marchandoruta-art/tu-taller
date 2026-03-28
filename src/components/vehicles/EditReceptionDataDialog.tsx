@@ -168,7 +168,7 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) resetFields(); }}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" data-edit-reception>
           <Pencil className="mr-2 h-4 w-4" />
           Editar Datos Recepción
         </Button>
