@@ -68,8 +68,6 @@ export default function VehicleDetail() {
    const [savingDescription, setSavingDescription] = useState(false);
    const [editingDescription, setEditingDescription] = useState(false);
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
-  const [estimatedCost, setEstimatedCost] = useState('');
-  const [savingCost, setSavingCost] = useState(false);
   const topRef = useRef<HTMLDivElement>(null);
 
   // Scroll to top on mount/id change
@@ -105,7 +103,7 @@ export default function VehicleDetail() {
       setVehicle(vehicleRes.data as VehicleWithOwner);
       setWorkSummary(vehicleRes.data.work_summary || '');
       setClientDescription(vehicleRes.data.client_description || '');
-      setEstimatedCost((vehicleRes.data as any).estimated_cost?.toString() || '');
+      
       
       // Fetch assigned user
       if (vehicleRes.data.assigned_to) {
@@ -608,50 +606,8 @@ export default function VehicleDetail() {
             </Card>
 
             {/* Vehicle Photos */}
-            {/* Estimated Cost */}
-            {(role === 'admin' || role === 'oficina') && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    💰 Presupuesto Estimado
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      value={estimatedCost}
-                      onChange={(e) => setEstimatedCost(e.target.value)}
-                      className="flex-1"
-                    />
-                    <span className="text-sm text-muted-foreground">€</span>
-                    <Button
-                      size="sm"
-                      disabled={savingCost}
-                      onClick={async () => {
-                        setSavingCost(true);
-                        const { error } = await supabase
-                          .from('vehicles')
-                          .update({ estimated_cost: estimatedCost ? parseFloat(estimatedCost) : null } as any)
-                          .eq('id', vehicle.id);
-                        if (error) toast.error('Error al guardar');
-                        else toast.success('Presupuesto guardado');
-                        setSavingCost(false);
-                      }}
-                    >
-                      {savingCost ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                  {estimatedCost && (
-                    <p className="text-2xl font-bold mt-3 text-primary">
-                      {parseFloat(estimatedCost).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            )}
+
+
 
             <VehiclePhotos vehicleId={vehicle.id} />
 

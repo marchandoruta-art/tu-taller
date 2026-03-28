@@ -25,7 +25,7 @@ interface VehicleHistory {
   delivered_at?: string;
   archived?: boolean;
   work_summary?: string;
-  estimated_cost?: number;
+  
   totalMinutes: number;
   partsCount: number;
   partsCost: number;
@@ -67,7 +67,7 @@ export default function ClientHistory() {
       // Fetch all vehicles for this owner (including archived)
       const { data: vehiclesData } = await supabase
         .from('vehicles')
-        .select('id, plate, brand, model, color, status, created_at, delivered_at, archived, work_summary, estimated_cost')
+        .select('id, plate, brand, model, color, status, created_at, delivered_at, archived, work_summary')
         .eq('owner_id', ownerId!)
         .order('created_at', { ascending: false });
 
@@ -123,7 +123,7 @@ export default function ClientHistory() {
     return h > 0 ? `${h}h ${m}m` : `${m}m`;
   };
 
-  const totalSpent = vehicles.reduce((sum, v) => sum + v.partsCost + (v.estimated_cost || 0), 0);
+  const totalSpent = vehicles.reduce((sum, v) => sum + v.partsCost, 0);
   const totalTime = vehicles.reduce((sum, v) => sum + v.totalMinutes, 0);
   const totalVehicles = vehicles.length;
   const completedVehicles = vehicles.filter(v => v.status === 'entregado' || v.archived).length;
@@ -268,10 +268,10 @@ export default function ClientHistory() {
                             {v.partsCount} piezas
                           </span>
                         )}
-                        {(v.partsCost > 0 || (v.estimated_cost && v.estimated_cost > 0)) && (
+                        {v.partsCost > 0 && (
                           <span className="flex items-center gap-1">
                             <Euro className="h-3 w-3" />
-                            {(v.partsCost + (v.estimated_cost || 0)).toFixed(0)}€
+                            {v.partsCost.toFixed(0)}€
                           </span>
                         )}
                       </div>
