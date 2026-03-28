@@ -188,7 +188,7 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
     }
   };
 
-  const tabCount = canEditOwner && vehicle.owner ? 3 : 2;
+  const tabCount = canEditOwner ? 3 : 2;
 
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) resetFields(); }}>
