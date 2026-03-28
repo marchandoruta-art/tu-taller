@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useOrganization } from '@/hooks/useOrganization';
 import { useAuth } from '@/hooks/useAuth';
 import {
   Dialog,
@@ -44,6 +45,7 @@ const DEFAULT_INTERIOR: InteriorCheckData = {
 
 export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDataDialogProps) {
   const { role } = useAuth();
+  const { organizationId } = useOrganization();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -136,20 +138,43 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
 
       if (error) throw error;
 
-      // Update owner data if allowed and owner exists
-      if (canEditOwner && vehicle.owner_id) {
-        const { error: ownerError } = await supabase
-          .from('owners')
-          .update({
-            name: ownerFields.name,
-            phone: ownerFields.phone || null,
-            email: ownerFields.email || null,
-            dni: ownerFields.dni || null,
-            address: ownerFields.address || null,
-          })
-          .eq('id', vehicle.owner_id);
-
-        if (ownerError) throw ownerError;
+      // Update or create owner data if allowed
+      if (canEditOwner && ownerFields.name.trim()) {
+        if (vehicle.owner_id) {
+          // Update existing owner
+          const { error: ownerError } = await supabase
+            .from('owners')
+            .update({
+              name: ownerFields.name,
+              phone: ownerFields.phone || null,
+              email: ownerFields.email || null,
+              dni: ownerFields.dni || null,
+              address: ownerFields.address || null,
+            })
+            .eq('id', vehicle.owner_id);
+          if (ownerError) throw ownerError;
+        } else {
+          // Create new owner and link to vehicle
+          const { data: newOwner, error: ownerError } = await supabase
+            .from('owners')
+            .insert({
+              name: ownerFields.name,
+              phone: ownerFields.phone || null,
+              email: ownerFields.email || null,
+              dni: ownerFields.dni || null,
+              address: ownerFields.address || null,
+              organization_id: organizationId,
+            })
+            .select('id')
+            .single();
+          if (ownerError) throw ownerError;
+          // Link owner to vehicle
+          const { error: linkError } = await supabase
+            .from('vehicles')
+            .update({ owner_id: newOwner.id })
+            .eq('id', vehicle.id);
+          if (linkError) throw linkError;
+        }
       }
 
       toast.success('Datos actualizados correctamente');
@@ -163,7 +188,7 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
     }
   };
 
-  const tabCount = canEditOwner && vehicle.owner ? 3 : 2;
+  const tabCount = canEditOwner ? 3 : 2;
 
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) resetFields(); }}>
@@ -184,7 +209,7 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
         <ScrollArea className="max-h-[65vh] pr-4">
           <Tabs defaultValue="vehicle" className="space-y-4">
             <TabsList className={`grid w-full ${tabCount === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
-              {canEditOwner && vehicle.owner && (
+              {canEditOwner && (
                 <TabsTrigger value="owner" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   Propietario
@@ -200,7 +225,7 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
               </TabsTrigger>
             </TabsList>
 
-            {canEditOwner && vehicle.owner && (
+            {canEditOwner && (
               <TabsContent value="owner" className="space-y-4">
                 <div className="space-y-2">
                   <Label>Nombre *</Label>
