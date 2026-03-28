@@ -67,7 +67,7 @@ export default function ClientHistory() {
       // Fetch all vehicles for this owner (including archived)
       const { data: vehiclesData } = await supabase
         .from('vehicles')
-        .select('id, plate, brand, model, color, status, created_at, delivered_at, archived, work_summary, estimated_cost')
+        .select('id, plate, brand, model, color, status, created_at, delivered_at, archived, work_summary')
         .eq('owner_id', ownerId!)
         .order('created_at', { ascending: false });
 
