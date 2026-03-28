@@ -68,8 +68,6 @@ export default function VehicleDetail() {
    const [savingDescription, setSavingDescription] = useState(false);
    const [editingDescription, setEditingDescription] = useState(false);
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
-  const [estimatedCost, setEstimatedCost] = useState('');
-  const [savingCost, setSavingCost] = useState(false);
   const topRef = useRef<HTMLDivElement>(null);
 
   // Scroll to top on mount/id change
@@ -105,7 +103,7 @@ export default function VehicleDetail() {
       setVehicle(vehicleRes.data as VehicleWithOwner);
       setWorkSummary(vehicleRes.data.work_summary || '');
       setClientDescription(vehicleRes.data.client_description || '');
-      setEstimatedCost((vehicleRes.data as any).estimated_cost?.toString() || '');
+      
       
       // Fetch assigned user
       if (vehicleRes.data.assigned_to) {
