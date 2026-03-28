@@ -179,7 +179,7 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
         )}
 
         {/* WhatsApp button for finished vehicles */}
-        {vehicle.status === 'terminado' && vehicle.owner?.phone && (
+        {(vehicle.status === 'terminado' || vehicle.status === 'facturado') && vehicle.owner?.phone && (
           <Button
             variant="outline"
             size="sm"
