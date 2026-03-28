@@ -45,6 +45,7 @@ const DEFAULT_INTERIOR: InteriorCheckData = {
 
 export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDataDialogProps) {
   const { role } = useAuth();
+  const { organizationId } = useOrganization();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
