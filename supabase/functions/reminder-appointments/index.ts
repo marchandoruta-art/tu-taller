@@ -85,7 +85,8 @@ serve(async (req) => {
       if (!adminRoles || adminRoles.length === 0) continue;
 
       // Create a notification for each admin/oficina user with the WhatsApp link
-      const notificationMessage = `📅 Recordatorio cita mañana${timeInfo}: ${appt.client_name}${vehicleInfo ? ` - ${vehicleInfo}${plateInfo}` : ""}. Enviar WhatsApp: ${whatsappUrl}`;
+      const notifVehicle = vehicleInfo ? ` - ${vehicleInfo}${plateInfo}` : (appt.vehicle_plate ? ` - ${appt.vehicle_plate}` : "");
+      const notificationMessage = `📅 Recordatorio cita mañana${timeInfo}: ${appt.client_name}${notifVehicle}. Enviar WhatsApp: ${whatsappUrl}`;
 
       const notifications = adminRoles.map((role) => ({
         user_id: role.user_id,
