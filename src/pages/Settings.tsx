@@ -161,7 +161,10 @@ export default function Settings() {
               Variables disponibles: <code className="text-xs bg-muted px-1 rounded">{'{matricula}'}</code>{' '}
               <code className="text-xs bg-muted px-1 rounded">{'{marca}'}</code>{' '}
               <code className="text-xs bg-muted px-1 rounded">{'{modelo}'}</code>{' '}
-              <code className="text-xs bg-muted px-1 rounded">{'{nombre_taller}'}</code>
+              <code className="text-xs bg-muted px-1 rounded">{'{nombre_taller}'}</code>{' '}
+              <code className="text-xs bg-muted px-1 rounded">{'{telefono}'}</code>{' '}
+              <code className="text-xs bg-muted px-1 rounded">{'{whatsapp_num}'}</code>{' '}
+              <code className="text-xs bg-muted px-1 rounded">{'{horario}'}</code>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
