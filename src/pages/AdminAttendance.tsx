@@ -49,6 +49,8 @@ const EXIT_TYPES = {
   medico: { label: 'Médico', icon: Stethoscope, color: 'destructive' },
   descanso: { label: 'Descanso', icon: Coffee, color: 'secondary' },
   desayuno: { label: 'Desayuno', icon: UtensilsCrossed, color: 'outline' },
+  auto_8h: { label: 'Auto 8h', icon: Clock, color: 'secondary' },
+  auto_16h: { label: 'Auto 16:00h', icon: Clock, color: 'secondary' },
 } as const;
 
 export default function AdminAttendance() {

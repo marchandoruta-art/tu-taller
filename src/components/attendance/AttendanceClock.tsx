@@ -34,6 +34,8 @@ const EXIT_TYPES = {
   medico: { label: 'Salida Médico', icon: Stethoscope },
   descanso: { label: 'Descanso', icon: Coffee },
   desayuno: { label: 'Desayuno', icon: UtensilsCrossed },
+  auto_8h: { label: 'Auto 8h', icon: Clock },
+  auto_16h: { label: 'Auto 16:00h', icon: Clock },
 } as const;
 
 export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClock(_, ref) {
