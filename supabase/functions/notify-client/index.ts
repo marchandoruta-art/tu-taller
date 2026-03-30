@@ -102,7 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
         
         const html = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h1 style="color: #333;">¡Hola ${escapeHtml(ownerName)}!</h1>
+            <h1 style="color: #333;">Estimado cliente</h1>
             <p style="font-size: 16px; color: #555;">
               ${notificationType === 'completed' 
                 ? 'Le informamos que su vehículo ha sido reparado y está listo.'
@@ -113,11 +113,18 @@ const handler = async (req: Request): Promise<Response> => {
               <p style="margin: 5px 0;"><strong>Matrícula:</strong> ${escapeHtml(vehiclePlate)}</p>
               <p style="margin: 5px 0;"><strong>Vehículo:</strong> ${escapeHtml(vehicleBrand)} ${escapeHtml(vehicleModel)}</p>
             </div>
-            <p style="font-size: 14px; color: #888;">
-              Puede pasar a recogerlo en nuestro horario de atención.
+            <p style="font-size: 14px; color: #555;">
+              Nuestro horario de atención es de <strong>8:00 a 16:00h</strong>.
             </p>
-            <p style="font-size: 14px; color: #888;">
+            <p style="font-size: 14px; color: #555;">
+              📞 Teléfono: <strong>971 322 883</strong><br/>
+              📱 WhatsApp: <strong>689 907 343</strong>
+            </p>
+            <p style="font-size: 14px; color: #888; margin-top: 20px;">
               Gracias por confiar en nosotros.
+            </p>
+            <p style="font-size: 14px; color: #333; font-weight: bold;">
+              Taller Autos Formentera
             </p>
           </div>
         `;
