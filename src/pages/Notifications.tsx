@@ -4,10 +4,17 @@ import { useAuth } from '@/hooks/useAuth';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Bell, Check, Trash2 } from 'lucide-react';
+import { Loader2, Bell, Check, MessageCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Notification } from '@/lib/types';
+
+function extractWhatsAppLink(message: string): { text: string; url: string } | null {
+  const match = message.match(/Enviar WhatsApp: (https:\/\/wa\.me\/[^\s]+)/);
+  if (!match) return null;
+  const text = message.replace(/\. Enviar WhatsApp: https:\/\/wa\.me\/[^\s]+/, '');
+  return { text, url: match[1] };
+}
 
 export default function Notifications() {
   const { user } = useAuth();
