@@ -101,29 +101,33 @@ const handler = async (req: Request): Promise<Response> => {
           : `Su vehículo ${escapeHtml(vehiclePlate)} está listo para recoger`;
         
         const html = `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h1 style="color: #333;">Estimado cliente</h1>
-            <p style="font-size: 16px; color: #555;">
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; color: #333;">
+            <h2 style="color: #1a1a1a; margin-bottom: 20px;">Taller Autos Formentera</h2>
+            <p style="font-size: 16px; line-height: 1.6;">
+              Buenos días,
+            </p>
+            <p style="font-size: 16px; line-height: 1.6;">
               ${notificationType === 'completed' 
-                ? 'Le informamos que su vehículo ha sido reparado y está listo.'
-                : 'Su vehículo está listo para ser recogido en nuestras instalaciones.'}
+                ? 'Nos complace informarle de que los trabajos realizados en su vehículo han finalizado satisfactoriamente.'
+                : 'Le comunicamos que su vehículo ya se encuentra listo para su recogida en nuestras instalaciones.'}
             </p>
-            <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="margin: 0 0 10px;">Datos del vehículo:</h3>
-              <p style="margin: 5px 0;"><strong>Matrícula:</strong> ${escapeHtml(vehiclePlate)}</p>
-              <p style="margin: 5px 0;"><strong>Vehículo:</strong> ${escapeHtml(vehicleBrand)} ${escapeHtml(vehicleModel)}</p>
+            <div style="background: #f7f7f7; padding: 18px; border-radius: 8px; margin: 24px 0; border-left: 4px solid #2563eb;">
+              <p style="margin: 5px 0; font-size: 15px;"><strong>Matrícula:</strong> ${escapeHtml(vehiclePlate)}</p>
+              <p style="margin: 5px 0; font-size: 15px;"><strong>Vehículo:</strong> ${escapeHtml(vehicleBrand)} ${escapeHtml(vehicleModel)}</p>
             </div>
-            <p style="font-size: 14px; color: #555;">
-              Nuestro horario de atención es de <strong>8:00 a 16:00h</strong>.
+            <p style="font-size: 15px; line-height: 1.6;">
+              Puede pasar a recogerlo dentro de nuestro horario de atención:
             </p>
-            <p style="font-size: 14px; color: #555;">
-              📞 Teléfono: <strong>971 322 883</strong><br/>
-              📱 WhatsApp: <strong>689 907 343</strong>
+            <p style="font-size: 15px; line-height: 1.8;">
+              🕐 <strong>Horario:</strong> lunes a viernes de 8:00 a 16:00h<br/>
+              📞 <strong>Teléfono:</strong> 971 322 883<br/>
+              📱 <strong>WhatsApp:</strong> 689 907 343
             </p>
-            <p style="font-size: 14px; color: #888; margin-top: 20px;">
-              Gracias por confiar en nosotros.
+            <p style="font-size: 15px; color: #555; margin-top: 24px;">
+              Gracias por confiar en nuestro equipo.
             </p>
-            <p style="font-size: 14px; color: #333; font-weight: bold;">
+            <p style="font-size: 15px; color: #333; font-weight: 600;">
+              Un cordial saludo,<br/>
               Taller Autos Formentera
             </p>
           </div>
@@ -164,7 +168,7 @@ const handler = async (req: Request): Promise<Response> => {
       const phoneWithCode = cleanPhone.startsWith('+') ? cleanPhone : `+34${cleanPhone}`;
       
       const message = encodeURIComponent(
-        `Estimado cliente,\n\nLe informamos de que su vehículo ${vehiclePlate} (${vehicleBrand} ${vehicleModel}) ya se encuentra terminado y disponible para su recogida en nuestras instalaciones.\n\nNuestro horario de atención es de 8:00 a 16:00h.\n\nPara cualquier consulta puede contactarnos:\n📞 971 322 883\n📱 WhatsApp: 689 907 343\n\nQuedamos a su disposición.\n\nAtentamente,\nTaller Autos Formentera`
+        `Buenos días,\n\nDesde Taller Autos Formentera nos complace informarle de que los trabajos realizados en su vehículo ${vehiclePlate} (${vehicleBrand} ${vehicleModel}) han finalizado satisfactoriamente.\n\nYa puede pasar a recogerlo en nuestras instalaciones dentro de nuestro horario de atención.\n\n🕐 Horario: lunes a viernes de 8:00 a 16:00h\n📞 Teléfono: 971 322 883\n📱 WhatsApp: 689 907 343\n\nGracias por confiar en nuestro equipo.\n\nUn cordial saludo,\nTaller Autos Formentera`
       );
       
       results.whatsapp = `https://wa.me/${phoneWithCode.replace('+', '')}?text=${message}`;
