@@ -90,6 +90,42 @@ const handler = async (req: Request): Promise<Response> => {
     const vehicleBrand = vehicle.brand;
     const vehicleModel = vehicle.model;
 
+    // Fetch workshop contact settings using service role client
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    const { data: settingsData } = await supabaseAdmin
+      .from('app_settings')
+      .select('key, value')
+      .in('key', ['taller_telefono', 'taller_whatsapp', 'taller_horario']);
+
+    const settings: Record<string, string> = {};
+    settingsData?.forEach((s: { key: string; value: string | null }) => {
+      if (s.value) settings[s.key] = s.value;
+    });
+
+    const tallerTelefono = settings.taller_telefono || '971 322 883';
+    const tallerWhatsapp = settings.taller_whatsapp || '689 907 343';
+    const tallerHorario = settings.taller_horario || 'Lunes a viernes: 8:00 – 16:00 h';
+
+    // Get org name
+    let tallerNombre = 'Taller Autos Formentera';
+    const { data: profileData } = await supabaseAdmin
+      .from('profiles')
+      .select('organization_id')
+      .eq('user_id', user.id)
+      .single();
+    if (profileData?.organization_id) {
+      const { data: orgData } = await supabaseAdmin
+        .from('organizations')
+        .select('name')
+        .eq('id', profileData.organization_id)
+        .single();
+      if (orgData?.name) tallerNombre = orgData.name;
+    }
+
     const results: { email?: string; whatsapp?: string; emailError?: string } = {};
 
     // 4. Send email with HTML-escaped user data
@@ -102,13 +138,13 @@ const handler = async (req: Request): Promise<Response> => {
         
         const html = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; color: #333;">
-            <h2 style="color: #1a1a1a; margin-bottom: 20px;">Taller Autos Formentera</h2>
+            <h2 style="color: #1a1a1a; margin-bottom: 20px;">${escapeHtml(tallerNombre)}</h2>
             <p style="font-size: 16px; line-height: 1.6;">
-              Buenos días,
+              Estimado cliente,
             </p>
             <p style="font-size: 16px; line-height: 1.6;">
               ${notificationType === 'completed' 
-                ? 'Nos complace informarle de que los trabajos realizados en su vehículo han finalizado satisfactoriamente.'
+                ? 'Le informamos de que las reparaciones de su vehículo han sido completadas satisfactoriamente.'
                 : 'Le comunicamos que su vehículo ya se encuentra listo para su recogida en nuestras instalaciones.'}
             </p>
             <div style="background: #f7f7f7; padding: 18px; border-radius: 8px; margin: 24px 0; border-left: 4px solid #2563eb;">
@@ -116,19 +152,19 @@ const handler = async (req: Request): Promise<Response> => {
               <p style="margin: 5px 0; font-size: 15px;"><strong>Vehículo:</strong> ${escapeHtml(vehicleBrand)} ${escapeHtml(vehicleModel)}</p>
             </div>
             <p style="font-size: 15px; line-height: 1.6;">
-              Puede pasar a recogerlo dentro de nuestro horario de atención:
+              Puede pasar a recogerlo en el horario indicado a continuación.
             </p>
             <p style="font-size: 15px; line-height: 1.8;">
-              🕐 <strong>Horario:</strong> lunes a viernes de 8:00 a 16:00h<br/>
-              📞 <strong>Teléfono:</strong> 971 322 883<br/>
-              📱 <strong>WhatsApp:</strong> 689 907 343
+              🕐 <strong>Horario:</strong> ${escapeHtml(tallerHorario)}<br/>
+              📞 <strong>Teléfono:</strong> ${escapeHtml(tallerTelefono)}<br/>
+              📱 <strong>WhatsApp:</strong> ${escapeHtml(tallerWhatsapp)}
             </p>
             <p style="font-size: 15px; color: #555; margin-top: 24px;">
-              Gracias por confiar en nuestro equipo.
+              Gracias por confiar en nosotros.
             </p>
             <p style="font-size: 15px; color: #333; font-weight: 600;">
               Un cordial saludo,<br/>
-              Taller Autos Formentera
+              ${escapeHtml(tallerNombre)}
             </p>
           </div>
         `;
@@ -168,7 +204,7 @@ const handler = async (req: Request): Promise<Response> => {
       const phoneWithCode = cleanPhone.startsWith('+') ? cleanPhone : `+34${cleanPhone}`;
       
       const message = encodeURIComponent(
-        `Estimado cliente,\n\nLe informamos de que las reparaciones de su vehículo *${vehiclePlate}* (${vehicleBrand} ${vehicleModel}) han sido completadas satisfactoriamente.\n\nPuede pasar a recogerlo en nuestras instalaciones en el horario indicado a continuación.\n\n📍 *Taller Autos Formentera*\n🕐 Lunes a viernes: 8:00 – 16:00 h\n📞 971 322 883\n📱 689 907 343\n\nGracias por confiar en nosotros.\nUn cordial saludo.`
+        `Estimado cliente,\n\nLe informamos de que las reparaciones de su vehículo *${vehiclePlate}* (${vehicleBrand} ${vehicleModel}) han sido completadas satisfactoriamente.\n\nPuede pasar a recogerlo en nuestras instalaciones en el horario indicado a continuación.\n\n📍 *${tallerNombre}*\n🕐 ${tallerHorario}\n📞 ${tallerTelefono}\n📱 ${tallerWhatsapp}\n\nGracias por confiar en nosotros.\nUn cordial saludo.`
       );
       
       results.whatsapp = `https://wa.me/${phoneWithCode.replace('+', '')}?text=${message}`;

@@ -52,6 +52,21 @@ serve(async (req) => {
       });
     }
 
+    // Fetch workshop contact settings
+    const { data: settingsData } = await supabase
+      .from("app_settings")
+      .select("key, value")
+      .in("key", ["taller_telefono", "taller_whatsapp", "taller_horario"]);
+
+    const settings: Record<string, string> = {};
+    settingsData?.forEach((s: { key: string; value: string | null }) => {
+      if (s.value) settings[s.key] = s.value;
+    });
+
+    const tallerTelefono = settings.taller_telefono || "971 322 883";
+    const tallerWhatsapp = settings.taller_whatsapp || "689 907 343";
+    const tallerHorario = settings.taller_horario || "Lunes a viernes: 8:00 – 16:00 h";
+
     let remindersSent = 0;
 
     for (const appt of appointments) {
@@ -71,7 +86,18 @@ serve(async (req) => {
 
       const vehicleText = vehicleInfo ? ` para su vehículo ${vehicleInfo}${plateInfo}` : (appt.vehicle_plate ? ` para el vehículo ${appt.vehicle_plate}` : "");
 
-      const message = `Estimado cliente,\n\nDesde *Taller Autos Formentera* le recordamos que tiene una cita programada para mañana${timeInfo}${vehicleText}.\n\nLe agradeceríamos que nos confirmase su asistencia. Si necesita modificar o cancelar la cita, le rogamos nos avise con la mayor antelación posible.\n\n📍 *Taller Autos Formentera*\n🕐 Lunes a viernes: 8:00 – 16:00 h\n📞 971 322 883\n📱 689 907 343\n\nGracias por confiar en nosotros.\nUn cordial saludo.`;
+      // Fetch org name for this appointment
+      let tallerNombre = "Taller Autos Formentera";
+      if (appt.organization_id) {
+        const { data: orgData } = await supabase
+          .from("organizations")
+          .select("name")
+          .eq("id", appt.organization_id)
+          .single();
+        if (orgData?.name) tallerNombre = orgData.name;
+      }
+
+      const message = `Estimado cliente,\n\nDesde *${tallerNombre}* le recordamos que tiene una cita programada para mañana${timeInfo}${vehicleText}.\n\nLe agradeceríamos que nos confirmase su asistencia. Si necesita modificar o cancelar la cita, le rogamos nos avise con la mayor antelación posible.\n\n📍 *${tallerNombre}*\n🕐 ${tallerHorario}\n📞 ${tallerTelefono}\n📱 ${tallerWhatsapp}\n\nGracias por confiar en nosotros.\nUn cordial saludo.`;
 
       const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
