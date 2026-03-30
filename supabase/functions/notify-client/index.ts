@@ -168,7 +168,7 @@ const handler = async (req: Request): Promise<Response> => {
       const phoneWithCode = cleanPhone.startsWith('+') ? cleanPhone : `+34${cleanPhone}`;
       
       const message = encodeURIComponent(
-        `Buenos días,\n\nDesde Taller Autos Formentera nos complace informarle de que los trabajos realizados en su vehículo ${vehiclePlate} (${vehicleBrand} ${vehicleModel}) han finalizado satisfactoriamente.\n\nYa puede pasar a recogerlo en nuestras instalaciones dentro de nuestro horario de atención.\n\n🕐 Horario: lunes a viernes de 8:00 a 16:00h\n📞 Teléfono: 971 322 883\n📱 WhatsApp: 689 907 343\n\nGracias por confiar en nuestro equipo.\n\nUn cordial saludo,\nTaller Autos Formentera`
+        `Estimado cliente,\n\nLe informamos de que las reparaciones de su vehículo *${vehiclePlate}* (${vehicleBrand} ${vehicleModel}) han sido completadas satisfactoriamente.\n\nPuede pasar a recogerlo en nuestras instalaciones en el horario indicado a continuación.\n\n📍 *Taller Autos Formentera*\n🕐 Lunes a viernes: 8:00 – 16:00 h\n📞 971 322 883\n📱 689 907 343\n\nGracias por confiar en nosotros.\nUn cordial saludo.`
       );
       
       results.whatsapp = `https://wa.me/${phoneWithCode.replace('+', '')}?text=${message}`;
