@@ -71,7 +71,7 @@ serve(async (req) => {
 
       const vehicleText = vehicleInfo ? ` para su vehículo ${vehicleInfo}${plateInfo}` : (appt.vehicle_plate ? ` para el vehículo ${appt.vehicle_plate}` : "");
 
-      const message = `Buenos días,\n\nDesde Taller Autos Formentera nos ponemos en contacto con usted para recordarle que tiene programada una cita en nuestro taller para mañana${timeInfo}${vehicleText}.\n\nLe rogamos confirme su asistencia o, en caso de no poder acudir, nos lo comunique con la mayor antelación posible para poder reorganizar nuestra agenda.\n\n🕐 Horario de atención: lunes a viernes de 8:00 a 16:00h\n📞 Teléfono: 971 322 883\n📱 WhatsApp: 689 907 343\n\nGracias por su confianza.\n\nUn cordial saludo,\nTaller Autos Formentera`;
+      const message = `Estimado cliente,\n\nDesde *Taller Autos Formentera* le recordamos que tiene una cita programada para mañana${timeInfo}${vehicleText}.\n\nLe agradeceríamos que nos confirmase su asistencia. Si necesita modificar o cancelar la cita, le rogamos nos avise con la mayor antelación posible.\n\n📍 *Taller Autos Formentera*\n🕐 Lunes a viernes: 8:00 – 16:00 h\n📞 971 322 883\n📱 689 907 343\n\nGracias por confiar en nosotros.\nUn cordial saludo.`;
 
       const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
