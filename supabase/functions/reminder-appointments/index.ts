@@ -62,13 +62,16 @@ serve(async (req) => {
       const phoneWithCode = cleanPhone.startsWith("+") ? cleanPhone : `+34${cleanPhone}`;
       const phoneNumber = phoneWithCode.replace("+", "");
 
-      const vehicleInfo = [appt.vehicle_brand, appt.vehicle_model].filter(Boolean).join(" ");
+      const vehicleParts = [appt.vehicle_brand, appt.vehicle_model].filter(Boolean);
+      const vehicleInfo = vehicleParts.length > 0 ? vehicleParts.join(" ") : "";
       const plateInfo = appt.vehicle_plate ? ` (${appt.vehicle_plate})` : "";
       const timeInfo = appt.appointment_time
         ? ` a las ${appt.appointment_time.substring(0, 5)}`
         : "";
 
-      const message = `Estimado/a ${appt.client_name},\n\nLe recordamos que mañana${timeInfo} tiene una cita en nuestro taller${vehicleInfo ? ` para su vehículo ${vehicleInfo}${plateInfo}` : ""}.\n\nLe esperamos. Un saludo.`;
+      const vehicleText = vehicleInfo ? ` para su vehículo ${vehicleInfo}${plateInfo}` : (appt.vehicle_plate ? ` para el vehículo ${appt.vehicle_plate}` : "");
+
+      const message = `Estimado/a ${appt.client_name},\n\nLe recordamos que mañana${timeInfo} tiene una cita en nuestro taller${vehicleText}.\n\nLe esperamos. Un saludo.`;
 
       const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
@@ -82,7 +85,8 @@ serve(async (req) => {
       if (!adminRoles || adminRoles.length === 0) continue;
 
       // Create a notification for each admin/oficina user with the WhatsApp link
-      const notificationMessage = `📅 Recordatorio cita mañana${timeInfo}: ${appt.client_name}${vehicleInfo ? ` - ${vehicleInfo}${plateInfo}` : ""}. Enviar WhatsApp: ${whatsappUrl}`;
+      const notifVehicle = vehicleInfo ? ` - ${vehicleInfo}${plateInfo}` : (appt.vehicle_plate ? ` - ${appt.vehicle_plate}` : "");
+      const notificationMessage = `📅 Recordatorio cita mañana${timeInfo}: ${appt.client_name}${notifVehicle}. Enviar WhatsApp: ${whatsappUrl}`;
 
       const notifications = adminRoles.map((role) => ({
         user_id: role.user_id,
