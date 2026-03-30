@@ -3,14 +3,17 @@ import { supabase } from '@/integrations/supabase/client';
 
 const DEFAULT_WHATSAPP_MESSAGE = `Estimado cliente,
 
-Le informamos de que su vehículo {matricula} ({marca} {modelo}) ya se encuentra terminado y disponible para su recogida en nuestras instalaciones.
+Le informamos de que las reparaciones de su vehículo *{matricula}* ({marca} {modelo}) han sido completadas satisfactoriamente.
 
-Puede pasar a retirarlo dentro de nuestro horario habitual.
+Puede pasar a recogerlo en nuestras instalaciones en el horario indicado a continuación.
 
-Quedamos a su disposición para cualquier aclaración.
+📍 *{nombre_taller}*
+🕐 Lunes a viernes: 8:00 – 16:00 h
+📞 971 322 883
+📱 689 907 343
 
-Atentamente,
-{nombre_taller}`;
+Gracias por confiar en nosotros.
+Un cordial saludo.`;
 
 export function useWhatsAppMessage() {
   const [template, setTemplate] = useState(DEFAULT_WHATSAPP_MESSAGE);
