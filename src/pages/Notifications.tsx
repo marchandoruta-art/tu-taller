@@ -4,10 +4,17 @@ import { useAuth } from '@/hooks/useAuth';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Bell, Check, Trash2 } from 'lucide-react';
+import { Loader2, Bell, Check, MessageCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Notification } from '@/lib/types';
+
+function extractWhatsAppLink(message: string): { text: string; url: string } | null {
+  const match = message.match(/Enviar WhatsApp: (https:\/\/wa\.me\/[^\s]+)/);
+  if (!match) return null;
+  const text = message.replace(/\. Enviar WhatsApp: https:\/\/wa\.me\/[^\s]+/, '');
+  return { text, url: match[1] };
+}
 
 export default function Notifications() {
   const { user } = useAuth();
@@ -129,9 +136,32 @@ export default function Notifications() {
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
-                        <p className={notification.read ? 'text-muted-foreground' : ''}>
-                          {notification.message}
-                        </p>
+                        {(() => {
+                          const waData = extractWhatsAppLink(notification.message);
+                          if (waData) {
+                            return (
+                              <>
+                                <p className={notification.read ? 'text-muted-foreground' : ''}>
+                                  {waData.text}
+                                </p>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="mt-2 text-green-600 border-green-300 hover:bg-green-50"
+                                  onClick={() => window.open(waData.url, '_blank')}
+                                >
+                                  <MessageCircle className="mr-2 h-4 w-4" />
+                                  Enviar WhatsApp
+                                </Button>
+                              </>
+                            );
+                          }
+                          return (
+                            <p className={notification.read ? 'text-muted-foreground' : ''}>
+                              {notification.message}
+                            </p>
+                          );
+                        })()}
                         <p className="text-xs text-muted-foreground mt-1">
                           {format(new Date(notification.created_at), "d 'de' MMMM, HH:mm", {
                             locale: es,
