@@ -136,9 +136,32 @@ export default function Notifications() {
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
-                        <p className={notification.read ? 'text-muted-foreground' : ''}>
-                          {notification.message}
-                        </p>
+                        {(() => {
+                          const waData = extractWhatsAppLink(notification.message);
+                          if (waData) {
+                            return (
+                              <>
+                                <p className={notification.read ? 'text-muted-foreground' : ''}>
+                                  {waData.text}
+                                </p>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="mt-2 text-green-600 border-green-300 hover:bg-green-50"
+                                  onClick={() => window.open(waData.url, '_blank')}
+                                >
+                                  <MessageCircle className="mr-2 h-4 w-4" />
+                                  Enviar WhatsApp
+                                </Button>
+                              </>
+                            );
+                          }
+                          return (
+                            <p className={notification.read ? 'text-muted-foreground' : ''}>
+                              {notification.message}
+                            </p>
+                          );
+                        })()}
                         <p className="text-xs text-muted-foreground mt-1">
                           {format(new Date(notification.created_at), "d 'de' MMMM, HH:mm", {
                             locale: es,
