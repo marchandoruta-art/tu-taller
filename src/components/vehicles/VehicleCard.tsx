@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import { deleteVehiclePermanently } from '@/lib/deleteVehicle';
 
 interface VehicleCardProps {
   vehicle: VehicleWithOwner;
@@ -225,10 +226,7 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     onClick={async (e) => {
                       e.stopPropagation();
-                      const { error } = await supabase
-                        .from('vehicles')
-                        .delete()
-                        .eq('id', vehicle.id);
+                      const { error } = await deleteVehiclePermanently(vehicle.id);
                       
                       if (error) {
                         toast.error('Error al eliminar el vehículo');

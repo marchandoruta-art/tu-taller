@@ -49,8 +49,14 @@ export default function Dashboard() {
 
     if (!todayAppointments || todayAppointments.length === 0) return;
 
+    // Si una cita ya generó un vehículo y luego ese vehículo se eliminó manualmente,
+    // no debemos volver a recrearlo automáticamente.
+    const appointmentsToConvert = todayAppointments.filter((apt) => apt.created_by);
+
+    if (appointmentsToConvert.length === 0) return;
+
     let created = 0;
-    for (const apt of todayAppointments) {
+    for (const apt of appointmentsToConvert) {
       if (!apt.vehicle_plate || !apt.vehicle_brand || !apt.vehicle_model) continue;
 
       // Create owner if we have client data
