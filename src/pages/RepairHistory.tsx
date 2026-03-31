@@ -22,6 +22,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { deleteVehiclePermanently } from '@/lib/deleteVehicle';
 
 interface ArchivedVehicle extends VehicleWithOwner {
   parts_list?: { id: string; name: string; quantity: number; reference?: string | null; notes?: string | null }[];
@@ -110,7 +111,7 @@ export default function RepairHistory() {
   };
 
   const deleteVehicle = async (vehicleId: string) => {
-    const { error } = await supabase.from('vehicles').delete().eq('id', vehicleId);
+    const { error } = await deleteVehiclePermanently(vehicleId);
     if (error) {
       toast.error('Error al eliminar el vehículo');
     } else {
