@@ -430,6 +430,12 @@ export default function AdminData() {
             )}
           </DialogContent>
         </Dialog>
+
+        <VehicleHistoryDialog
+          vehicleId={historyVehicleId}
+          vehiclePlate={historyVehiclePlate}
+          onClose={() => setHistoryVehicleId(null)}
+        />
       </div>
     </MainLayout>
   );
