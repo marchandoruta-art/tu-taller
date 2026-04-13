@@ -38,6 +38,8 @@ export default function AdminData() {
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
   const [editingOwner, setEditingOwner] = useState<Owner | null>(null);
   const [saving, setSaving] = useState(false);
+  const [historyVehicleId, setHistoryVehicleId] = useState<string | null>(null);
+  const [historyVehiclePlate, setHistoryVehiclePlate] = useState<string>('');
 
   useEffect(() => {
     if (role === 'admin') {
