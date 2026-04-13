@@ -200,8 +200,9 @@ export default function AdminData() {
                         <TableHead>Año</TableHead>
                         <TableHead>Color</TableHead>
                         <TableHead>VIN</TableHead>
-                        <TableHead className="text-right">Acciones</TableHead>
                         <TableHead>Estado</TableHead>
+                        <TableHead className="text-right">Acciones</TableHead>
+                      </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filteredVehicles.map((vehicle) => (
@@ -212,14 +213,25 @@ export default function AdminData() {
                           <TableCell>{vehicle.year || '-'}</TableCell>
                           <TableCell>{vehicle.color || '-'}</TableCell>
                           <TableCell className="font-mono text-xs">{vehicle.vin || '-'}</TableCell>
+                          <TableCell className="text-xs">{vehicle.status}</TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setEditingVehicle(vehicle)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
+                            <div className="flex items-center justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => { setHistoryVehicleId(vehicle.id); setHistoryVehiclePlate(vehicle.plate); }}
+                                title="Ver histórico"
+                              >
+                                <History className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setEditingVehicle(vehicle)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
