@@ -201,7 +201,7 @@ export default function AdminData() {
                         <TableHead>Color</TableHead>
                         <TableHead>VIN</TableHead>
                         <TableHead className="text-right">Acciones</TableHead>
-                      </TableRow>
+                        <TableHead>Estado</TableHead>
                     </TableHeader>
                     <TableBody>
                       {filteredVehicles.map((vehicle) => (
