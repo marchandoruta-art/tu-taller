@@ -3,7 +3,8 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Owner, Vehicle } from '@/lib/types';
-import { Loader2, Database, Car, Users, Edit, Save, X, Search } from 'lucide-react';
+import { Loader2, Database, Car, Users, Edit, Save, X, Search, History } from 'lucide-react';
+import { VehicleHistoryDialog } from '@/components/vehicles/VehicleHistoryDialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -37,6 +38,8 @@ export default function AdminData() {
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
   const [editingOwner, setEditingOwner] = useState<Owner | null>(null);
   const [saving, setSaving] = useState(false);
+  const [historyVehicleId, setHistoryVehicleId] = useState<string | null>(null);
+  const [historyVehiclePlate, setHistoryVehiclePlate] = useState<string>('');
 
   useEffect(() => {
     if (role === 'admin') {
@@ -197,6 +200,7 @@ export default function AdminData() {
                         <TableHead>Año</TableHead>
                         <TableHead>Color</TableHead>
                         <TableHead>VIN</TableHead>
+                        <TableHead>Estado</TableHead>
                         <TableHead className="text-right">Acciones</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -209,14 +213,25 @@ export default function AdminData() {
                           <TableCell>{vehicle.year || '-'}</TableCell>
                           <TableCell>{vehicle.color || '-'}</TableCell>
                           <TableCell className="font-mono text-xs">{vehicle.vin || '-'}</TableCell>
+                          <TableCell className="text-xs">{vehicle.status}</TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setEditingVehicle(vehicle)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
+                            <div className="flex items-center justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => { setHistoryVehicleId(vehicle.id); setHistoryVehiclePlate(vehicle.plate); }}
+                                title="Ver histórico"
+                              >
+                                <History className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setEditingVehicle(vehicle)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -415,6 +430,12 @@ export default function AdminData() {
             )}
           </DialogContent>
         </Dialog>
+
+        <VehicleHistoryDialog
+          vehicleId={historyVehicleId}
+          vehiclePlate={historyVehiclePlate}
+          onClose={() => setHistoryVehicleId(null)}
+        />
       </div>
     </MainLayout>
   );
