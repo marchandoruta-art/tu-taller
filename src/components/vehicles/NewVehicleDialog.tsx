@@ -443,7 +443,7 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
                     id="vehicle-description"
                     value={vehicleData.client_description}
                     onChange={(e) => setVehicleData({ ...vehicleData, client_description: e.target.value })}
-                    placeholder="Describe lo que el cliente indica sobre el problema del vehículo..."
+                    placeholder="Escribe cada trabajo o problema en una línea separada. Ej:&#10;Ruido en frenos delanteros&#10;Cambio de aceite&#10;Revisar luces traseras"
                     rows={3}
                   />
                 </div>
