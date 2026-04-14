@@ -559,6 +559,14 @@ export default function VehicleDetail() {
               </CardContent>
             </Card>
 
+            {/* Client Tasks Checklist */}
+            <ClientTasksChecklist
+              vehicleId={vehicle.id}
+              tasks={clientTasks}
+              clientDescription={vehicle.client_description}
+              onUpdate={(updated) => setClientTasks(updated)}
+            />
+
             {/* Description */}
             <Card>
               <CardHeader className="pb-3">
@@ -601,7 +609,7 @@ export default function VehicleDetail() {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {vehicle.client_description || 'Sin descripción. Pulsa Editar para añadir.'}
                   </p>
                 )}
