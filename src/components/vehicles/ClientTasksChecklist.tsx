@@ -73,7 +73,7 @@ export function ClientTasksChecklist({ vehicleId, tasks, clientDescription, onUp
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <ClipboardList className="h-5 w-5" />
-            Tareas del Cliente
+            Trabajos Solicitados
           </CardTitle>
           {totalCount > 0 && (
             <span className="text-sm text-muted-foreground font-medium">
@@ -132,7 +132,7 @@ export function ClientTasksChecklist({ vehicleId, tasks, clientDescription, onUp
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Nueva tarea... (Enter para añadir)"
+            placeholder="Añadir trabajo... (Enter)"
             className="flex-1"
             disabled={saving}
           />
