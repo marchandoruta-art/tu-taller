@@ -10,6 +10,7 @@ import { AssignUserDialog } from '@/components/vehicles/AssignUserDialog';
 import { ViewDepositReceipt } from '@/components/vehicles/reception/ViewDepositReceipt';
 import { EditReceptionDataDialog } from '@/components/vehicles/EditReceptionDataDialog';
 import { VehiclePhotos } from '@/components/vehicles/VehiclePhotos';
+import { ClientTasksChecklist, ClientTask } from '@/components/vehicles/ClientTasksChecklist';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -67,6 +68,7 @@ export default function VehicleDetail() {
    const [clientDescription, setClientDescription] = useState('');
    const [savingDescription, setSavingDescription] = useState(false);
    const [editingDescription, setEditingDescription] = useState(false);
+   const [clientTasks, setClientTasks] = useState<ClientTask[]>([]);
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
   const topRef = useRef<HTMLDivElement>(null);
 
