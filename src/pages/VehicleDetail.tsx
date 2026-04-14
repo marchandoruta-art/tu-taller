@@ -105,7 +105,7 @@ export default function VehicleDetail() {
       setVehicle(vehicleRes.data as VehicleWithOwner);
       setWorkSummary(vehicleRes.data.work_summary || '');
       setClientDescription(vehicleRes.data.client_description || '');
-      setClientTasks(Array.isArray(vehicleRes.data.client_tasks) ? (vehicleRes.data.client_tasks as ClientTask[]) : []);
+      setClientTasks(Array.isArray(vehicleRes.data.client_tasks) ? (vehicleRes.data.client_tasks as unknown as ClientTask[]) : []);
       
       
       // Fetch assigned user
