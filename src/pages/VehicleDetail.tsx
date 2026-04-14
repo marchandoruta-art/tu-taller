@@ -10,6 +10,7 @@ import { AssignUserDialog } from '@/components/vehicles/AssignUserDialog';
 import { ViewDepositReceipt } from '@/components/vehicles/reception/ViewDepositReceipt';
 import { EditReceptionDataDialog } from '@/components/vehicles/EditReceptionDataDialog';
 import { VehiclePhotos } from '@/components/vehicles/VehiclePhotos';
+import { ClientTasksChecklist, ClientTask } from '@/components/vehicles/ClientTasksChecklist';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -67,6 +68,7 @@ export default function VehicleDetail() {
    const [clientDescription, setClientDescription] = useState('');
    const [savingDescription, setSavingDescription] = useState(false);
    const [editingDescription, setEditingDescription] = useState(false);
+   const [clientTasks, setClientTasks] = useState<ClientTask[]>([]);
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
   const topRef = useRef<HTMLDivElement>(null);
 
@@ -103,6 +105,7 @@ export default function VehicleDetail() {
       setVehicle(vehicleRes.data as VehicleWithOwner);
       setWorkSummary(vehicleRes.data.work_summary || '');
       setClientDescription(vehicleRes.data.client_description || '');
+      setClientTasks(Array.isArray(vehicleRes.data.client_tasks) ? (vehicleRes.data.client_tasks as unknown as ClientTask[]) : []);
       
       
       // Fetch assigned user
@@ -556,6 +559,14 @@ export default function VehicleDetail() {
               </CardContent>
             </Card>
 
+            {/* Client Tasks Checklist */}
+            <ClientTasksChecklist
+              vehicleId={vehicle.id}
+              tasks={clientTasks}
+              clientDescription={vehicle.client_description}
+              onUpdate={(updated) => setClientTasks(updated)}
+            />
+
             {/* Description */}
             <Card>
               <CardHeader className="pb-3">
@@ -598,7 +609,7 @@ export default function VehicleDetail() {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {vehicle.client_description || 'Sin descripción. Pulsa Editar para añadir.'}
                   </p>
                 )}

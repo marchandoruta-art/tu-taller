@@ -778,6 +778,7 @@ export type Database = {
           client_belongings: string | null
           client_description: string | null
           client_signature: string | null
+          client_tasks: Json | null
           color: string | null
           created_at: string
           created_by: string | null
@@ -808,6 +809,7 @@ export type Database = {
           client_belongings?: string | null
           client_description?: string | null
           client_signature?: string | null
+          client_tasks?: Json | null
           color?: string | null
           created_at?: string
           created_by?: string | null
@@ -838,6 +840,7 @@ export type Database = {
           client_belongings?: string | null
           client_description?: string | null
           client_signature?: string | null
+          client_tasks?: Json | null
           color?: string | null
           created_at?: string
           created_by?: string | null
