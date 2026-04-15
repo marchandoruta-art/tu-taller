@@ -67,6 +67,7 @@ const App = () => (
             <RealtimeNotificationListener />
             <BrowserRouter>
               <ScrollToTop />
+              <AuthCallback />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
