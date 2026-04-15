@@ -14,6 +14,7 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
+  const [linkInvalid, setLinkInvalid] = useState(false);
 
   useEffect(() => {
     const establishSessionFromUrl = async () => {
@@ -46,7 +47,10 @@ export default function ResetPassword() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setSessionReady(true);
+        return;
       }
+
+      setLinkInvalid(true);
     };
 
     void establishSessionFromUrl();
@@ -96,10 +100,19 @@ export default function ResetPassword() {
           </div>
         </CardHeader>
         <CardContent>
-          {!sessionReady ? (
+          {!sessionReady && !linkInvalid ? (
             <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Validando enlace…
+            </div>
+          ) : linkInvalid ? (
+            <div className="space-y-3 py-2 text-center">
+              <p className="text-sm text-muted-foreground">
+                El enlace no es válido o ha caducado. Solicita uno nuevo.
+              </p>
+              <Button type="button" variant="outline" className="w-full" onClick={() => navigate('/forgot-password')}>
+                Solicitar nuevo enlace
+              </Button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
