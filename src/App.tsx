@@ -9,6 +9,7 @@ import { OrganizationProvider } from "@/hooks/useOrganization";
 import { OnlineStatusProvider } from "@/hooks/useOnlineStatus";
 
 import { RealtimeNotificationListener } from "@/components/notifications/RealtimeNotificationListener";
+import { AuthCallback } from "@/components/auth/AuthCallback";
 import Index from "./pages/Index";
 import Vehicles from "./pages/Vehicles";
 import VehicleDetail from "./pages/VehicleDetail";
