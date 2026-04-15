@@ -16,9 +16,16 @@ export default function ResetPassword() {
   const [sessionReady, setSessionReady] = useState(false);
 
   useEffect(() => {
-    // Supabase will auto-detect the recovery token from the URL hash
+    // Check if we already have a session (e.g. from invite link)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setSessionReady(true);
+      }
+    });
+
+    // Also listen for recovery/invite events
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
+      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
         setSessionReady(true);
       }
     });
