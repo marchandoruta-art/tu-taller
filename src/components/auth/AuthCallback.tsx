@@ -11,6 +11,23 @@ export function AuthCallback() {
   const location = useLocation();
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const queryType = searchParams.get('type');
+    const tokenHash = searchParams.get('token_hash');
+    const authCode = searchParams.get('code');
+
+    if ((queryType === 'invite' || queryType === 'recovery') && (tokenHash || authCode)) {
+      navigate(`/reset-password${window.location.search}${window.location.hash}`, { replace: true });
+      return;
+    }
+
+    if (queryType === 'magiclink' && authCode) {
+      supabase.auth.exchangeCodeForSession(authCode).finally(() => {
+        navigate('/', { replace: true });
+      });
+      return;
+    }
+
     // Check URL hash for auth tokens (Supabase appends them as hash fragments)
     const hash = window.location.hash;
     if (!hash) return;

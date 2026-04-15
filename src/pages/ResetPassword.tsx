@@ -16,12 +16,40 @@ export default function ResetPassword() {
   const [sessionReady, setSessionReady] = useState(false);
 
   useEffect(() => {
-    // Check if we already have a session (e.g. from invite link)
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const establishSessionFromUrl = async () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      const authCode = searchParams.get('code');
+      const tokenHash = searchParams.get('token_hash');
+      const type = searchParams.get('type');
+
+      if (authCode) {
+        const { error } = await supabase.auth.exchangeCodeForSession(authCode);
+        if (!error) {
+          setSessionReady(true);
+          return;
+        }
+      }
+
+      if (tokenHash && (type === 'recovery' || type === 'invite')) {
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type,
+        });
+
+        if (!error) {
+          setSessionReady(true);
+          return;
+        }
+      }
+
+      // Check if we already have a session (e.g. from invite link)
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setSessionReady(true);
       }
-    });
+    };
+
+    void establishSessionFromUrl();
 
     // Also listen for recovery/invite events
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
@@ -68,36 +96,43 @@ export default function ResetPassword() {
           </div>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="password">Nueva contraseña</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                minLength={6}
-                required
-              />
+          {!sessionReady ? (
+            <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Validando enlace…
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirm">Confirmar contraseña</Label>
-              <Input
-                id="confirm"
-                type="password"
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                minLength={6}
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full gap-2" disabled={loading}>
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
-              Actualizar contraseña
-            </Button>
-          </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="password">Nueva contraseña</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  minLength={6}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm">Confirmar contraseña</Label>
+                <Input
+                  id="confirm"
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  minLength={6}
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full gap-2" disabled={loading}>
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
+                Actualizar contraseña
+              </Button>
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>
