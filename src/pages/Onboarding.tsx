@@ -207,6 +207,10 @@ export default function Onboarding() {
                     value={inviteCode}
                     onChange={(e) => setInviteCode(e.target.value)}
                     placeholder="taller-garcia-abc123"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
                     required
                   />
                 </div>
