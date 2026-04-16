@@ -887,6 +887,10 @@ export type Database = {
     }
     Functions: {
       archive_old_delivered_vehicles: { Args: never; Returns: undefined }
+      assign_user_to_organization: {
+        Args: { _org_id: string; _target_user_id: string }
+        Returns: undefined
+      }
       get_user_organization_id: { Args: { _user_id?: string }; Returns: string }
       get_user_role: {
         Args: { _user_id: string }

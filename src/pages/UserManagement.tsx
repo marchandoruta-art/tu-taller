@@ -111,22 +111,20 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
 
       if (error) throw error;
 
-      // After signup, update the profile and role with organization_id
+      // After signup, assign user to organization using secure function
       if (authData.user) {
-        // Wait for trigger to create profile and role, then update them
+        // Wait for trigger to create profile and role
         await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // Update profile with organization_id
-        await supabase
-          .from('profiles')
-          .update({ organization_id: organizationId })
-          .eq('user_id', authData.user.id);
+        const { error: assignError } = await supabase
+          .rpc('assign_user_to_organization', {
+            _target_user_id: authData.user.id,
+            _org_id: organizationId,
+          });
         
-        // Update role with organization_id
-        await supabase
-          .from('user_roles')
-          .update({ organization_id: organizationId })
-          .eq('user_id', authData.user.id);
+        if (assignError) {
+          console.error('Error assigning user to org:', assignError);
+        }
       }
 
       toast.success('Usuario creado correctamente');
