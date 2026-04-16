@@ -74,6 +74,15 @@ export default function Dashboard() {
         if (owner) ownerId = owner.id;
       }
 
+      // Build client_tasks from issue_description
+      const clientTasks = apt.issue_description
+        ? apt.issue_description
+            .split(/\n|,|;/)
+            .map((line: string) => line.trim())
+            .filter((line: string) => line.length > 0)
+            .map((text: string) => ({ text, done: false }))
+        : [];
+
       // Create vehicle
       const { data: vehicle, error } = await supabase
         .from('vehicles')
@@ -82,6 +91,7 @@ export default function Dashboard() {
           brand: apt.vehicle_brand,
           model: apt.vehicle_model,
           client_description: apt.issue_description || null,
+          client_tasks: clientTasks.length > 0 ? JSON.parse(JSON.stringify(clientTasks)) : [],
           owner_id: ownerId,
           assigned_to: apt.assigned_to || null,
           created_by: apt.created_by || user.id,
