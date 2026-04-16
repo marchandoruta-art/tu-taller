@@ -83,12 +83,24 @@ export default function Onboarding() {
 
     setLoading(true);
     try {
+      // Normalize invite code: trim whitespace, newlines, etc.
+      const normalizedCode = inviteCode.trim().replace(/[\s\n\r]+/g, '');
+
       // Find organization by slug (invite code) using secure RPC function
       const { data: orgs, error: findError } = await supabase
-        .rpc('lookup_organization_by_slug', { _slug: inviteCode.trim() });
+        .rpc('lookup_organization_by_slug', { _slug: normalizedCode });
 
-      if (findError || !orgs || orgs.length === 0) {
-        toast.error('Código de invitación no válido');
+      if (findError) {
+        console.error('Error looking up organization:', findError);
+        toast.error('Error al buscar el taller');
+        setLoading(false);
+        return;
+      }
+
+      if (!orgs || orgs.length === 0) {
+        toast.error('Código de invitación no válido', {
+          description: 'Verifica que el código sea correcto e inténtalo de nuevo.',
+        });
         setLoading(false);
         return;
       }
@@ -101,7 +113,10 @@ export default function Onboarding() {
         .update({ organization_id: org.id })
         .eq('user_id', user.id);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Error updating profile:', profileError);
+        throw profileError;
+      }
 
       // Update user_roles with organization_id
       const { error: roleError } = await supabase
@@ -109,7 +124,10 @@ export default function Onboarding() {
         .update({ organization_id: org.id })
         .eq('user_id', user.id);
 
-      if (roleError) throw roleError;
+      if (roleError) {
+        console.error('Error updating role:', roleError);
+        throw roleError;
+      }
 
       await refetch();
       toast.success(`¡Te has unido a ${org.name}!`);
