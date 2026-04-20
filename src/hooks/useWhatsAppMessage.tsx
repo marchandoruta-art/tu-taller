@@ -3,17 +3,22 @@ import { supabase } from '@/integrations/supabase/client';
 
 const DEFAULT_WHATSAPP_MESSAGE = `Estimado cliente,
 
-Le informamos de que las reparaciones de su vehículo *{matricula}* ({marca} {modelo}) han sido completadas satisfactoriamente.
+Le comunicamos que las labores de reparación correspondientes a su vehículo {marca} {modelo}, con matrícula *{matricula}*, han sido finalizadas satisfactoriamente.
 
-Puede pasar a recogerlo en nuestras instalaciones en el horario indicado a continuación.
+Su vehículo se encuentra a su disposición en nuestras instalaciones, pudiendo proceder a su recogida dentro del horario habitual de atención.
 
-📍 *{nombre_taller}*
-🕐 {horario}
-📞 {telefono}
-📱 {whatsapp_num}
+— Datos de contacto —
+Taller: *{nombre_taller}*
+Horario: {horario}
+Teléfono: {telefono}
+WhatsApp: {whatsapp_num}
 
-Gracias por confiar en nosotros.
-Un cordial saludo.`;
+Le rogamos confirme la fecha y hora de recogida con la mayor antelación posible.
+
+Agradecemos sinceramente la confianza depositada en nuestro equipo.
+
+Reciba un cordial saludo,
+*{nombre_taller}*`;
 
 export function useWhatsAppMessage() {
   const [template, setTemplate] = useState(DEFAULT_WHATSAPP_MESSAGE);
