@@ -903,6 +903,7 @@ export type Database = {
           nombre_taller: string
           telefono: string
           whatsapp: string
+          whatsapp_message: string
         }[]
       }
       has_role: {
