@@ -896,6 +896,16 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      get_workshop_contact_settings: {
+        Args: never
+        Returns: {
+          horario: string
+          nombre_taller: string
+          telefono: string
+          whatsapp: string
+          whatsapp_message: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["user_role"]

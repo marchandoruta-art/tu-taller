@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,6 +28,7 @@ import {
 
 export default function Settings() {
   const { role } = useAuth();
+  const { organization, loading: organizationLoading } = useOrganization();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -40,14 +42,24 @@ export default function Settings() {
       navigate('/');
       return;
     }
-    fetchSettings();
-  }, [role, navigate]);
+
+    if (!organizationLoading) {
+      if (organization) {
+        fetchSettings();
+      } else {
+        setLoading(false);
+      }
+    }
+  }, [role, navigate, organization, organizationLoading]);
 
   const fetchSettings = async () => {
+    if (!organization) return;
+
     try {
       const { data, error } = await supabase
         .from('app_settings')
-        .select('*');
+        .select('key, value')
+        .eq('organization_id', organization.id);
 
       if (error) throw error;
 
@@ -68,9 +80,14 @@ export default function Settings() {
   };
 
   const saveSetting = async (key: string, value: string) => {
+    if (!organization) throw new Error('No organization found');
+
     const { error } = await supabase
       .from('app_settings')
-      .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+      .upsert(
+        { key, value, organization_id: organization.id, updated_at: new Date().toISOString() },
+        { onConflict: 'key,organization_id' }
+      );
 
     if (error) throw error;
   };
