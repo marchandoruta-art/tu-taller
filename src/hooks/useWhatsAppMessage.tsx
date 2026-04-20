@@ -23,60 +23,39 @@ Reciba un cordial saludo,
 export function useWhatsAppMessage() {
   const [template, setTemplate] = useState(DEFAULT_WHATSAPP_MESSAGE);
   const [contactSettings, setContactSettings] = useState({
-    telefono: '',
-    whatsapp: '',
-    horario: '',
+    telefono: '971 322 883',
+    whatsapp: '689 907 343',
+    horario: 'Lunes a viernes: 8:00 – 16:00 h',
     nombreTaller: 'Taller',
   });
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const fetchAll = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      let nombreTaller = 'Taller';
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('organization_id')
-          .eq('user_id', user.id)
-          .maybeSingle();
-        if (profile?.organization_id) {
-          const { data: org } = await supabase
-            .from('organizations')
-            .select('name')
-            .eq('id', profile.organization_id)
-            .maybeSingle();
-          if (org?.name) nombreTaller = org.name;
+      try {
+        const { data, error } = await supabase.rpc('get_workshop_contact_settings');
+
+        if (error) throw error;
+
+        const workshopData = data?.[0];
+
+        if (workshopData?.whatsapp_message) {
+          setTemplate(workshopData.whatsapp_message);
         }
+
+        setContactSettings({
+          telefono: workshopData?.telefono || '971 322 883',
+          whatsapp: workshopData?.whatsapp || '689 907 343',
+          horario: workshopData?.horario || 'Lunes a viernes: 8:00 – 16:00 h',
+          nombreTaller: workshopData?.nombre_taller || 'Taller',
+        });
+      } catch (error) {
+        console.error('Error fetching workshop contact settings:', error);
+      } finally {
+        setLoaded(true);
       }
-
-      const [templateRes, settingsRes] = await Promise.all([
-        supabase
-          .from('app_settings')
-          .select('value')
-          .eq('key', 'whatsapp_message')
-          .maybeSingle(),
-        supabase
-          .from('app_settings')
-          .select('key, value')
-          .in('key', ['taller_telefono', 'taller_whatsapp', 'taller_horario']),
-      ]);
-
-      if (templateRes.data?.value) setTemplate(templateRes.data.value);
-
-      const s: Record<string, string> = {};
-      settingsRes.data?.forEach((row) => {
-        if (row.value) s[row.key] = row.value;
-      });
-      setContactSettings({
-        telefono: s.taller_telefono || '971 322 883',
-        whatsapp: s.taller_whatsapp || '689 907 343',
-        horario: s.taller_horario || 'Lunes a viernes: 8:00 – 16:00 h',
-        nombreTaller,
-      });
-
-      setLoaded(true);
     };
+
     fetchAll();
   }, []);
 

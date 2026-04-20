@@ -36,20 +36,14 @@ export default function OrganizationSettings() {
 
   const fetchContactSettings = async () => {
     try {
-      const { data } = await supabase
-        .from('app_settings')
-        .select('key, value')
-        .in('key', ['taller_telefono', 'taller_whatsapp', 'taller_horario']);
+      const { data, error } = await supabase.rpc('get_workshop_contact_settings');
 
-      if (data) {
-        const settings = data.reduce((acc: Record<string, string>, curr) => {
-          acc[curr.key] = curr.value || '';
-          return acc;
-        }, {});
-        setTallerTelefono(settings.taller_telefono || '');
-        setTallerWhatsapp(settings.taller_whatsapp || '');
-        setTallerHorario(settings.taller_horario || '');
-      }
+      if (error) throw error;
+
+      const workshopData = data?.[0];
+      setTallerTelefono(workshopData?.telefono || '');
+      setTallerWhatsapp(workshopData?.whatsapp || '');
+      setTallerHorario(workshopData?.horario || '');
     } catch (error) {
       console.error('Error fetching contact settings:', error);
     } finally {
@@ -77,15 +71,19 @@ export default function OrganizationSettings() {
         { key: 'taller_horario', value: tallerHorario.trim() },
       ];
 
-      for (const s of settings) {
-        const { error: settingError } = await supabase
-          .from('app_settings')
-          .upsert(
-            { key: s.key, value: s.value, organization_id: organization.id, updated_at: new Date().toISOString() },
-            { onConflict: 'key' }
-          );
-        if (settingError) throw settingError;
-      }
+      const results = await Promise.all(
+        settings.map((s) =>
+          supabase
+            .from('app_settings')
+            .upsert(
+              { key: s.key, value: s.value, organization_id: organization.id, updated_at: new Date().toISOString() },
+              { onConflict: 'key,organization_id' }
+            )
+        )
+      );
+
+      const settingError = results.find((result) => result.error)?.error;
+      if (settingError) throw settingError;
 
       await refetch();
       toast.success('Taller actualizado correctamente');
