@@ -26,11 +26,30 @@ export function useWhatsAppMessage() {
     telefono: '',
     whatsapp: '',
     horario: '',
+    nombreTaller: 'Taller',
   });
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const fetchAll = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      let nombreTaller = 'Taller';
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('organization_id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (profile?.organization_id) {
+          const { data: org } = await supabase
+            .from('organizations')
+            .select('name')
+            .eq('id', profile.organization_id)
+            .maybeSingle();
+          if (org?.name) nombreTaller = org.name;
+        }
+      }
+
       const [templateRes, settingsRes] = await Promise.all([
         supabase
           .from('app_settings')
@@ -53,6 +72,7 @@ export function useWhatsAppMessage() {
         telefono: s.taller_telefono || '971 322 883',
         whatsapp: s.taller_whatsapp || '689 907 343',
         horario: s.taller_horario || 'Lunes a viernes: 8:00 – 16:00 h',
+        nombreTaller,
       });
 
       setLoaded(true);
@@ -65,7 +85,7 @@ export function useWhatsAppMessage() {
       .replace(/{matricula}/g, vehicle.plate)
       .replace(/{marca}/g, vehicle.brand)
       .replace(/{modelo}/g, vehicle.model)
-      .replace(/{nombre_taller}/g, tallerName || 'Taller')
+      .replace(/{nombre_taller}/g, tallerName || contactSettings.nombreTaller)
       .replace(/{telefono}/g, contactSettings.telefono)
       .replace(/{whatsapp_num}/g, contactSettings.whatsapp)
       .replace(/{horario}/g, contactSettings.horario);
