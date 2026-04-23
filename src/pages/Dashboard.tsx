@@ -207,6 +207,20 @@ export default function Dashboard() {
       filter: 'en_reparacion' as VehicleStatus,
     },
     {
+      label: 'Presupuestar',
+      value: vehicles.filter((v) => v.status === 'presupuestar').length,
+      icon: Clock,
+      color: 'text-status-pending-parts',
+      filter: 'presupuestar' as VehicleStatus,
+    },
+    {
+      label: 'Presupuestado',
+      value: vehicles.filter((v) => v.status === 'presupuestado').length,
+      icon: CheckCircle,
+      color: 'text-status-completed',
+      filter: 'presupuestado' as VehicleStatus,
+    },
+    {
       label: 'Pendiente Piezas',
       value: vehicles.filter((v) => v.status === 'pendiente_piezas').length,
       icon: Clock,
