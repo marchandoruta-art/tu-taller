@@ -127,8 +127,8 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
     <Card className="glass-card hover:shadow-elevated transition-all duration-200 cursor-pointer group"
           onClick={() => navigate(`/vehicles/${vehicle.id}`)}>
       <CardHeader className="pb-3 space-y-2">
-        <div className="min-w-0">
-          <h3 className="font-bold text-xl lg:text-2xl tracking-[0.12em] leading-none group-hover:text-primary transition-colors whitespace-nowrap overflow-visible">
+        <div className="min-w-0 w-full">
+          <h3 className="font-bold text-lg md:text-xl 2xl:text-2xl tracking-[0.08em] lg:tracking-[0.1em] leading-none group-hover:text-primary transition-colors whitespace-nowrap overflow-hidden text-ellipsis">
             {vehicle.plate}
           </h3>
         </div>
