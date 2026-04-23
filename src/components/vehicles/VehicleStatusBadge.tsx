@@ -9,6 +9,8 @@ interface VehicleStatusBadgeProps {
 export function VehicleStatusBadge({ status, className }: VehicleStatusBadgeProps) {
   const statusStyles: Record<VehicleStatus, string> = {
     recibido: 'status-received',
+    presupuestar: 'status-to-quote',
+    presupuestado: 'status-quoted',
     en_reparacion: 'status-in-progress',
     pendiente_piezas: 'status-pending-parts',
     terminado: 'status-completed',

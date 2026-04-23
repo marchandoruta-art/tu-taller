@@ -10,6 +10,8 @@ interface StatusColumnProps {
 
 const statusColors: Record<VehicleStatus, string> = {
   recibido: 'border-t-muted-foreground',
+  presupuestar: 'border-t-status-to-quote',
+  presupuestado: 'border-t-status-quoted',
   en_reparacion: 'border-t-status-in-progress',
   pendiente_piezas: 'border-t-status-pending-parts',
   terminado: 'border-t-status-completed',

@@ -38,6 +38,8 @@
 
     /* Status colors */
     --status-received: 220 15% 50%;
+    --status-to-quote: 25 95% 53%;
+    --status-quoted: 190 85% 42%;
     --status-in-progress: 35 92% 50%;
     --status-pending-parts: 0 72% 51%;
     --status-completed: 142 72% 40%;
@@ -132,6 +134,16 @@
 
   .status-received {
     @apply bg-muted text-muted-foreground;
+  }
+
+  .status-to-quote {
+    background-color: hsl(var(--status-to-quote) / 0.15);
+    color: hsl(var(--status-to-quote));
+  }
+
+  .status-quoted {
+    background-color: hsl(var(--status-quoted) / 0.15);
+    color: hsl(var(--status-quoted));
   }
 
   .status-in-progress {

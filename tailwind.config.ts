@@ -63,6 +63,8 @@ export default {
         },
         status: {
           received: "hsl(var(--status-received))",
+          "to-quote": "hsl(var(--status-to-quote))",
+          quoted: "hsl(var(--status-quoted))",
           "in-progress": "hsl(var(--status-in-progress))",
           "pending-parts": "hsl(var(--status-pending-parts))",
           completed: "hsl(var(--status-completed))",

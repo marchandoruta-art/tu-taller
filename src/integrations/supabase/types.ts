@@ -937,6 +937,8 @@ export type Database = {
       user_role: "mecanico" | "chapista" | "oficina" | "admin"
       vehicle_status:
         | "recibido"
+        | "presupuestar"
+        | "presupuestado"
         | "en_reparacion"
         | "pendiente_piezas"
         | "terminado"
@@ -1073,6 +1075,8 @@ export const Constants = {
       user_role: ["mecanico", "chapista", "oficina", "admin"],
       vehicle_status: [
         "recibido",
+        "presupuestar",
+        "presupuestado",
         "en_reparacion",
         "pendiente_piezas",
         "terminado",

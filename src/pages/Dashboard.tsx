@@ -19,7 +19,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 
-const statusOrder: VehicleStatus[] = ['recibido', 'en_reparacion', 'pendiente_piezas', 'terminado', 'facturado', 'entregado'];
+const statusOrder: VehicleStatus[] = ['recibido', 'presupuestar', 'presupuestado', 'en_reparacion', 'pendiente_piezas', 'terminado', 'facturado', 'entregado'];
 type ViewMode = 'kanban' | 'charts' | 'list';
 type StatusFilter = 'all' | 'en_taller' | VehicleStatus;
 
