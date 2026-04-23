@@ -19,7 +19,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 
-const statusOrder: VehicleStatus[] = ['recibido', 'presupuestar', 'presupuestado', 'en_reparacion', 'pendiente_piezas', 'terminado', 'facturado', 'entregado'];
+const statusOrder: VehicleStatus[] = ['recibido', 'en_reparacion', 'presupuestar', 'presupuestado', 'pendiente_piezas', 'terminado', 'facturado', 'entregado'];
 type ViewMode = 'kanban' | 'charts' | 'list';
 type StatusFilter = 'all' | 'en_taller' | VehicleStatus;
 
@@ -207,6 +207,20 @@ export default function Dashboard() {
       filter: 'en_reparacion' as VehicleStatus,
     },
     {
+      label: 'Presupuestar',
+      value: vehicles.filter((v) => v.status === 'presupuestar').length,
+      icon: Clock,
+      color: 'text-status-pending-parts',
+      filter: 'presupuestar' as VehicleStatus,
+    },
+    {
+      label: 'Presupuestado',
+      value: vehicles.filter((v) => v.status === 'presupuestado').length,
+      icon: CheckCircle,
+      color: 'text-status-completed',
+      filter: 'presupuestado' as VehicleStatus,
+    },
+    {
       label: 'Pendiente Piezas',
       value: vehicles.filter((v) => v.status === 'pendiente_piezas').length,
       icon: Clock,
@@ -295,7 +309,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stats - clickable filters */}
-        <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 md:gap-4">
           {stats.map((stat) => {
             const isActive = statusFilter === stat.filter;
             return (
