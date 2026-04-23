@@ -11,6 +11,8 @@ interface DashboardChartsProps {
 
 const STATUS_COLORS = {
   recibido: 'hsl(220, 15%, 50%)',
+  presupuestar: 'hsl(25, 95%, 53%)',
+  presupuestado: 'hsl(190, 85%, 42%)',
   en_reparacion: 'hsl(35, 92%, 50%)',
   pendiente_piezas: 'hsl(0, 72%, 51%)',
   terminado: 'hsl(142, 72%, 40%)',
