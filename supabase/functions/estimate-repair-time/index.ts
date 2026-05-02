@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
     // Get vehicle (RLS applies)
     const { data: vehicle, error: vErr } = await supabase
       .from("vehicles")
-      .select("brand, model, year, organization_id")
+      .select("plate, brand, model, year, vin, organization_id")
       .eq("id", vehicle_id)
       .single();
 
@@ -93,16 +93,27 @@ Deno.serve(async (req) => {
         .map(v => `- ${v.brand} ${v.model} ${v.year || ''}: anomalías [${anomaliesByVehicle[v.id].join('; ')}] → tiempo total real: ${Math.round(minutesByVehicle[v.id] / 60 * 10) / 10}h`);
 
       if (samples.length > 0) {
-        historicalContext = `\n\nHISTÓRICO REAL DE ESTE TALLER (mismo fabricante):\n${samples.join('\n')}\n\nUsa estos datos reales para calibrar tu estimación al ritmo de este taller concreto.`;
+        historicalContext = `\n\nDATOS DE CALIBRACIÓN (histórico de este taller, mismo fabricante) — úsalos SOLO como ajuste secundario al ritmo del taller, NO como fuente principal:\n${samples.join('\n')}`;
       }
     }
 
-    const systemPrompt = `Eres un perito mecánico experto en estimación de tiempos de reparación para talleres de automoción. Devuelves SIEMPRE estimaciones realistas en formato JSON estructurado. No exageres ni quedes corto. Si la anomalía es ambigua, da un rango más amplio.`;
+    const systemPrompt = `Eres un perito mecánico experto en automoción con conocimiento profundo de tiempos baremo de fabricantes (Audatex, GT Estimate, tiempos oficiales de marca) y de la mecánica concreta de cada modelo.
 
-    const userPrompt = `VEHÍCULO: ${vehicle.brand} ${vehicle.model} ${vehicle.year || ''}
+Tu tarea PRINCIPAL: estimar el tiempo de reparación basándote en TU CONOCIMIENTO TÉCNICO del vehículo concreto (marca, modelo, año, motorización típica, accesibilidad de componentes, particularidades conocidas del modelo).
+
+Si se te aportan datos históricos del taller, úsalos SOLO como calibración secundaria para ajustar al ritmo real del taller, nunca como fuente principal. Si no hay histórico, estima igualmente con tu conocimiento técnico sin disculparte.
+
+Devuelves SIEMPRE JSON estructurado. Rangos realistas (ni inflados ni cortos). Si la anomalía es ambigua, amplía el rango y baja la confianza.`;
+
+    const userPrompt = `VEHÍCULO:
+- Matrícula: ${vehicle.plate}
+- Marca/Modelo: ${vehicle.brand} ${vehicle.model}
+- Año: ${vehicle.year || 'no especificado'}
+${vehicle.vin ? `- VIN: ${vehicle.vin}` : ''}
+
 ANOMALÍA REPORTADA: "${anomaly_description}"${historicalContext}
 
-Estima el tiempo de reparación, dificultad y operaciones probables.`;
+Aplica tu conocimiento técnico del modelo concreto (accesibilidad, particularidades, tiempos baremo habituales) para estimar tiempo, dificultad y operaciones probables.`;
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
