@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Loader2, Clock, Wrench, AlertTriangle, Database } from 'lucide-react';
+import { Sparkles, Loader2, Clock, Wrench, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface RepairEstimate {
@@ -20,13 +20,13 @@ interface Props {
   vehicleId: string;
   anomalyDescription: string;
   disabled?: boolean;
+  variant?: 'icon' | 'compact';
 }
 
-export function AIRepairEstimateButton({ vehicleId, anomalyDescription, disabled }: Props) {
+export function AIRepairEstimateButton({ vehicleId, anomalyDescription, disabled, variant = 'icon' }: Props) {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [estimate, setEstimate] = useState<RepairEstimate | null>(null);
-  const [usedHistory, setUsedHistory] = useState(false);
 
   const handleEstimate = async () => {
     if (!anomalyDescription.trim()) {
@@ -49,7 +49,6 @@ export function AIRepairEstimateButton({ vehicleId, anomalyDescription, disabled
         return;
       }
       setEstimate(data.estimate);
-      setUsedHistory(!!data.used_workshop_history);
       setOpen(true);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Error de red');
@@ -66,17 +65,32 @@ export function AIRepairEstimateButton({ vehicleId, anomalyDescription, disabled
 
   return (
     <>
-      <Button
-        type="button"
-        variant="outline"
-        size="icon"
-        onClick={handleEstimate}
-        disabled={disabled || loading || !anomalyDescription.trim()}
-        title="Estimar tiempo con IA"
-        className="border-primary/40 hover:bg-primary/10"
-      >
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 text-primary" />}
-      </Button>
+      {variant === 'compact' ? (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={handleEstimate}
+          disabled={disabled || loading || !anomalyDescription.trim()}
+          title="Estimar tiempo con IA"
+          className="h-8 gap-1 text-primary hover:bg-primary/10"
+        >
+          {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+          <span className="text-xs">Estimar IA</span>
+        </Button>
+      ) : (
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={handleEstimate}
+          disabled={disabled || loading || !anomalyDescription.trim()}
+          title="Estimar tiempo con IA"
+          className="border-primary/40 hover:bg-primary/10"
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 text-primary" />}
+        </Button>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg">
@@ -152,12 +166,6 @@ export function AIRepairEstimateButton({ vehicleId, anomalyDescription, disabled
                 </p>
               )}
 
-              {usedHistory && (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground bg-primary/5 rounded p-2">
-                  <Database className="h-3 w-3 text-primary" />
-                  Calibrado con el histórico real de tu taller
-                </div>
-              )}
             </div>
           )}
         </DialogContent>

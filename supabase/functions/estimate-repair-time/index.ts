@@ -57,51 +57,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Get historical context: similar repairs in the same workshop
-    // Pull recent finished vehicles with anomalies + total time, same brand
-    const { data: historicalVehicles } = await supabase
-      .from("vehicles")
-      .select("id, brand, model, year")
-      .eq("organization_id", vehicle.organization_id)
-      .eq("brand", vehicle.brand)
-      .in("status", ["terminado", "facturado", "entregado"])
-      .limit(20);
-
-    let historicalContext = "";
-    if (historicalVehicles && historicalVehicles.length > 0) {
-      const vehicleIds = historicalVehicles.map(v => v.id);
-
-      const [{ data: historicalAnomalies }, { data: historicalLogs }] = await Promise.all([
-        supabase.from("vehicle_anomalies").select("vehicle_id, description").in("vehicle_id", vehicleIds),
-        supabase.from("time_logs").select("vehicle_id, total_minutes").in("vehicle_id", vehicleIds),
-      ]);
-
-      const minutesByVehicle: Record<string, number> = {};
-      (historicalLogs || []).forEach(l => {
-        minutesByVehicle[l.vehicle_id] = (minutesByVehicle[l.vehicle_id] || 0) + (l.total_minutes || 0);
-      });
-
-      const anomaliesByVehicle: Record<string, string[]> = {};
-      (historicalAnomalies || []).forEach(a => {
-        if (!anomaliesByVehicle[a.vehicle_id]) anomaliesByVehicle[a.vehicle_id] = [];
-        anomaliesByVehicle[a.vehicle_id].push(a.description);
-      });
-
-      const samples = historicalVehicles
-        .filter(v => anomaliesByVehicle[v.id] && minutesByVehicle[v.id])
-        .slice(0, 8)
-        .map(v => `- ${v.brand} ${v.model} ${v.year || ''}: anomalías [${anomaliesByVehicle[v.id].join('; ')}] → tiempo total real: ${Math.round(minutesByVehicle[v.id] / 60 * 10) / 10}h`);
-
-      if (samples.length > 0) {
-        historicalContext = `\n\nDATOS DE CALIBRACIÓN (histórico de este taller, mismo fabricante) — úsalos SOLO como ajuste secundario al ritmo del taller, NO como fuente principal:\n${samples.join('\n')}`;
-      }
-    }
-
     const systemPrompt = `Eres un perito mecánico experto en automoción con conocimiento profundo de tiempos baremo de fabricantes (Audatex, GT Estimate, tiempos oficiales de marca) y de la mecánica concreta de cada modelo.
 
-Tu tarea PRINCIPAL: estimar el tiempo de reparación basándote en TU CONOCIMIENTO TÉCNICO del vehículo concreto (marca, modelo, año, motorización típica, accesibilidad de componentes, particularidades conocidas del modelo).
-
-Si se te aportan datos históricos del taller, úsalos SOLO como calibración secundaria para ajustar al ritmo real del taller, nunca como fuente principal. Si no hay histórico, estima igualmente con tu conocimiento técnico sin disculparte.
+Tu tarea: estimar el tiempo de reparación basándote EXCLUSIVAMENTE en tu conocimiento técnico del vehículo concreto (marca, modelo, año, motorización típica, accesibilidad de componentes, particularidades conocidas del modelo, tiempos baremo habituales del fabricante).
 
 Devuelves SIEMPRE JSON estructurado. Rangos realistas (ni inflados ni cortos). Si la anomalía es ambigua, amplía el rango y baja la confianza.`;
 
@@ -111,7 +69,7 @@ Devuelves SIEMPRE JSON estructurado. Rangos realistas (ni inflados ni cortos). S
 - Año: ${vehicle.year || 'no especificado'}
 ${vehicle.vin ? `- VIN: ${vehicle.vin}` : ''}
 
-ANOMALÍA REPORTADA: "${anomaly_description}"${historicalContext}
+ANOMALÍA REPORTADA: "${anomaly_description}"
 
 Aplica tu conocimiento técnico del modelo concreto (accesibilidad, particularidades, tiempos baremo habituales) para estimar tiempo, dificultad y operaciones probables.`;
 
@@ -183,9 +141,8 @@ Aplica tu conocimiento técnico del modelo concreto (accesibilidad, particularid
     }
 
     const estimate = JSON.parse(toolCall.function.arguments);
-    const usedHistory = historicalContext.length > 0;
 
-    return new Response(JSON.stringify({ estimate, used_workshop_history: usedHistory }), {
+    return new Response(JSON.stringify({ estimate }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
