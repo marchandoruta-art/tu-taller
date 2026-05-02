@@ -141,9 +141,8 @@ Aplica tu conocimiento técnico del modelo concreto (accesibilidad, particularid
     }
 
     const estimate = JSON.parse(toolCall.function.arguments);
-    const usedHistory = historicalContext.length > 0;
 
-    return new Response(JSON.stringify({ estimate, used_workshop_history: usedHistory }), {
+    return new Response(JSON.stringify({ estimate }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Loader2, Clock, Wrench, AlertTriangle, Database } from 'lucide-react';
+import { Sparkles, Loader2, Clock, Wrench, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface RepairEstimate {
@@ -20,6 +20,7 @@ interface Props {
   vehicleId: string;
   anomalyDescription: string;
   disabled?: boolean;
+  variant?: 'icon' | 'compact';
 }
 
 export function AIRepairEstimateButton({ vehicleId, anomalyDescription, disabled }: Props) {
