@@ -781,6 +781,10 @@ export default function VehicleDetail() {
                     onChange={(e) => setNewAnomaly(e.target.value)}
                     className="flex-1"
                   />
+                  <AIRepairEstimateButton
+                    vehicleId={vehicle.id}
+                    anomalyDescription={newAnomaly}
+                  />
                   <Button type="submit" size="icon">
                     <Plus className="h-4 w-4" />
                   </Button>
