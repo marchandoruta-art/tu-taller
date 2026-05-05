@@ -19,31 +19,72 @@ export default function ResetPassword() {
   useEffect(() => {
     const establishSessionFromUrl = async () => {
       const searchParams = new URLSearchParams(window.location.search);
-      const authCode = searchParams.get('code');
-      const tokenHash = searchParams.get('token_hash');
-      const type = searchParams.get('type');
+      const hashParams = new URLSearchParams(
+        window.location.hash.startsWith('#') ? window.location.hash.substring(1) : ''
+      );
 
+      const authCode = searchParams.get('code') || hashParams.get('code');
+      const tokenHash = searchParams.get('token_hash') || hashParams.get('token_hash');
+      const type = (searchParams.get('type') || hashParams.get('type')) as
+        | 'recovery'
+        | 'invite'
+        | null;
+      const errorDescription =
+        searchParams.get('error_description') || hashParams.get('error_description');
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+
+      // Link explicitly expired/invalid from email provider
+      if (errorDescription) {
+        setLinkInvalid(true);
+        return;
+      }
+
+      // Always sign out any prior session so we use the recovery link's session
+      try {
+        await supabase.auth.signOut({ scope: 'local' });
+      } catch {
+        // ignore
+      }
+
+      // Format 1: PKCE code in query (?code=...)
       if (authCode) {
         const { error } = await supabase.auth.exchangeCodeForSession(authCode);
         if (!error) {
           setSessionReady(true);
+          // Clean URL
+          window.history.replaceState({}, '', '/reset-password');
           return;
         }
       }
 
+      // Format 2: token_hash + type (newer email links)
       if (tokenHash && (type === 'recovery' || type === 'invite')) {
         const { error } = await supabase.auth.verifyOtp({
           token_hash: tokenHash,
           type,
         });
-
         if (!error) {
           setSessionReady(true);
+          window.history.replaceState({}, '', '/reset-password');
           return;
         }
       }
 
-      // Check if we already have a session (e.g. from invite link)
+      // Format 3: legacy hash with access_token & refresh_token
+      if (accessToken && refreshToken) {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        if (!error) {
+          setSessionReady(true);
+          window.history.replaceState({}, '', '/reset-password');
+          return;
+        }
+      }
+
+      // Fallback: existing session (e.g. PASSWORD_RECOVERY event already fired)
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setSessionReady(true);
@@ -79,9 +120,10 @@ export default function ResetPassword() {
     const { error } = await supabase.auth.updateUser({ password });
 
     if (error) {
-      toast.error('Error al actualizar la contraseña');
+      toast.error('Error al actualizar la contraseña', { description: error.message });
     } else {
       toast.success('Contraseña actualizada correctamente');
+      await supabase.auth.signOut();
       navigate('/');
     }
     setLoading(false);
