@@ -120,9 +120,10 @@ export default function ResetPassword() {
     const { error } = await supabase.auth.updateUser({ password });
 
     if (error) {
-      toast.error('Error al actualizar la contraseña');
+      toast.error('Error al actualizar la contraseña', { description: error.message });
     } else {
       toast.success('Contraseña actualizada correctamente');
+      await supabase.auth.signOut();
       navigate('/');
     }
     setLoading(false);
