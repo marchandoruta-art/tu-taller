@@ -34,7 +34,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { UserPlus, Trash2, Edit, Loader2, Shield } from 'lucide-react';
+import { UserPlus, Trash2, Edit, Loader2, Shield, KeyRound } from 'lucide-react';
 
 interface UserWithRole extends Profile {
   role?: UserRole;
