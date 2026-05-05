@@ -11,13 +11,24 @@ export function AuthCallback() {
   const location = useLocation();
 
   useEffect(() => {
+    // Don't intercept if we're already on the reset-password page
+    if (window.location.pathname === '/reset-password') return;
+
     const searchParams = new URLSearchParams(window.location.search);
     const queryType = searchParams.get('type');
     const tokenHash = searchParams.get('token_hash');
     const authCode = searchParams.get('code');
+    const errorDescription = searchParams.get('error_description');
 
+    // Recovery/invite link (with token_hash or PKCE code) → reset-password
     if ((queryType === 'invite' || queryType === 'recovery') && (tokenHash || authCode)) {
       navigate(`/reset-password${window.location.search}${window.location.hash}`, { replace: true });
+      return;
+    }
+
+    // Expired/invalid recovery link → still send to reset-password to show "link invalid"
+    if (errorDescription && (queryType === 'recovery' || queryType === 'invite')) {
+      navigate(`/reset-password${window.location.search}`, { replace: true });
       return;
     }
 
