@@ -35,83 +35,17 @@ export default function Dashboard() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const appointmentsConverted = useRef(false);
 
-  // Auto-convert today's appointments into vehicles
+  // Auto-convert today's appointments into vehicles (server-side, respects RLS via SECURITY DEFINER)
   const convertTodayAppointments = async () => {
     if (appointmentsConverted.current || !user || !organizationId) return;
     appointmentsConverted.current = true;
 
-    const today = format(new Date(), 'yyyy-MM-dd');
-    const { data: todayAppointments } = await supabase
-      .from('appointments')
-      .select('*')
-      .eq('appointment_date', today)
-      .is('vehicle_id', null);
-
-    if (!todayAppointments || todayAppointments.length === 0) return;
-
-    // Si una cita ya generó un vehículo y luego ese vehículo se eliminó manualmente,
-    // no debemos volver a recrearlo automáticamente.
-    const appointmentsToConvert = todayAppointments.filter((apt) => apt.created_by);
-
-    if (appointmentsToConvert.length === 0) return;
-
-    let created = 0;
-    for (const apt of appointmentsToConvert) {
-      if (!apt.vehicle_plate || !apt.vehicle_brand || !apt.vehicle_model) continue;
-
-      // Create owner if we have client data
-      let ownerId: string | null = null;
-      if (apt.client_name) {
-        const { data: owner } = await supabase
-          .from('owners')
-          .insert({
-            name: apt.client_name,
-            phone: apt.client_phone || null,
-            organization_id: organizationId,
-          })
-          .select('id')
-          .single();
-        if (owner) ownerId = owner.id;
-      }
-
-      // Build client_tasks from issue_description
-      const clientTasks = apt.issue_description
-        ? apt.issue_description
-            .split(/\n|,|;/)
-            .map((line: string) => line.trim())
-            .filter((line: string) => line.length > 0)
-            .map((text: string) => ({ text, done: false }))
-        : [];
-
-      // Create vehicle
-      const { data: vehicle, error } = await supabase
-        .from('vehicles')
-        .insert({
-          plate: apt.vehicle_plate,
-          brand: apt.vehicle_brand,
-          model: apt.vehicle_model,
-          client_description: apt.issue_description || null,
-          client_tasks: clientTasks.length > 0 ? JSON.parse(JSON.stringify(clientTasks)) : [],
-          owner_id: ownerId,
-          assigned_to: apt.assigned_to || null,
-          created_by: apt.created_by || user.id,
-          organization_id: organizationId,
-          status: 'recibido' as const,
-        })
-        .select('id')
-        .single();
-
-      if (vehicle && !error) {
-        // Link appointment to vehicle
-        await supabase
-          .from('appointments')
-          .update({ vehicle_id: vehicle.id })
-          .eq('id', apt.id);
-        created++;
-      }
+    const { data: created, error } = await supabase.rpc('convert_today_appointments');
+    if (error) {
+      console.error('Error converting appointments:', error);
+      return;
     }
-
-    if (created > 0) {
+    if (created && created > 0) {
       toast.success(`${created} vehículo${created > 1 ? 's' : ''} creado${created > 1 ? 's' : ''} desde citas de hoy`);
     }
   };
