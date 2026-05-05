@@ -345,6 +345,14 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
                         <Button
                           variant="outline"
                           size="sm"
+                          onClick={() => handleSendPasswordReset(user)}
+                          title="Enviar email de recuperación de contraseña"
+                        >
+                          <KeyRound className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => {
                             setSelectedUser(user);
                             setNewRole(user.role || 'mecanico');
