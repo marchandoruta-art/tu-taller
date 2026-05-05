@@ -34,7 +34,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { UserPlus, Trash2, Edit, Loader2, Shield } from 'lucide-react';
+import { UserPlus, Trash2, Edit, Loader2, Shield, KeyRound } from 'lucide-react';
 
 interface UserWithRole extends Profile {
   role?: UserRole;
@@ -185,6 +185,23 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
     }
   };
 
+  const handleSendPasswordReset = async (user: UserWithRole) => {
+    if (!confirm(`¿Enviar email de recuperación de contraseña a ${user.full_name}?`)) return;
+    try {
+      const { data, error } = await supabase.functions.invoke('send-password-reset', {
+        body: {
+          targetUserId: user.user_id,
+          redirectTo: `${window.location.origin}/reset-password`,
+        },
+      });
+      if (error) throw error;
+      toast.success(`Email enviado a ${data?.email || user.full_name}`);
+    } catch (error: any) {
+      console.error('Error sending password reset:', error);
+      toast.error(error.message || 'Error al enviar email de recuperación');
+    }
+  };
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -325,6 +342,14 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleSendPasswordReset(user)}
+                          title="Enviar email de recuperación de contraseña"
+                        >
+                          <KeyRound className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="outline"
                           size="sm"
