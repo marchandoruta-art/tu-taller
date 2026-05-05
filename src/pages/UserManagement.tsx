@@ -185,6 +185,23 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
     }
   };
 
+  const handleSendPasswordReset = async (user: UserWithRole) => {
+    if (!confirm(`¿Enviar email de recuperación de contraseña a ${user.full_name}?`)) return;
+    try {
+      const { data, error } = await supabase.functions.invoke('send-password-reset', {
+        body: {
+          targetUserId: user.user_id,
+          redirectTo: `${window.location.origin}/reset-password`,
+        },
+      });
+      if (error) throw error;
+      toast.success(`Email enviado a ${data?.email || user.full_name}`);
+    } catch (error: any) {
+      console.error('Error sending password reset:', error);
+      toast.error(error.message || 'Error al enviar email de recuperación');
+    }
+  };
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
