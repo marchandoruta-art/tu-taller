@@ -76,6 +76,9 @@ export function DepositReceipt({ ownerData, vehicleData, inspectionData }: Depos
     const now = new Date();
     const formattedDate = format(now, "d 'de' MMMM 'de' yyyy", { locale: es });
     const formattedTime = format(now, 'HH:mm');
+    const esc = (s: unknown): string =>
+      String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m] as string));
+    const escAttr = (s: unknown): string => esc(s);
 
     const checkedItems = Object.entries(inspectionData.interior_check)
       .filter(([key, value]) => key !== 'keys_count' && value === true)
