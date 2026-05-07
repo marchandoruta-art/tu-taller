@@ -72,6 +72,8 @@ export function ViewDepositReceipt({ vehicle }: ViewDepositReceiptProps) {
       : new Date(vehicle.created_at);
     const formattedDate = format(receptionDate, "d 'de' MMMM 'de' yyyy", { locale: es });
     const formattedTime = format(receptionDate, 'HH:mm');
+    const esc = (s: unknown): string =>
+      String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m] as string));
 
     const checkedItems = Object.entries(interiorCheck)
       .filter(([key, value]) => key !== 'keys_count' && value === true)
