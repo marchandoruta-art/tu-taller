@@ -503,6 +503,16 @@ export default function VehicleDetail() {
               currentAssignedTo={vehicle.assigned_to} 
               onAssigned={fetchVehicleData}
             />
+            {vehicle.status !== 'terminado' && vehicle.status !== 'facturado' && vehicle.status !== 'entregado' && (
+              <Button
+                onClick={() => updateStatus('terminado')}
+                className="gap-2 bg-green-600 hover:bg-green-700 text-white"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                <span className="hidden sm:inline">Marcar Terminado</span>
+                <span className="sm:hidden">Terminado</span>
+              </Button>
+            )}
             <Select value={vehicle.status} onValueChange={(v) => updateStatus(v as VehicleStatus)}>
               <SelectTrigger className="w-40 md:w-48">
                 <SelectValue />
