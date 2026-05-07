@@ -12,7 +12,18 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  try {
+  
+    // Restrict to internal/cron callers presenting the service role key
+    const _auth = (req.headers.get('Authorization') ?? '').replace('Bearer ', '').trim();
+    const _svc = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    if (!_auth || !_svc || _auth !== _svc) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
