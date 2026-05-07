@@ -33,6 +33,7 @@ import {
   Loader2,
   MessageSquare,
   Bell,
+  CheckCircle2,
   Lock,
   FileText,
   UserCheck,
