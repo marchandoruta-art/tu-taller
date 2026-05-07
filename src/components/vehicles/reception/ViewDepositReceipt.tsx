@@ -72,6 +72,8 @@ export function ViewDepositReceipt({ vehicle }: ViewDepositReceiptProps) {
       : new Date(vehicle.created_at);
     const formattedDate = format(receptionDate, "d 'de' MMMM 'de' yyyy", { locale: es });
     const formattedTime = format(receptionDate, 'HH:mm');
+    const esc = (s: unknown): string =>
+      String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m] as string));
 
     const checkedItems = Object.entries(interiorCheck)
       .filter(([key, value]) => key !== 'keys_count' && value === true)
@@ -119,22 +121,22 @@ export function ViewDepositReceipt({ vehicle }: ViewDepositReceiptProps) {
 
   <h2>DATOS DEL CLIENTE</h2>
   <div class="section grid">
-    <div class="field"><span class="label">Nombre:</span> ${vehicle.owner?.name || 'No indicado'}</div>
-    <div class="field"><span class="label">DNI/NIF:</span> ${vehicle.owner?.dni || 'No indicado'}</div>
-    <div class="field"><span class="label">Teléfono:</span> ${vehicle.owner?.phone || 'No indicado'}</div>
-    <div class="field"><span class="label">Email:</span> ${vehicle.owner?.email || 'No indicado'}</div>
-    <div class="field" style="grid-column: 1 / -1;"><span class="label">Dirección:</span> ${vehicle.owner?.address || 'No indicada'}</div>
+    <div class="field"><span class="label">Nombre:</span> ${esc(vehicle.owner?.name) || 'No indicado'}</div>
+    <div class="field"><span class="label">DNI/NIF:</span> ${esc(vehicle.owner?.dni) || 'No indicado'}</div>
+    <div class="field"><span class="label">Teléfono:</span> ${esc(vehicle.owner?.phone) || 'No indicado'}</div>
+    <div class="field"><span class="label">Email:</span> ${esc(vehicle.owner?.email) || 'No indicado'}</div>
+    <div class="field" style="grid-column: 1 / -1;"><span class="label">Dirección:</span> ${esc(vehicle.owner?.address) || 'No indicada'}</div>
   </div>
 
   <h2>DATOS DEL VEHÍCULO</h2>
   <div class="section grid">
-    <div class="field"><span class="label">Matrícula:</span> ${vehicle.plate}</div>
-    <div class="field"><span class="label">Marca:</span> ${vehicle.brand}</div>
-    <div class="field"><span class="label">Modelo:</span> ${vehicle.model}</div>
-    <div class="field"><span class="label">Año:</span> ${vehicle.year || 'No indicado'}</div>
-    <div class="field"><span class="label">Color:</span> ${vehicle.color || 'No indicado'}</div>
-    <div class="field"><span class="label">Nº Bastidor:</span> ${vehicle.vin || 'No indicado'}</div>
-    <div class="field"><span class="label">Kilometraje:</span> ${vehicle.mileage ? `${vehicle.mileage} km` : 'No indicado'}</div>
+    <div class="field"><span class="label">Matrícula:</span> ${esc(vehicle.plate)}</div>
+    <div class="field"><span class="label">Marca:</span> ${esc(vehicle.brand)}</div>
+    <div class="field"><span class="label">Modelo:</span> ${esc(vehicle.model)}</div>
+    <div class="field"><span class="label">Año:</span> ${esc(vehicle.year) || 'No indicado'}</div>
+    <div class="field"><span class="label">Color:</span> ${esc(vehicle.color) || 'No indicado'}</div>
+    <div class="field"><span class="label">Nº Bastidor:</span> ${esc(vehicle.vin) || 'No indicado'}</div>
+    <div class="field"><span class="label">Kilometraje:</span> ${vehicle.mileage ? `${esc(vehicle.mileage)} km` : 'No indicado'}</div>
     <div class="field">
       <span class="label">Combustible:</span>
       <div class="fuel-gauge">
@@ -150,35 +152,35 @@ export function ViewDepositReceipt({ vehicle }: ViewDepositReceiptProps) {
 
   <h2>MOTIVO DE ENTRADA</h2>
   <div class="section">
-    <p>${vehicle.client_description || 'No indicado'}</p>
+    <p>${esc(vehicle.client_description) || 'No indicado'}</p>
   </div>
 
   ${exteriorDamages.length > 0 ? `
   <h2>DAÑOS EXTERIORES DETECTADOS EN RECEPCIÓN</h2>
   <div class="damages">
     <ul>
-      ${exteriorDamages.map(d => `<li><strong>${VEHICLE_ZONES[d.zone] || d.zone}:</strong> ${d.description}</li>`).join('')}
+      ${exteriorDamages.map(d => `<li><strong>${esc(VEHICLE_ZONES[d.zone] || d.zone)}:</strong> ${esc(d.description)}</li>`).join('')}
     </ul>
   </div>
   ` : ''}
 
   <h2>ELEMENTOS VERIFICADOS EN EL VEHÍCULO</h2>
   <div class="section">
-    <p><strong>Presentes:</strong> ${checkedItems.length > 0 ? checkedItems.join(', ') : 'Ninguno marcado'}</p>
-    <p><strong>Número de llaves entregadas:</strong> ${interiorCheck.keys_count || 1}</p>
+    <p><strong>Presentes:</strong> ${checkedItems.length > 0 ? esc(checkedItems.join(', ')) : 'Ninguno marcado'}</p>
+    <p><strong>Número de llaves entregadas:</strong> ${esc(interiorCheck.keys_count || 1)}</p>
   </div>
 
   ${vehicle.client_belongings ? `
   <h2>OBJETOS PERSONALES DEL CLIENTE EN EL VEHÍCULO</h2>
   <div class="section">
-    <p>${vehicle.client_belongings}</p>
+    <p>${esc(vehicle.client_belongings)}</p>
   </div>
   ` : ''}
 
   ${vehicle.reception_notes ? `
   <h2>OBSERVACIONES</h2>
   <div class="section">
-    <p>${vehicle.reception_notes}</p>
+    <p>${esc(vehicle.reception_notes)}</p>
   </div>
   ` : ''}
 
@@ -204,8 +206,8 @@ export function ViewDepositReceipt({ vehicle }: ViewDepositReceiptProps) {
     </div>
     <div class="signature-box">
       <p>El Cliente</p>
-      ${vehicle.client_signature ? `<img src="${vehicle.client_signature}" class="signature-img" alt="Firma del cliente" />` : ''}
-      <div class="signature-line">${vehicle.owner?.name || 'Firma del cliente'}</div>
+      ${vehicle.client_signature && /^data:image\//.test(vehicle.client_signature) ? `<img src="${esc(vehicle.client_signature)}" class="signature-img" alt="Firma del cliente" />` : ''}
+      <div class="signature-line">${esc(vehicle.owner?.name) || 'Firma del cliente'}</div>
     </div>
   </div>
 </body>
