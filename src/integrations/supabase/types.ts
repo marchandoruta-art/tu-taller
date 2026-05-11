@@ -587,6 +587,69 @@ export type Database = {
           },
         ]
       }
+      vehicle_archives: {
+        Row: {
+          anomalies_snapshot: Json
+          archived_at: string
+          archived_by: string | null
+          brand: string | null
+          files_snapshot: Json
+          id: string
+          messages_snapshot: Json
+          model: string | null
+          organization_id: string
+          owner_id: string | null
+          owner_snapshot: Json | null
+          parts_snapshot: Json
+          photos_snapshot: Json
+          plate: string
+          status_history_snapshot: Json
+          time_logs_snapshot: Json
+          vehicle_id: string
+          vehicle_snapshot: Json
+        }
+        Insert: {
+          anomalies_snapshot?: Json
+          archived_at?: string
+          archived_by?: string | null
+          brand?: string | null
+          files_snapshot?: Json
+          id?: string
+          messages_snapshot?: Json
+          model?: string | null
+          organization_id: string
+          owner_id?: string | null
+          owner_snapshot?: Json | null
+          parts_snapshot?: Json
+          photos_snapshot?: Json
+          plate: string
+          status_history_snapshot?: Json
+          time_logs_snapshot?: Json
+          vehicle_id: string
+          vehicle_snapshot: Json
+        }
+        Update: {
+          anomalies_snapshot?: Json
+          archived_at?: string
+          archived_by?: string | null
+          brand?: string | null
+          files_snapshot?: Json
+          id?: string
+          messages_snapshot?: Json
+          model?: string | null
+          organization_id?: string
+          owner_id?: string | null
+          owner_snapshot?: Json | null
+          parts_snapshot?: Json
+          photos_snapshot?: Json
+          plate?: string
+          status_history_snapshot?: Json
+          time_logs_snapshot?: Json
+          vehicle_id?: string
+          vehicle_snapshot?: Json
+        }
+        Relationships: []
+      }
       vehicle_files: {
         Row: {
           created_at: string
