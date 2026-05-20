@@ -956,6 +956,8 @@ export type Database = {
       }
       auto_stop_vehicle_timers: { Args: never; Returns: number }
       convert_today_appointments: { Args: never; Returns: number }
+      cron_auto_clock_in: { Args: never; Returns: number }
+      cron_auto_clock_out: { Args: never; Returns: number }
       get_user_organization_id: { Args: { _user_id?: string }; Returns: string }
       get_user_role: {
         Args: { _user_id: string }
