@@ -40,19 +40,25 @@ export default function ResetPassword() {
         return;
       }
 
-      // Always sign out any prior session so we use the recovery link's session
-      try {
-        await supabase.auth.signOut({ scope: 'local' });
-      } catch {
-        // ignore
+      // CRITICAL: do NOT signOut before checking the session.
+      // With detectSessionInUrl (default), the SDK auto-consumes the hash
+      // tokens from the recovery email and creates a session. signing out
+      // here would wipe that recovery session and break the flow.
+      const { data: { session: existingSession } } = await supabase.auth.getSession();
+      if (existingSession) {
+        setSessionReady(true);
+        if (window.location.hash || window.location.search) {
+          window.history.replaceState({}, '', '/reset-password');
+        }
+        return;
       }
 
+      // No auto-session yet. Try manual flows for other link formats.
       // Format 1: PKCE code in query (?code=...)
       if (authCode) {
         const { error } = await supabase.auth.exchangeCodeForSession(authCode);
         if (!error) {
           setSessionReady(true);
-          // Clean URL
           window.history.replaceState({}, '', '/reset-password');
           return;
         }
@@ -84,9 +90,10 @@ export default function ResetPassword() {
         }
       }
 
-      // Fallback: existing session (e.g. PASSWORD_RECOVERY event already fired)
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
+      // Give the SDK a brief moment in case PASSWORD_RECOVERY is still firing
+      await new Promise((r) => setTimeout(r, 600));
+      const { data: { session: laterSession } } = await supabase.auth.getSession();
+      if (laterSession) {
         setSessionReady(true);
         return;
       }
