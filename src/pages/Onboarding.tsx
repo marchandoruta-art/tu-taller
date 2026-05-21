@@ -226,6 +226,22 @@ export default function Onboarding() {
               </form>
             </TabsContent>
           </Tabs>
+
+          <div className="mt-6 pt-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
+            <button
+              onClick={handleGoBack}
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Cerrar sesión y volver
+            </button>
+            <Link
+              to="/forgot-password"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>
