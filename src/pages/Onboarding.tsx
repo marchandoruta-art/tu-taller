@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -8,13 +8,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Wrench, Loader2, Building2, UserPlus } from 'lucide-react';
+import { Wrench, Loader2, Building2, UserPlus, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Onboarding() {
-  const { user, profile } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const { refetch } = useOrganization();
   const navigate = useNavigate();
+
+  const handleGoBack = async () => {
+    await signOut();
+    navigate('/');
+  };
   const [loading, setLoading] = useState(false);
   const [orgName, setOrgName] = useState('');
   const [inviteCode, setInviteCode] = useState('');
@@ -221,6 +226,22 @@ export default function Onboarding() {
               </form>
             </TabsContent>
           </Tabs>
+
+          <div className="mt-6 pt-4 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
+            <button
+              onClick={handleGoBack}
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Cerrar sesión y volver
+            </button>
+            <Link
+              to="/forgot-password"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>
