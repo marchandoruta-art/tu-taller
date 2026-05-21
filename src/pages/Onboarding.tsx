@@ -12,9 +12,14 @@ import { Wrench, Loader2, Building2, UserPlus, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Onboarding() {
-  const { user, profile } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const { refetch } = useOrganization();
   const navigate = useNavigate();
+
+  const handleGoBack = async () => {
+    await signOut();
+    navigate('/');
+  };
   const [loading, setLoading] = useState(false);
   const [orgName, setOrgName] = useState('');
   const [inviteCode, setInviteCode] = useState('');
