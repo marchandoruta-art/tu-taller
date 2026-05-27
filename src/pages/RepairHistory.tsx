@@ -272,9 +272,16 @@ export default function RepairHistory() {
                           {vehicle.owner?.name && (
                             <span className="text-xs text-muted-foreground">• {vehicle.owner.name}</span>
                           )}
+                          {vehicle.source === 'deleted' && (
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-destructive/10 text-destructive uppercase tracking-wide">
+                              Eliminado
+                            </span>
+                          )}
                         </div>
                         <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-muted-foreground">
-                          {vehicle.delivered_at && (
+                          {vehicle.source === 'deleted' && vehicle.archived_at ? (
+                            <span>Eliminado: {format(new Date(vehicle.archived_at), 'dd MMM yyyy', { locale: es })}</span>
+                          ) : vehicle.delivered_at && (
                             <span>Entregado: {format(new Date(vehicle.delivered_at), 'dd MMM yyyy', { locale: es })}</span>
                           )}
                           {(vehicle.total_work_minutes ?? 0) > 0 && (
@@ -290,10 +297,12 @@ export default function RepairHistory() {
                       </div>
 
                       <div className="flex items-center gap-1 shrink-0">
-                        <Button variant="ghost" size="icon" onClick={() => navigate(`/vehicles/${vehicle.id}`)} title="Ver ficha completa">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        {isAdmin && (
+                        {vehicle.source !== 'deleted' && (
+                          <Button variant="ghost" size="icon" onClick={() => navigate(`/vehicles/${vehicle.id}`)} title="Ver ficha completa">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {isAdmin && vehicle.source !== 'deleted' && (
                           <>
                             <Button variant="ghost" size="icon" onClick={() => restoreVehicle(vehicle.id)} title="Restaurar">
                               <RotateCcw className="h-4 w-4" />
