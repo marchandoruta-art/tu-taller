@@ -49,58 +49,84 @@ export default function RepairHistory() {
   }, []);
 
   const fetchArchivedVehicles = async () => {
-    const { data: vehiclesData, error } = await supabase
-      .from('vehicles')
-      .select('*, owner:owners(*)')
-      .eq('archived', true)
-      .order('delivered_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching archived vehicles:', error);
-      setLoading(false);
-      return;
-    }
-
-    if (!vehiclesData || vehiclesData.length === 0) {
-      setVehicles([]);
-      setLoading(false);
-      return;
-    }
-
-    const vehicleIds = vehiclesData.map(v => v.id);
-
-    const [partsRes, anomaliesRes, timeLogsRes] = await Promise.all([
-      supabase.from('parts').select('id, name, quantity, reference, notes, vehicle_id').in('vehicle_id', vehicleIds),
-      supabase.from('vehicle_anomalies').select('id, description, created_at, vehicle_id').in('vehicle_id', vehicleIds),
-      supabase.from('time_logs').select('id, user_id, started_at, ended_at, total_minutes, notes, vehicle_id').in('vehicle_id', vehicleIds),
+    const [archivedRes, deletedRes] = await Promise.all([
+      supabase.from('vehicles').select('*, owner:owners(*)').eq('archived', true).order('delivered_at', { ascending: false }),
+      supabase.from('vehicle_archives').select('*').order('archived_at', { ascending: false }),
     ]);
 
-    // Fetch profile names for time logs
-    const userIds = [...new Set((timeLogsRes.data || []).map(t => t.user_id))];
+    const vehiclesData = archivedRes.data || [];
+    const archivesData = deletedRes.data || [];
+
+    // Profiles map for time logs (collect all user_ids upfront)
+    const collectedUserIds = new Set<string>();
+
+    // Fetch related data for live archived vehicles
+    const vehicleIds = vehiclesData.map((v: any) => v.id);
+    let partsRes: any = { data: [] }, anomaliesRes: any = { data: [] }, timeLogsRes: any = { data: [] };
+    if (vehicleIds.length > 0) {
+      [partsRes, anomaliesRes, timeLogsRes] = await Promise.all([
+        supabase.from('parts').select('id, name, quantity, reference, notes, vehicle_id').in('vehicle_id', vehicleIds),
+        supabase.from('vehicle_anomalies').select('id, description, created_at, vehicle_id').in('vehicle_id', vehicleIds),
+        supabase.from('time_logs').select('id, user_id, started_at, ended_at, total_minutes, notes, vehicle_id').in('vehicle_id', vehicleIds),
+      ]);
+    }
+    (timeLogsRes.data || []).forEach((t: any) => collectedUserIds.add(t.user_id));
+    archivesData.forEach((a: any) => {
+      (a.time_logs_snapshot || []).forEach((t: any) => t?.user_id && collectedUserIds.add(t.user_id));
+    });
+
     let profileMap: Record<string, string> = {};
-    if (userIds.length > 0) {
-      const { data: profiles } = await supabase.from('profiles').select('user_id, full_name').in('user_id', userIds);
-      if (profiles) {
-        profileMap = Object.fromEntries(profiles.map(p => [p.user_id, p.full_name]));
-      }
+    if (collectedUserIds.size > 0) {
+      const { data: profiles } = await supabase.from('profiles').select('user_id, full_name').in('user_id', Array.from(collectedUserIds));
+      if (profiles) profileMap = Object.fromEntries(profiles.map((p) => [p.user_id, p.full_name]));
     }
 
-    const enriched: ArchivedVehicle[] = vehiclesData.map(v => {
-      const parts = (partsRes.data || []).filter(p => p.vehicle_id === v.id);
-      const anomalies = (anomaliesRes.data || []).filter(a => a.vehicle_id === v.id);
-      const timeLogs = (timeLogsRes.data || []).filter(t => t.vehicle_id === v.id);
-      const totalMinutes = timeLogs.reduce((sum, t) => sum + (t.total_minutes || 0), 0);
-
+    const liveArchived: ArchivedVehicle[] = vehiclesData.map((v: any) => {
+      const parts = (partsRes.data || []).filter((p: any) => p.vehicle_id === v.id);
+      const anomalies = (anomaliesRes.data || []).filter((a: any) => a.vehicle_id === v.id);
+      const timeLogs = (timeLogsRes.data || []).filter((t: any) => t.vehicle_id === v.id);
+      const totalMinutes = timeLogs.reduce((sum: number, t: any) => sum + (t.total_minutes || 0), 0);
       return {
         ...v,
         parts_list: parts,
         anomalies_list: anomalies,
-        time_logs_list: timeLogs.map(t => ({ ...t, profile_name: profileMap[t.user_id] || 'Desconocido' })),
+        time_logs_list: timeLogs.map((t: any) => ({ ...t, profile_name: profileMap[t.user_id] || 'Desconocido' })),
         total_work_minutes: totalMinutes,
+        source: 'archived' as const,
       } as ArchivedVehicle;
     });
 
-    setVehicles(enriched);
+    const deletedItems: ArchivedVehicle[] = archivesData.map((a: any) => {
+      const snap = a.vehicle_snapshot || {};
+      const parts = a.parts_snapshot || [];
+      const anomalies = a.anomalies_snapshot || [];
+      const timeLogs = a.time_logs_snapshot || [];
+      const totalMinutes = timeLogs.reduce((sum: number, t: any) => sum + (t?.total_minutes || 0), 0);
+      return {
+        ...snap,
+        id: a.vehicle_id,
+        plate: a.plate || snap.plate,
+        brand: a.brand || snap.brand,
+        model: a.model || snap.model,
+        organization_id: a.organization_id,
+        owner: a.owner_snapshot || null,
+        parts_list: parts,
+        anomalies_list: anomalies,
+        time_logs_list: timeLogs.map((t: any) => ({ ...t, profile_name: profileMap[t?.user_id] || 'Desconocido' })),
+        total_work_minutes: totalMinutes,
+        source: 'deleted' as const,
+        archived_at: a.archived_at,
+      } as ArchivedVehicle;
+    });
+
+    // Merge & sort by archived_at/delivered_at desc
+    const merged = [...liveArchived, ...deletedItems].sort((a, b) => {
+      const da = new Date(a.archived_at || a.delivered_at || a.created_at).getTime();
+      const db = new Date(b.archived_at || b.delivered_at || b.created_at).getTime();
+      return db - da;
+    });
+
+    setVehicles(merged);
     setLoading(false);
   };
 
