@@ -29,6 +29,8 @@ interface ArchivedVehicle extends VehicleWithOwner {
   anomalies_list?: { id: string; description: string; created_at: string }[];
   time_logs_list?: { id: string; user_id: string; started_at: string; ended_at?: string | null; total_minutes: number | null; notes?: string | null; profile_name?: string }[];
   total_work_minutes?: number;
+  source?: 'archived' | 'deleted';
+  archived_at?: string;
 }
 
 export default function RepairHistory() {
