@@ -24,6 +24,7 @@ import UserManagement from "./pages/UserManagement";
 import InstallApp from "./pages/InstallApp";
 import Settings from "./pages/Settings";
 import RepairHistory from "./pages/RepairHistory";
+import PlateHistory from "./pages/PlateHistory";
 import ClientHistory from "./pages/ClientHistory";
 import Appointments from "./pages/Appointments";
 import Workload from "./pages/Workload";
@@ -87,6 +88,7 @@ const App = () => (
                 <Route path="/install" element={<InstallApp />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/repair-history" element={<RepairHistory />} />
+                <Route path="/plate-history" element={<PlateHistory />} />
                 <Route path="/clients/:ownerId" element={<ClientHistory />} />
                 <Route path="/appointments" element={<Appointments />} />
                 <Route path="/admin/workload" element={<Workload />} />

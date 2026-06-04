@@ -24,6 +24,7 @@ import {
   Building2,
   Scale,
   Archive,
+  Search,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -32,6 +33,7 @@ import { cn } from '@/lib/utils';
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Vehículos', href: '/vehicles', icon: Car },
+  { name: 'Buscar Matrícula', href: '/plate-history', icon: Search },
   { name: 'Archivados', href: '/repair-history', icon: Archive },
   { name: 'Entregas', href: '/calendar', icon: Calendar },
   { name: 'Citas Previas', href: '/appointments', icon: CalendarCheck },
