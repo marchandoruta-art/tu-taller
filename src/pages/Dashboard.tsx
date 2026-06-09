@@ -355,6 +355,7 @@ export default function Dashboard() {
                   <TableHead>Matrícula</TableHead>
                   <TableHead>Vehículo</TableHead>
                   <TableHead>Estado</TableHead>
+                  <TableHead>Prioridad</TableHead>
                   <TableHead>Asignado a</TableHead>
                   <TableHead className="hidden md:table-cell">Descripción</TableHead>
                 </TableRow>
@@ -369,6 +370,7 @@ export default function Dashboard() {
                     <TableCell className="font-semibold">{vehicle.plate}</TableCell>
                     <TableCell className="text-muted-foreground">{vehicle.brand} {vehicle.model}</TableCell>
                     <TableCell><VehicleStatusBadge status={vehicle.status} /></TableCell>
+                    <TableCell><PriorityBadge value={(vehicle.priority as VehiclePriority) || 'normal'} /></TableCell>
                     <TableCell>{vehicle.assigned_to ? profiles[vehicle.assigned_to] || '—' : <span className="text-muted-foreground italic">Sin asignar</span>}</TableCell>
                     <TableCell className="hidden md:table-cell text-muted-foreground text-xs max-w-[200px] truncate">
                       {vehicle.client_description || '—'}
