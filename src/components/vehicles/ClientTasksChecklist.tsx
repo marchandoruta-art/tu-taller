@@ -25,6 +25,32 @@ interface ClientTasksChecklistProps {
 export function ClientTasksChecklist({ vehicleId, tasks, clientDescription, onUpdate }: ClientTasksChecklistProps) {
   const [newTask, setNewTask] = useState('');
   const [saving, setSaving] = useState(false);
+  const [templates, setTemplates] = useState<{ id: string; name: string; tasks: { text: string }[] }[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from('task_templates')
+      .select('id, name, tasks')
+      .order('name', { ascending: true })
+      .then(({ data }) => setTemplates((data as any) || []));
+  }, []);
+
+  const applyTemplate = async (tplId: string) => {
+    const tpl = templates.find((t) => t.id === tplId);
+    if (!tpl) return;
+    const existingTexts = new Set(tasks.map((t) => t.text.toLowerCase().trim()));
+    const newOnes = (tpl.tasks || [])
+      .filter((t: any) => t?.text && !existingTexts.has(String(t.text).toLowerCase().trim()))
+      .map((t: any) => ({ text: t.text, done: false }));
+    if (newOnes.length === 0) {
+      toast.info('La plantilla ya está aplicada');
+      return;
+    }
+    const updated = [...tasks, ...newOnes];
+    const ok = await saveTasks(updated);
+    if (ok) toast.success(`${newOnes.length} tarea(s) añadidas desde "${tpl.name}"`);
+  };
+
 
   const saveTasks = async (updated: ClientTask[]) => {
     setSaving(true);
