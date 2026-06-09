@@ -189,17 +189,57 @@ export default function Dashboard() {
     },
   ];
 
-  const filteredVehicles = statusFilter === 'all'
+  const matchesPriority = (v: VehicleWithOwner) => {
+    const p = (v.priority as VehiclePriority) || 'normal';
+    if (priorityFilter === 'all') return true;
+    if (priorityFilter === 'urgent_high') return p === 'urgente' || p === 'alta';
+    return p === priorityFilter;
+  };
+
+  const sortByPriority = (a: VehicleWithOwner, b: VehicleWithOwner) => {
+    const pa = PRIORITY_ORDER[(a.priority as VehiclePriority) || 'normal'];
+    const pb = PRIORITY_ORDER[(b.priority as VehiclePriority) || 'normal'];
+    if (pa !== pb) return pa - pb;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  };
+
+  const baseFiltered = statusFilter === 'all'
     ? vehicles
     : statusFilter === 'en_taller'
     ? vehicles.filter(v => v.status !== 'terminado' && v.status !== 'entregado')
     : vehicles.filter(v => v.status === statusFilter);
+
+  const filteredVehicles = baseFiltered.filter(matchesPriority).sort(sortByPriority);
 
   const filteredStatusOrder = statusFilter === 'all'
     ? statusOrder
     : statusFilter === 'en_taller'
     ? statusOrder.filter(s => s !== 'terminado' && s !== 'entregado')
     : statusOrder.filter(s => s === statusFilter);
+
+  const getVehiclesByStatusFiltered = (status: VehicleStatus) =>
+    filteredVehicles.filter(v => v.status === status);
+
+  const handleExport = () => {
+    if (filteredVehicles.length === 0) {
+      toast.info('Nada que exportar');
+      return;
+    }
+    downloadCsv('vehiculos', filteredVehicles, [
+      { key: 'plate', label: 'Matrícula', value: (v) => v.plate },
+      { key: 'brand', label: 'Marca', value: (v) => v.brand },
+      { key: 'model', label: 'Modelo', value: (v) => v.model },
+      { key: 'status', label: 'Estado', value: (v) => STATUS_LABELS[v.status] },
+      { key: 'priority', label: 'Prioridad', value: (v) => PRIORITY_LABELS[(v.priority as VehiclePriority) || 'normal'] },
+      { key: 'owner', label: 'Cliente', value: (v) => v.owner?.name || '' },
+      { key: 'phone', label: 'Teléfono', value: (v) => v.owner?.phone || '' },
+      { key: 'assigned', label: 'Asignado a', value: (v) => v.assigned_to ? profiles[v.assigned_to] || '' : '' },
+      { key: 'description', label: 'Descripción', value: (v) => v.client_description || '' },
+      { key: 'time', label: 'Tiempo trabajado', value: (v) => formatMinutes(vehicleTimes[v.id] || 0) },
+      { key: 'created', label: 'Creado', value: (v) => format(new Date(v.created_at), 'dd/MM/yyyy HH:mm') },
+    ]);
+  };
+
 
   const isAdmin = role === 'admin';
 
