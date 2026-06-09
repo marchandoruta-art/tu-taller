@@ -94,6 +94,8 @@ const App = () => (
                 <Route path="/clients/:ownerId" element={<ClientHistory />} />
                 <Route path="/appointments" element={<Appointments />} />
                 <Route path="/admin/workload" element={<Workload />} />
+                <Route path="/settings/templates" element={<TaskTemplates />} />
+                <Route path="/c/:token" element={<PortalView />} />
                 <Route path="/legal" element={<LegalIndex />} />
                 <Route path="/aviso-legal" element={<AvisoLegal />} />
                 <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
