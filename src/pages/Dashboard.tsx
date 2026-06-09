@@ -262,7 +262,7 @@ export default function Dashboard() {
             <h1 className="text-xl md:text-2xl font-bold">Dashboard</h1>
             <p className="text-sm text-muted-foreground">Vista general del taller</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             {isAdmin && (
               <Button 
                 variant={viewMode === 'charts' ? "default" : "outline"} 
@@ -271,7 +271,7 @@ export default function Dashboard() {
                 className="gap-2"
               >
                 <BarChart2 className="h-4 w-4" />
-                Gráficos
+                <span className="hidden sm:inline">Gráficos</span>
               </Button>
             )}
             <Button 
@@ -281,8 +281,23 @@ export default function Dashboard() {
               className="gap-2"
             >
               {viewMode === 'list' ? <LayoutGrid className="h-4 w-4" /> : <List className="h-4 w-4" />}
-              {viewMode === 'list' ? 'Kanban' : 'Lista'}
+              <span className="hidden sm:inline">{viewMode === 'list' ? 'Kanban' : 'Lista'}</span>
             </Button>
+            <Button
+              variant={priorityFilter === 'urgent_high' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setPriorityFilter(priorityFilter === 'urgent_high' ? 'all' : 'urgent_high')}
+              className={cn('gap-2', priorityFilter === 'urgent_high' && 'bg-red-600 hover:bg-red-700 text-white')}
+              title="Solo urgentes y altas"
+            >
+              <Flame className="h-4 w-4" />
+              <span className="hidden sm:inline">Urgentes</span>
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExport} className="gap-2" title="Exportar CSV">
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">Exportar</span>
+            </Button>
+            <QuickPlateDialog onSuccess={fetchVehicles} triggerLabel="Matrícula rápida" />
             <NewVehicleDialog onSuccess={fetchVehicles} />
           </div>
         </div>
