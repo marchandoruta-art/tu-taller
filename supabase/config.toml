@@ -1,1 +1,4 @@
 project_id = "vzinqlkktnzgciigtycx"
+
+[functions.get-portal-vehicle]
+verify_jwt = false
