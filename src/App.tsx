@@ -40,6 +40,8 @@ import TerminosCondiciones from "./pages/legal/TerminosCondiciones";
 import ContratoEncargado from "./pages/legal/ContratoEncargado";
 import TextosLegales from "./pages/legal/TextosLegales";
 import LegalIndex from "./pages/legal/LegalIndex";
+import TaskTemplates from "./pages/TaskTemplates";
+import PortalView from "./pages/PortalView";
 
 const queryClient = new QueryClient();
 
