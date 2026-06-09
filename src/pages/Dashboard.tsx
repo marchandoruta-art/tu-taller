@@ -372,7 +372,7 @@ export default function Dashboard() {
             <div className="lg:hidden overflow-x-auto pb-4 -mx-4 px-4">
               <div className="flex gap-4 min-w-max">
                 {filteredStatusOrder.map((status) => {
-                  const statusVehicles = getVehiclesByStatus(status);
+                  const statusVehicles = getVehiclesByStatusFiltered(status);
                   return (
                     <Droppable key={status} droppableId={status}>
                       {(provided, snapshot) => (
@@ -416,7 +416,7 @@ export default function Dashboard() {
               filteredStatusOrder.length === 8 && "lg:grid-cols-8",
             )}>
               {filteredStatusOrder.map((status) => {
-                const statusVehicles = getVehiclesByStatus(status);
+                const statusVehicles = getVehiclesByStatusFiltered(status);
                 return (
                   <Droppable key={status} droppableId={status}>
                     {(provided, snapshot) => (
