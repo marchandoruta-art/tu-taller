@@ -97,11 +97,31 @@ export default function WorkloadPage() {
     <MainLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Users className="h-6 w-6 text-primary" />
-            Carga de Trabajo
-          </h1>
-          <p className="text-muted-foreground text-sm">Distribución de vehículos y horas por operario</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <Users className="h-6 w-6 text-primary" />
+              Carga de Trabajo
+            </h1>
+            <p className="text-muted-foreground text-sm">Distribución de vehículos y horas por operario</p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => {
+              if (operators.length === 0) return toast.info('Nada que exportar');
+              downloadCsv('carga-trabajo', operators, [
+                { key: 'name', label: 'Operario', value: (o) => o.profile.full_name },
+                { key: 'role', label: 'Rol', value: (o) => ROLE_LABELS[o.role] },
+                { key: 'vehicles', label: 'Vehículos asignados', value: (o) => o.vehicleCount },
+                { key: 'time', label: 'Horas totales', value: (o) => formatMinutes(o.totalMinutes) },
+                { key: 'plates', label: 'Matrículas', value: (o) => o.vehiclePlates.join(', ') },
+              ]);
+            }}
+          >
+            <Download className="h-4 w-4" /> Exportar
+          </Button>
         </div>
 
         {/* Summary Cards */}
