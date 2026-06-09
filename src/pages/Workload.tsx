@@ -5,8 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Loader2, Users, Car, Clock, Wrench } from 'lucide-react';
+import { Loader2, Users, Car, Clock, Wrench, Download } from 'lucide-react';
 import { Profile, ROLE_LABELS, UserRole } from '@/lib/types';
+import { Button } from '@/components/ui/button';
+import { downloadCsv, formatMinutes } from '@/lib/exportCsv';
+import { toast } from 'sonner';
 
 interface OperatorWorkload {
   profile: Profile;
