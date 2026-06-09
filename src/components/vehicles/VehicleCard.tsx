@@ -210,7 +210,16 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
             <span className="font-mono">{formatTime(totalTime)}</span>
           </div>
           {isAdmin && (
-            <AlertDialog>
+            <AlertDialog
+              open={deleteOpen}
+              onOpenChange={(open) => {
+                setDeleteOpen(open);
+                if (!open) {
+                  setDeleteStep(1);
+                  setConfirmPlate('');
+                }
+              }}
+            >
               <AlertDialogTrigger asChild>
                 <Button
                   variant="ghost"
@@ -223,34 +232,82 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
-
               </AlertDialogTrigger>
               <AlertDialogContent onClick={(e) => e.stopPropagation()}>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>¿Eliminar vehículo?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Esta acción eliminará permanentemente el vehículo {vehicle.plate} y toda su información asociada.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      const { error } = await deleteVehiclePermanently(vehicle.id);
-                      
-                      if (error) {
-                        toast.error('Error al eliminar el vehículo');
-                      } else {
-                        toast.success('Vehículo eliminado');
-                        onStatusChange?.();
-                      }
-                    }}
-                  >
-                    Eliminar
-                  </AlertDialogAction>
-                </AlertDialogFooter>
+                {deleteStep === 1 ? (
+                  <>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5 text-destructive" />
+                        Paso 1 de 2 · ¿Eliminar vehículo?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Vas a eliminar permanentemente el vehículo <strong>{vehicle.plate}</strong> ({vehicle.brand} {vehicle.model}) y toda su información asociada (recambios, tiempos, fotos, mensajes...).
+                        <br /><br />
+                        Esta acción no se puede deshacer. En el siguiente paso tendrás que escribir la matrícula para confirmar.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancelar</AlertDialogCancel>
+                      <Button
+                        variant="destructive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteStep(2);
+                        }}
+                      >
+                        Continuar
+                      </Button>
+                    </AlertDialogFooter>
+                  </>
+                ) : (
+                  <>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5 text-destructive" />
+                        Paso 2 de 2 · Confirmación final
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Escribe la matrícula <strong>{vehicle.plate}</strong> para confirmar el borrado definitivo.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="space-y-2 py-2">
+                      <Label htmlFor={`confirm-plate-${vehicle.id}`}>Matrícula</Label>
+                      <Input
+                        id={`confirm-plate-${vehicle.id}`}
+                        value={confirmPlate}
+                        onChange={(e) => setConfirmPlate(e.target.value.toUpperCase())}
+                        placeholder={vehicle.plate}
+                        onClick={(e) => e.stopPropagation()}
+                        autoFocus
+                      />
+                    </div>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancelar</AlertDialogCancel>
+                      <Button
+                        variant="destructive"
+                        disabled={confirmPlate.trim().toUpperCase() !== vehicle.plate.toUpperCase() || deleting}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          setDeleting(true);
+                          const { error } = await deleteVehiclePermanently(vehicle.id);
+                          setDeleting(false);
+                          if (error) {
+                            toast.error('Error al eliminar el vehículo');
+                          } else {
+                            toast.success(`Vehículo ${vehicle.plate} eliminado`);
+                            setDeleteOpen(false);
+                            setDeleteStep(1);
+                            setConfirmPlate('');
+                            onStatusChange?.();
+                          }
+                        }}
+                      >
+                        {deleting ? 'Eliminando...' : 'Eliminar definitivamente'}
+                      </Button>
+                    </AlertDialogFooter>
+                  </>
+                )}
               </AlertDialogContent>
             </AlertDialog>
           )}
