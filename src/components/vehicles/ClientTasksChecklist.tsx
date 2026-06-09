@@ -99,16 +99,36 @@ export function ClientTasksChecklist({ vehicleId, tasks, clientDescription, onUp
   return (
     <Card>
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
           <CardTitle className="text-lg flex items-center gap-2">
             <ClipboardList className="h-5 w-5" />
             Trabajos Solicitados
           </CardTitle>
-          {totalCount > 0 && (
-            <span className="text-sm text-muted-foreground font-medium">
-              {doneCount}/{totalCount} ({progress}%)
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {templates.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-1 h-8 text-xs">
+                    <ClipboardList className="h-3.5 w-3.5" /> Plantilla <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="max-h-72 overflow-y-auto">
+                  <DropdownMenuLabel>Aplicar plantilla</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {templates.map((t) => (
+                    <DropdownMenuItem key={t.id} onClick={() => applyTemplate(t.id)}>
+                      {t.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            {totalCount > 0 && (
+              <span className="text-sm text-muted-foreground font-medium">
+                {doneCount}/{totalCount} ({progress}%)
+              </span>
+            )}
+          </div>
         </div>
         {totalCount > 0 && (
           <div className="w-full bg-muted rounded-full h-2 mt-2">
