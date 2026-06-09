@@ -44,6 +44,7 @@ export interface Vehicle {
   client_description?: string;
   work_summary?: string;
   status: VehicleStatus;
+  priority?: VehiclePriority;
   assigned_to?: string;
   created_by?: string;
   created_at: string;
