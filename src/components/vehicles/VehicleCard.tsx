@@ -52,6 +52,10 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
   const { openWhatsApp } = useWhatsAppMessage();
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteStep, setDeleteStep] = useState<1 | 2>(1);
+  const [confirmPlate, setConfirmPlate] = useState('');
+  const [deleting, setDeleting] = useState(false);
   const isAdmin = role === 'admin';
 
   useEffect(() => {
