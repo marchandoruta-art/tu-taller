@@ -1,16 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
-import { VehicleWithOwner, VehicleStatus, Profile } from '@/lib/types';
+import { VehicleWithOwner, VehicleStatus, Profile, VehiclePriority, PRIORITY_ORDER, PRIORITY_LABELS } from '@/lib/types';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { StatusColumn } from '@/components/dashboard/StatusColumn';
 import { VehicleCard } from '@/components/vehicles/VehicleCard';
 import { NewVehicleDialog } from '@/components/vehicles/NewVehicleDialog';
+import { QuickPlateDialog } from '@/components/vehicles/QuickPlateDialog';
 import { DashboardCharts } from '@/components/dashboard/DashboardCharts';
-import { Loader2, Car, Clock, Wrench, CheckCircle, PackageCheck, BarChart2, LayoutGrid, List } from 'lucide-react';
+import { Loader2, Car, Clock, Wrench, CheckCircle, PackageCheck, BarChart2, LayoutGrid, List, Download, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { VehicleStatusBadge } from '@/components/vehicles/VehicleStatusBadge';
+import { PriorityBadge } from '@/components/vehicles/PrioritySelector';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useNavigate } from 'react-router-dom';
@@ -18,10 +20,12 @@ import { STATUS_LABELS } from '@/lib/types';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
+import { downloadCsv, formatMinutes } from '@/lib/exportCsv';
 
 const statusOrder: VehicleStatus[] = ['recibido', 'en_reparacion', 'presupuestar', 'presupuestado', 'pendiente_piezas', 'terminado', 'facturado', 'entregado'];
 type ViewMode = 'kanban' | 'charts' | 'list';
 type StatusFilter = 'all' | 'en_taller' | VehicleStatus;
+type PriorityFilter = 'all' | 'urgent_high' | VehiclePriority;
 
 export default function Dashboard() {
   const navigate = useNavigate();
