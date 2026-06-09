@@ -512,6 +512,11 @@ export default function VehicleDetail() {
               currentAssignedTo={vehicle.assigned_to} 
               onAssigned={fetchVehicleData}
             />
+            <PortalShareDialog
+              vehicleId={vehicle.id}
+              vehiclePlate={vehicle.plate}
+              ownerPhone={vehicle.owner?.phone}
+            />
             {vehicle.status !== 'terminado' && vehicle.status !== 'facturado' && vehicle.status !== 'entregado' && (
               <Button
                 onClick={() => updateStatus('terminado')}
