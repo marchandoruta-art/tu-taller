@@ -475,8 +475,14 @@ export default function VehicleDetail() {
                 </p>
               </div>
               <VehicleStatusBadge status={vehicle.status} />
+              <PrioritySelector
+                vehicleId={vehicle.id}
+                value={(vehicle as any).priority || 'normal'}
+                canEdit={role === 'admin' || role === 'oficina'}
+                onChanged={() => fetchVehicleData()}
+              />
             </div>
-            
+
             {/* Assigned user info */}
             <div className="flex items-center gap-2 mt-2">
               <UserCheck className="h-4 w-4 text-muted-foreground" />
