@@ -139,8 +139,9 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
             {vehicle.plate}
           </h3>
         </div>
-        <div className="flex items-center justify-start">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
           <VehicleStatusBadge status={vehicle.status} />
+          <PriorityBadge value={(vehicle.priority as VehiclePriority) || 'normal'} />
         </div>
         <p className="text-xs md:text-sm text-muted-foreground truncate">
           {vehicle.brand} {vehicle.model}
