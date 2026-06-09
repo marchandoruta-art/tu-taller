@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { VehicleWithOwner, Profile, ROLE_LABELS, UserRole, VehicleStatus } from '@/lib/types';
+import { VehicleWithOwner, Profile, ROLE_LABELS, UserRole, VehicleStatus, VehiclePriority } from '@/lib/types';
+import { PriorityBadge } from './PrioritySelector';
 import { useWhatsAppMessage } from '@/hooks/useWhatsAppMessage';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { VehicleStatusBadge } from './VehicleStatusBadge';
