@@ -165,6 +165,54 @@ export type Database = {
           },
         ]
       }
+      client_portal_tokens: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          id: string
+          organization_id: string
+          revoked: boolean
+          token: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          id?: string
+          organization_id: string
+          revoked?: boolean
+          token?: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          id?: string
+          organization_id?: string
+          revoked?: boolean
+          token?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_portal_tokens_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_portal_tokens_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -464,6 +512,44 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          organization_id: string
+          tasks: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          tasks?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          tasks?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -857,6 +943,7 @@ export type Database = {
           organization_id: string | null
           owner_id: string | null
           plate: string
+          priority: Database["public"]["Enums"]["vehicle_priority"]
           reception_date: string | null
           reception_notes: string | null
           status: Database["public"]["Enums"]["vehicle_status"]
@@ -888,6 +975,7 @@ export type Database = {
           organization_id?: string | null
           owner_id?: string | null
           plate: string
+          priority?: Database["public"]["Enums"]["vehicle_priority"]
           reception_date?: string | null
           reception_notes?: string | null
           status?: Database["public"]["Enums"]["vehicle_status"]
@@ -919,6 +1007,7 @@ export type Database = {
           organization_id?: string | null
           owner_id?: string | null
           plate?: string
+          priority?: Database["public"]["Enums"]["vehicle_priority"]
           reception_date?: string | null
           reception_notes?: string | null
           status?: Database["public"]["Enums"]["vehicle_status"]
@@ -1002,6 +1091,7 @@ export type Database = {
     Enums: {
       appointment_type: "mecanica" | "chapa_pintura"
       user_role: "mecanico" | "chapista" | "oficina" | "admin"
+      vehicle_priority: "baja" | "normal" | "alta" | "urgente"
       vehicle_status:
         | "recibido"
         | "presupuestar"
@@ -1140,6 +1230,7 @@ export const Constants = {
     Enums: {
       appointment_type: ["mecanica", "chapa_pintura"],
       user_role: ["mecanico", "chapista", "oficina", "admin"],
+      vehicle_priority: ["baja", "normal", "alta", "urgente"],
       vehicle_status: [
         "recibido",
         "presupuestar",
