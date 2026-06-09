@@ -17,12 +17,13 @@ import {
 import {
   Collapsible, CollapsibleContent, CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { History, Search, Loader2, Eye, Trash2, RotateCcw, Car, ChevronDown, ChevronRight, Clock, Wrench, AlertTriangle, FileText } from 'lucide-react';
+import { History, Search, Loader2, Eye, Trash2, RotateCcw, Car, ChevronDown, ChevronRight, Clock, Wrench, AlertTriangle, FileText, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { deleteVehiclePermanently } from '@/lib/deleteVehicle';
+import { downloadCsv, formatMinutes } from '@/lib/exportCsv';
 
 interface ArchivedVehicle extends VehicleWithOwner {
   parts_list?: { id: string; name: string; quantity: number; reference?: string | null; notes?: string | null }[];
