@@ -214,6 +214,30 @@ export default function RepairHistory() {
               </p>
             </div>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => {
+              if (filteredVehicles.length === 0) return toast.info('Nada que exportar');
+              downloadCsv('historial-reparaciones', filteredVehicles, [
+                { key: 'plate', label: 'Matrícula', value: (v) => v.plate },
+                { key: 'brand', label: 'Marca', value: (v) => v.brand },
+                { key: 'model', label: 'Modelo', value: (v) => v.model },
+                { key: 'owner', label: 'Cliente', value: (v) => v.owner?.name || '' },
+                { key: 'phone', label: 'Teléfono', value: (v) => v.owner?.phone || '' },
+                { key: 'status', label: 'Estado', value: (v) => STATUS_LABELS[v.status] || v.status },
+                { key: 'source', label: 'Origen', value: (v) => (v.source === 'deleted' ? 'Eliminado' : 'Archivado') },
+                { key: 'time', label: 'Tiempo trabajado', value: (v) => formatMinutes(v.total_work_minutes || 0) },
+                { key: 'parts_count', label: 'Nº recambios', value: (v) => v.parts_list?.length || 0 },
+                { key: 'work_summary', label: 'Resumen', value: (v) => v.work_summary || '' },
+                { key: 'delivered_at', label: 'Entregado', value: (v) => v.delivered_at ? format(new Date(v.delivered_at), 'dd/MM/yyyy') : '' },
+                { key: 'archived_at', label: 'Archivado', value: (v) => v.archived_at ? format(new Date(v.archived_at), 'dd/MM/yyyy HH:mm') : '' },
+              ]);
+            }}
+          >
+            <Download className="h-4 w-4" /> Exportar CSV
+          </Button>
         </div>
 
         {/* Filters */}
