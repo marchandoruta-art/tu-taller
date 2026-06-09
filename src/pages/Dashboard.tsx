@@ -37,6 +37,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('kanban');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>('all');
   const appointmentsConverted = useRef(false);
 
   // Auto-convert today's appointments into vehicles (server-side, respects RLS via SECURITY DEFINER)
