@@ -10,7 +10,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Settings as SettingsIcon, Save, Loader2, Trash2, AlertTriangle, MessageCircle } from 'lucide-react';
+import {
+  Settings as SettingsIcon,
+  Save,
+  Loader2,
+  Trash2,
+  AlertTriangle,
+  MessageCircle,
+  CalendarDays,
+  Plus,
+  X,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { DEFAULT_WHATSAPP_MESSAGE } from '@/hooks/useWhatsAppMessage';
@@ -26,6 +36,12 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
+interface Holiday {
+  id: string;
+  date: string;
+  name: string;
+}
+
 export default function Settings() {
   const { role } = useAuth();
   const { organization, loading: organizationLoading } = useOrganization();
@@ -37,6 +53,11 @@ export default function Settings() {
   const [autoArchive, setAutoArchive] = useState(true);
   const [whatsappMessage, setWhatsappMessage] = useState(DEFAULT_WHATSAPP_MESSAGE);
 
+  const [holidays, setHolidays] = useState<Holiday[]>([]);
+  const [newHolidayDate, setNewHolidayDate] = useState('');
+  const [newHolidayName, setNewHolidayName] = useState('');
+  const [addingHoliday, setAddingHoliday] = useState(false);
+
   useEffect(() => {
     if (role !== 'admin') {
       navigate('/');
@@ -46,6 +67,7 @@ export default function Settings() {
     if (!organizationLoading) {
       if (organization) {
         fetchSettings();
+        fetchHolidays();
       } else {
         setLoading(false);
       }
@@ -76,6 +98,56 @@ export default function Settings() {
       console.error('Error fetching settings:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchHolidays = async () => {
+    if (!organization) return;
+    try {
+      const { data, error } = await supabase
+        .from('organization_holidays')
+        .select('id, date, name')
+        .eq('organization_id', organization.id)
+        .order('date', { ascending: true });
+
+      if (error) throw error;
+      setHolidays(data || []);
+    } catch (error) {
+      console.error('Error fetching holidays:', error);
+    }
+  };
+
+  const addHoliday = async () => {
+    if (!organization || !newHolidayDate || !newHolidayName.trim()) return;
+    setAddingHoliday(true);
+    try {
+      const { error } = await supabase.from('organization_holidays').insert({
+        organization_id: organization.id,
+        date: newHolidayDate,
+        name: newHolidayName.trim(),
+      });
+      if (error) throw error;
+      toast.success('Festivo añadido');
+      setNewHolidayDate('');
+      setNewHolidayName('');
+      await fetchHolidays();
+    } catch (error) {
+      console.error('Error adding holiday:', error);
+      toast.error('Error al añadir festivo');
+    } finally {
+      setAddingHoliday(false);
+    }
+  };
+
+  const deleteHoliday = async (id: string) => {
+    try {
+      const { error } = await supabase.from('organization_holidays').delete().eq('id', id);
+      if (error) throw error;
+      toast.success('Festivo eliminado');
+      setHolidays((prev) => prev.filter((h) => h.id !== id));
+    } catch (error) {
+      console.error('Error deleting holiday:', error);
+      toast.error('Error al eliminar festivo');
     }
   };
 
@@ -132,6 +204,11 @@ export default function Settings() {
       </MainLayout>
     );
   }
+
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+  };
 
   return (
     <MainLayout>
@@ -248,6 +325,79 @@ export default function Settings() {
                 Archivar
               </Button>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Holidays */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CalendarDays className="h-5 w-5" />
+              Festivos del Taller
+            </CardTitle>
+            <CardDescription>
+              Define los días que el taller está cerrado. Los temporizadores de reparación no se pararán automáticamente en festivos.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-end gap-2">
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="holidayDate">Fecha</Label>
+                <Input
+                  id="holidayDate"
+                  type="date"
+                  value={newHolidayDate}
+                  onChange={(e) => setNewHolidayDate(e.target.value)}
+                />
+              </div>
+              <div className="flex-[2] space-y-2">
+                <Label htmlFor="holidayName">Nombre del festivo</Label>
+                <Input
+                  id="holidayName"
+                  value={newHolidayName}
+                  onChange={(e) => setNewHolidayName(e.target.value)}
+                  placeholder="Ej: Festividad local, Puente..."
+                />
+              </div>
+              <Button
+                onClick={addHoliday}
+                disabled={addingHoliday || !newHolidayDate || !newHolidayName.trim()}
+                size="icon"
+              >
+                {addingHoliday ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              </Button>
+            </div>
+
+            {holidays.length > 0 ? (
+              <div className="space-y-2">
+                {holidays.map((h) => (
+                  <div
+                    key={h.id}
+                    className="flex items-center justify-between rounded-lg border px-3 py-2"
+                  >
+                    <div className="flex items-center gap-3">
+                      <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium">{h.name}</p>
+                        <p className="text-xs text-muted-foreground">{formatDate(h.date)}</p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      onClick={() => deleteHoliday(h.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No hay festivos configurados. Los temporizadores se pararán de lunes a viernes a las 17:15.
+              </p>
+            )}
           </CardContent>
         </Card>
 
