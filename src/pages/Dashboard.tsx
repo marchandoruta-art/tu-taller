@@ -1,16 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
-import { VehicleWithOwner, VehicleStatus, Profile } from '@/lib/types';
+import { VehicleWithOwner, VehicleStatus, Profile, VehiclePriority, PRIORITY_ORDER, PRIORITY_LABELS } from '@/lib/types';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { StatusColumn } from '@/components/dashboard/StatusColumn';
 import { VehicleCard } from '@/components/vehicles/VehicleCard';
 import { NewVehicleDialog } from '@/components/vehicles/NewVehicleDialog';
+import { QuickPlateDialog } from '@/components/vehicles/QuickPlateDialog';
 import { DashboardCharts } from '@/components/dashboard/DashboardCharts';
-import { Loader2, Car, Clock, Wrench, CheckCircle, PackageCheck, BarChart2, LayoutGrid, List } from 'lucide-react';
+import { Loader2, Car, Clock, Wrench, CheckCircle, PackageCheck, BarChart2, LayoutGrid, List, Download, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { VehicleStatusBadge } from '@/components/vehicles/VehicleStatusBadge';
+import { PriorityBadge } from '@/components/vehicles/PrioritySelector';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useNavigate } from 'react-router-dom';
@@ -18,10 +20,12 @@ import { STATUS_LABELS } from '@/lib/types';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
+import { downloadCsv, formatMinutes } from '@/lib/exportCsv';
 
 const statusOrder: VehicleStatus[] = ['recibido', 'en_reparacion', 'presupuestar', 'presupuestado', 'pendiente_piezas', 'terminado', 'facturado', 'entregado'];
 type ViewMode = 'kanban' | 'charts' | 'list';
 type StatusFilter = 'all' | 'en_taller' | VehicleStatus;
+type PriorityFilter = 'all' | 'urgent_high' | VehiclePriority;
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -33,6 +37,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('kanban');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>('all');
   const appointmentsConverted = useRef(false);
 
   // Auto-convert today's appointments into vehicles (server-side, respects RLS via SECURITY DEFINER)
@@ -184,17 +189,57 @@ export default function Dashboard() {
     },
   ];
 
-  const filteredVehicles = statusFilter === 'all'
+  const matchesPriority = (v: VehicleWithOwner) => {
+    const p = (v.priority as VehiclePriority) || 'normal';
+    if (priorityFilter === 'all') return true;
+    if (priorityFilter === 'urgent_high') return p === 'urgente' || p === 'alta';
+    return p === priorityFilter;
+  };
+
+  const sortByPriority = (a: VehicleWithOwner, b: VehicleWithOwner) => {
+    const pa = PRIORITY_ORDER[(a.priority as VehiclePriority) || 'normal'];
+    const pb = PRIORITY_ORDER[(b.priority as VehiclePriority) || 'normal'];
+    if (pa !== pb) return pa - pb;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  };
+
+  const baseFiltered = statusFilter === 'all'
     ? vehicles
     : statusFilter === 'en_taller'
     ? vehicles.filter(v => v.status !== 'terminado' && v.status !== 'entregado')
     : vehicles.filter(v => v.status === statusFilter);
+
+  const filteredVehicles = baseFiltered.filter(matchesPriority).sort(sortByPriority);
 
   const filteredStatusOrder = statusFilter === 'all'
     ? statusOrder
     : statusFilter === 'en_taller'
     ? statusOrder.filter(s => s !== 'terminado' && s !== 'entregado')
     : statusOrder.filter(s => s === statusFilter);
+
+  const getVehiclesByStatusFiltered = (status: VehicleStatus) =>
+    filteredVehicles.filter(v => v.status === status);
+
+  const handleExport = () => {
+    if (filteredVehicles.length === 0) {
+      toast.info('Nada que exportar');
+      return;
+    }
+    downloadCsv('vehiculos', filteredVehicles, [
+      { key: 'plate', label: 'Matrícula', value: (v) => v.plate },
+      { key: 'brand', label: 'Marca', value: (v) => v.brand },
+      { key: 'model', label: 'Modelo', value: (v) => v.model },
+      { key: 'status', label: 'Estado', value: (v) => STATUS_LABELS[v.status] },
+      { key: 'priority', label: 'Prioridad', value: (v) => PRIORITY_LABELS[(v.priority as VehiclePriority) || 'normal'] },
+      { key: 'owner', label: 'Cliente', value: (v) => v.owner?.name || '' },
+      { key: 'phone', label: 'Teléfono', value: (v) => v.owner?.phone || '' },
+      { key: 'assigned', label: 'Asignado a', value: (v) => v.assigned_to ? profiles[v.assigned_to] || '' : '' },
+      { key: 'description', label: 'Descripción', value: (v) => v.client_description || '' },
+      { key: 'time', label: 'Tiempo trabajado', value: (v) => formatMinutes(vehicleTimes[v.id] || 0) },
+      { key: 'created', label: 'Creado', value: (v) => format(new Date(v.created_at), 'dd/MM/yyyy HH:mm') },
+    ]);
+  };
+
 
   const isAdmin = role === 'admin';
 
@@ -217,7 +262,7 @@ export default function Dashboard() {
             <h1 className="text-xl md:text-2xl font-bold">Dashboard</h1>
             <p className="text-sm text-muted-foreground">Vista general del taller</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             {isAdmin && (
               <Button 
                 variant={viewMode === 'charts' ? "default" : "outline"} 
@@ -226,7 +271,7 @@ export default function Dashboard() {
                 className="gap-2"
               >
                 <BarChart2 className="h-4 w-4" />
-                Gráficos
+                <span className="hidden sm:inline">Gráficos</span>
               </Button>
             )}
             <Button 
@@ -236,8 +281,23 @@ export default function Dashboard() {
               className="gap-2"
             >
               {viewMode === 'list' ? <LayoutGrid className="h-4 w-4" /> : <List className="h-4 w-4" />}
-              {viewMode === 'list' ? 'Kanban' : 'Lista'}
+              <span className="hidden sm:inline">{viewMode === 'list' ? 'Kanban' : 'Lista'}</span>
             </Button>
+            <Button
+              variant={priorityFilter === 'urgent_high' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setPriorityFilter(priorityFilter === 'urgent_high' ? 'all' : 'urgent_high')}
+              className={cn('gap-2', priorityFilter === 'urgent_high' && 'bg-red-600 hover:bg-red-700 text-white')}
+              title="Solo urgentes y altas"
+            >
+              <Flame className="h-4 w-4" />
+              <span className="hidden sm:inline">Urgentes</span>
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExport} className="gap-2" title="Exportar CSV">
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">Exportar</span>
+            </Button>
+            <QuickPlateDialog onSuccess={fetchVehicles} triggerLabel="Matrícula rápida" />
             <NewVehicleDialog onSuccess={fetchVehicles} />
           </div>
         </div>
@@ -295,6 +355,7 @@ export default function Dashboard() {
                   <TableHead>Matrícula</TableHead>
                   <TableHead>Vehículo</TableHead>
                   <TableHead>Estado</TableHead>
+                  <TableHead>Prioridad</TableHead>
                   <TableHead>Asignado a</TableHead>
                   <TableHead className="hidden md:table-cell">Descripción</TableHead>
                 </TableRow>
@@ -309,6 +370,7 @@ export default function Dashboard() {
                     <TableCell className="font-semibold">{vehicle.plate}</TableCell>
                     <TableCell className="text-muted-foreground">{vehicle.brand} {vehicle.model}</TableCell>
                     <TableCell><VehicleStatusBadge status={vehicle.status} /></TableCell>
+                    <TableCell><PriorityBadge value={(vehicle.priority as VehiclePriority) || 'normal'} /></TableCell>
                     <TableCell>{vehicle.assigned_to ? profiles[vehicle.assigned_to] || '—' : <span className="text-muted-foreground italic">Sin asignar</span>}</TableCell>
                     <TableCell className="hidden md:table-cell text-muted-foreground text-xs max-w-[200px] truncate">
                       {vehicle.client_description || '—'}
@@ -327,7 +389,7 @@ export default function Dashboard() {
             <div className="lg:hidden overflow-x-auto pb-4 -mx-4 px-4">
               <div className="flex gap-4 min-w-max">
                 {filteredStatusOrder.map((status) => {
-                  const statusVehicles = getVehiclesByStatus(status);
+                  const statusVehicles = getVehiclesByStatusFiltered(status);
                   return (
                     <Droppable key={status} droppableId={status}>
                       {(provided, snapshot) => (
@@ -371,7 +433,7 @@ export default function Dashboard() {
               filteredStatusOrder.length === 8 && "lg:grid-cols-8",
             )}>
               {filteredStatusOrder.map((status) => {
-                const statusVehicles = getVehiclesByStatus(status);
+                const statusVehicles = getVehiclesByStatusFiltered(status);
                 return (
                   <Droppable key={status} droppableId={status}>
                     {(provided, snapshot) => (

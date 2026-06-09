@@ -5,8 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Loader2, Users, Car, Clock, Wrench } from 'lucide-react';
+import { Loader2, Users, Car, Clock, Wrench, Download } from 'lucide-react';
 import { Profile, ROLE_LABELS, UserRole } from '@/lib/types';
+import { Button } from '@/components/ui/button';
+import { downloadCsv, formatMinutes } from '@/lib/exportCsv';
+import { toast } from 'sonner';
 
 interface OperatorWorkload {
   profile: Profile;
@@ -93,12 +96,31 @@ export default function WorkloadPage() {
   return (
     <MainLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Users className="h-6 w-6 text-primary" />
-            Carga de Trabajo
-          </h1>
-          <p className="text-muted-foreground text-sm">Distribución de vehículos y horas por operario</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <Users className="h-6 w-6 text-primary" />
+              Carga de Trabajo
+            </h1>
+            <p className="text-muted-foreground text-sm">Distribución de vehículos y horas por operario</p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => {
+              if (operators.length === 0) return toast.info('Nada que exportar');
+              downloadCsv('carga-trabajo', operators, [
+                { key: 'name', label: 'Operario', value: (o) => o.profile.full_name },
+                { key: 'role', label: 'Rol', value: (o) => ROLE_LABELS[o.role] },
+                { key: 'vehicles', label: 'Vehículos asignados', value: (o) => o.vehicleCount },
+                { key: 'time', label: 'Horas totales', value: (o) => formatMinutes(o.totalMinutes) },
+                { key: 'plates', label: 'Matrículas', value: (o) => o.vehiclePlates.join(', ') },
+              ]);
+            }}
+          >
+            <Download className="h-4 w-4" /> Exportar
+          </Button>
         </div>
 
         {/* Summary Cards */}

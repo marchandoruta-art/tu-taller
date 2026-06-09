@@ -25,6 +25,7 @@ import {
   Scale,
   Archive,
   Search,
+  ClipboardList,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -51,6 +52,7 @@ const adminNavigation = [
   { name: 'Alertas', href: '/admin/alerts', icon: AlertTriangle },
   { name: 'Gestión Datos', href: '/admin/data', icon: Database },
   { name: 'Legal', href: '/legal', icon: Scale },
+  { name: 'Plantillas Tareas', href: '/settings/templates', icon: ClipboardList },
   { name: 'Ajustes', href: '/settings', icon: Settings },
 ];
 
@@ -164,6 +166,25 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   </NavLink>
                 ))}
               </div>
+            </div>
+          )}
+
+          {role === 'oficina' && (
+            <div className="pt-4 space-y-1">
+              <NavLink
+                to="/settings/templates"
+                className={({ isActive }) =>
+                  cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                    isActive ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                    collapsed && 'justify-center px-2'
+                  )
+                }
+                title={collapsed ? 'Plantillas' : undefined}
+              >
+                <ClipboardList className="h-5 w-5 flex-shrink-0" />
+                {!collapsed && <span>Plantillas Tareas</span>}
+              </NavLink>
             </div>
           )}
         </nav>

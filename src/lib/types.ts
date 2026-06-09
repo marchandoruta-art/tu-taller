@@ -5,6 +5,22 @@ export type VehicleWithOwner = Vehicle & { owner: Owner | null };
 
 export type VehicleStatus = 'recibido' | 'presupuestar' | 'presupuestado' | 'en_reparacion' | 'pendiente_piezas' | 'terminado' | 'facturado' | 'entregado';
 
+export type VehiclePriority = 'baja' | 'normal' | 'alta' | 'urgente';
+
+export const PRIORITY_LABELS: Record<VehiclePriority, string> = {
+  baja: 'Baja',
+  normal: 'Normal',
+  alta: 'Alta',
+  urgente: 'Urgente',
+};
+
+export const PRIORITY_ORDER: Record<VehiclePriority, number> = {
+  urgente: 0,
+  alta: 1,
+  normal: 2,
+  baja: 3,
+};
+
 export interface Owner {
   id: string;
   name: string;
@@ -28,6 +44,7 @@ export interface Vehicle {
   client_description?: string;
   work_summary?: string;
   status: VehicleStatus;
+  priority?: VehiclePriority;
   assigned_to?: string;
   created_by?: string;
   created_at: string;

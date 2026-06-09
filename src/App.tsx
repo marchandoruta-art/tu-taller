@@ -40,6 +40,8 @@ import TerminosCondiciones from "./pages/legal/TerminosCondiciones";
 import ContratoEncargado from "./pages/legal/ContratoEncargado";
 import TextosLegales from "./pages/legal/TextosLegales";
 import LegalIndex from "./pages/legal/LegalIndex";
+import TaskTemplates from "./pages/TaskTemplates";
+import PortalView from "./pages/PortalView";
 
 const queryClient = new QueryClient();
 
@@ -92,6 +94,8 @@ const App = () => (
                 <Route path="/clients/:ownerId" element={<ClientHistory />} />
                 <Route path="/appointments" element={<Appointments />} />
                 <Route path="/admin/workload" element={<Workload />} />
+                <Route path="/settings/templates" element={<TaskTemplates />} />
+                <Route path="/c/:token" element={<PortalView />} />
                 <Route path="/legal" element={<LegalIndex />} />
                 <Route path="/aviso-legal" element={<AvisoLegal />} />
                 <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />

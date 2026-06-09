@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { VehicleWithOwner, Profile, ROLE_LABELS, UserRole, VehicleStatus } from '@/lib/types';
+import { VehicleWithOwner, Profile, ROLE_LABELS, UserRole, VehicleStatus, VehiclePriority } from '@/lib/types';
+import { PriorityBadge } from './PrioritySelector';
 import { useWhatsAppMessage } from '@/hooks/useWhatsAppMessage';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { VehicleStatusBadge } from './VehicleStatusBadge';
@@ -138,8 +139,9 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
             {vehicle.plate}
           </h3>
         </div>
-        <div className="flex items-center justify-start">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
           <VehicleStatusBadge status={vehicle.status} />
+          <PriorityBadge value={(vehicle.priority as VehiclePriority) || 'normal'} />
         </div>
         <p className="text-xs md:text-sm text-muted-foreground truncate">
           {vehicle.brand} {vehicle.model}

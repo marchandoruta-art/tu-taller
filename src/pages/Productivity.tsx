@@ -14,8 +14,11 @@ import {
   ChevronLeft, 
   ChevronRight,
   BarChart3,
-  Users
+  Users,
+  Download,
 } from 'lucide-react';
+import { downloadCsv, formatMinutes } from '@/lib/exportCsv';
+import { toast } from 'sonner';
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, startOfMonth, endOfMonth, subMonths, addMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Navigate } from 'react-router-dom';
@@ -256,6 +259,25 @@ export default function Productivity() {
               onClick={() => navigatePeriod('next')}
             >
               <ChevronRight className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => {
+                if (productivityData.length === 0) return toast.info('Nada que exportar');
+                downloadCsv(`productividad-${periodType}`, productivityData, [
+                  { key: 'name', label: 'Empleado', value: (r) => r.full_name },
+                  { key: 'role', label: 'Rol', value: (r) => r.role ? ROLE_LABELS[r.role] : '' },
+                  { key: 'attendance', label: 'Tiempo en taller', value: (r) => formatMinutes(r.attendanceMinutes) },
+                  { key: 'work', label: 'Tiempo en tareas', value: (r) => formatMinutes(r.workMinutes) },
+                  { key: 'productivity', label: 'Productividad %', value: (r) => `${r.productivity}%` },
+                  { key: 'attendance_sessions', label: 'Fichajes', value: (r) => r.attendanceSessions },
+                  { key: 'work_sessions', label: 'Sesiones trabajo', value: (r) => r.workSessions },
+                ]);
+              }}
+            >
+              <Download className="h-4 w-4" /> Exportar
             </Button>
           </div>
         </div>

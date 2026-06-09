@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Trash2, Loader2, ClipboardList } from 'lucide-react';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import { Plus, Trash2, Loader2, ClipboardList, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 
 export interface ClientTask {
@@ -22,6 +25,32 @@ interface ClientTasksChecklistProps {
 export function ClientTasksChecklist({ vehicleId, tasks, clientDescription, onUpdate }: ClientTasksChecklistProps) {
   const [newTask, setNewTask] = useState('');
   const [saving, setSaving] = useState(false);
+  const [templates, setTemplates] = useState<{ id: string; name: string; tasks: { text: string }[] }[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from('task_templates')
+      .select('id, name, tasks')
+      .order('name', { ascending: true })
+      .then(({ data }) => setTemplates((data as any) || []));
+  }, []);
+
+  const applyTemplate = async (tplId: string) => {
+    const tpl = templates.find((t) => t.id === tplId);
+    if (!tpl) return;
+    const existingTexts = new Set(tasks.map((t) => t.text.toLowerCase().trim()));
+    const newOnes = (tpl.tasks || [])
+      .filter((t: any) => t?.text && !existingTexts.has(String(t.text).toLowerCase().trim()))
+      .map((t: any) => ({ text: t.text, done: false }));
+    if (newOnes.length === 0) {
+      toast.info('La plantilla ya está aplicada');
+      return;
+    }
+    const updated = [...tasks, ...newOnes];
+    const ok = await saveTasks(updated);
+    if (ok) toast.success(`${newOnes.length} tarea(s) añadidas desde "${tpl.name}"`);
+  };
+
 
   const saveTasks = async (updated: ClientTask[]) => {
     setSaving(true);
@@ -70,16 +99,36 @@ export function ClientTasksChecklist({ vehicleId, tasks, clientDescription, onUp
   return (
     <Card>
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
           <CardTitle className="text-lg flex items-center gap-2">
             <ClipboardList className="h-5 w-5" />
             Trabajos Solicitados
           </CardTitle>
-          {totalCount > 0 && (
-            <span className="text-sm text-muted-foreground font-medium">
-              {doneCount}/{totalCount} ({progress}%)
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {templates.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-1 h-8 text-xs">
+                    <ClipboardList className="h-3.5 w-3.5" /> Plantilla <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="max-h-72 overflow-y-auto">
+                  <DropdownMenuLabel>Aplicar plantilla</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {templates.map((t) => (
+                    <DropdownMenuItem key={t.id} onClick={() => applyTemplate(t.id)}>
+                      {t.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            {totalCount > 0 && (
+              <span className="text-sm text-muted-foreground font-medium">
+                {doneCount}/{totalCount} ({progress}%)
+              </span>
+            )}
+          </div>
         </div>
         {totalCount > 0 && (
           <div className="w-full bg-muted rounded-full h-2 mt-2">

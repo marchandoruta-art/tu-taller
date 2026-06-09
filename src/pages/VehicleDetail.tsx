@@ -11,6 +11,8 @@ import { ViewDepositReceipt } from '@/components/vehicles/reception/ViewDepositR
 import { EditReceptionDataDialog } from '@/components/vehicles/EditReceptionDataDialog';
 import { VehiclePhotos } from '@/components/vehicles/VehiclePhotos';
 import { ClientTasksChecklist, ClientTask } from '@/components/vehicles/ClientTasksChecklist';
+import { PortalShareDialog } from '@/components/vehicles/PortalShareDialog';
+import { PrioritySelector } from '@/components/vehicles/PrioritySelector';
 import { AIRepairEstimateButton } from '@/components/vehicles/AIRepairEstimateButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -473,8 +475,14 @@ export default function VehicleDetail() {
                 </p>
               </div>
               <VehicleStatusBadge status={vehicle.status} />
+              <PrioritySelector
+                vehicleId={vehicle.id}
+                value={(vehicle as any).priority || 'normal'}
+                canEdit={role === 'admin' || role === 'oficina'}
+                onChanged={() => fetchVehicleData()}
+              />
             </div>
-            
+
             {/* Assigned user info */}
             <div className="flex items-center gap-2 mt-2">
               <UserCheck className="h-4 w-4 text-muted-foreground" />
@@ -503,6 +511,11 @@ export default function VehicleDetail() {
               vehicleId={vehicle.id} 
               currentAssignedTo={vehicle.assigned_to} 
               onAssigned={fetchVehicleData}
+            />
+            <PortalShareDialog
+              vehicleId={vehicle.id}
+              vehiclePlate={vehicle.plate}
+              ownerPhone={vehicle.owner?.phone}
             />
             {vehicle.status !== 'terminado' && vehicle.status !== 'facturado' && vehicle.status !== 'entregado' && (
               <Button
