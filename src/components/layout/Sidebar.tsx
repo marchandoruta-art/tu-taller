@@ -52,6 +52,7 @@ const adminNavigation = [
   { name: 'Alertas', href: '/admin/alerts', icon: AlertTriangle },
   { name: 'Gestión Datos', href: '/admin/data', icon: Database },
   { name: 'Legal', href: '/legal', icon: Scale },
+  { name: 'Plantillas Tareas', href: '/settings/templates', icon: ClipboardList },
   { name: 'Ajustes', href: '/settings', icon: Settings },
 ];
 
