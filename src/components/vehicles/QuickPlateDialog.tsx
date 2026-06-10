@@ -267,7 +267,9 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
             <div className="text-xs text-muted-foreground">Sin propietario registrado.</div>
           )}
           <p className="text-xs text-muted-foreground pt-1">
-            Se creará una nueva ficha {match.ownerId ? 'vinculada al mismo cliente' : 'sin propietario'} (origen: {match.source === 'archive' ? 'archivo' : 'entregado'}).
+            {match.vehicleId
+              ? 'Se reabrirá la ficha existente como nueva recepción (estado: Recibido), manteniendo todo el histórico.'
+              : `Se creará una nueva ficha ${match.ownerId ? 'vinculada al mismo cliente' : 'sin propietario'} (origen: archivo).`}
           </p>
         </div>
       );
