@@ -129,10 +129,17 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
   };
 
   const nextStatus = getNextStatus(vehicle.status);
+  const isUrgent = (vehicle.priority as VehiclePriority) === 'urgente';
 
   return (
-    <Card className="glass-card hover:shadow-elevated transition-all duration-200 cursor-pointer group"
-          onClick={() => navigate(`/vehicles/${vehicle.id}`)}>
+    <Card
+      className={`glass-card hover:shadow-elevated transition-all duration-200 cursor-pointer group ${
+        isUrgent
+          ? 'bg-red-500/15 dark:bg-red-500/20 border-red-500/60 ring-1 ring-red-500/40 animate-pulse-slow'
+          : ''
+      }`}
+      onClick={() => navigate(`/vehicles/${vehicle.id}`)}
+    >
       <CardHeader className="pb-3 space-y-2">
         <div className="min-w-0 w-full">
           <h3 className="font-bold text-sm md:text-base xl:text-lg tracking-wider leading-none group-hover:text-primary transition-colors whitespace-nowrap break-all">

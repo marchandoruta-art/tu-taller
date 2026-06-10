@@ -21,7 +21,7 @@ interface QuickPlateDialogProps {
 
 type PlateMatch =
   | { kind: 'active'; vehicleId: string; plate: string; brand: string; model: string; ownerName?: string | null; ownerPhone?: string | null }
-  | { kind: 'history'; plate: string; brand: string; model: string; ownerId: string | null; ownerName?: string | null; ownerPhone?: string | null; source: 'delivered' | 'archive' }
+  | { kind: 'history'; vehicleId: string | null; plate: string; brand: string; model: string; ownerId: string | null; ownerName?: string | null; ownerPhone?: string | null; source: 'delivered' | 'archive' }
   | { kind: 'none' }
   | null;
 
@@ -87,7 +87,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
         // 2) Delivered/archived vehicles (still in vehicles table)
         const { data: delivered } = await supabase
           .from('vehicles')
-          .select('brand, model, owner_id, owner:owners(name, phone)')
+          .select('id, brand, model, owner_id, owner:owners(name, phone)')
           .eq('organization_id', organizationId)
           .ilike('plate', p)
           .order('created_at', { ascending: false })
@@ -97,6 +97,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
         if (delivered) {
           setMatch({
             kind: 'history',
+            vehicleId: delivered.id,
             plate: p,
             brand: delivered.brand,
             model: delivered.model,
@@ -122,6 +123,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
           const snap = (archSnap as any).owner_snapshot || {};
           setMatch({
             kind: 'history',
+            vehicleId: null,
             plate: p,
             brand: archSnap.brand,
             model: archSnap.model,
@@ -161,6 +163,23 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
 
     setLoading(true);
     try {
+      // Reuse existing vehicle row (delivered/facturado/etc) → reset to 'recibido'
+      if (match && match.kind === 'history' && match.vehicleId) {
+        const { error } = await supabase
+          .from('vehicles')
+          .update({ status: 'recibido', archived: false, delivered_at: null, assigned_to: null })
+          .eq('id', match.vehicleId);
+        if (error) throw error;
+        toast.success(`Ficha de ${p} reabierta como nueva recepción`);
+        setOpen(false);
+        const id = match.vehicleId;
+        reset();
+        onSuccess?.();
+        navigate(`/vehicles/${id}`);
+        return;
+      }
+
+      // No active row exists (deep archive or fully new) → create
       const brand = match && match.kind === 'history' ? (match.brand || 'Sin especificar') : 'Sin especificar';
       const model = match && match.kind === 'history' ? (match.model || 'Sin especificar') : 'Sin especificar';
       const ownerId = match && match.kind === 'history' ? match.ownerId : null;
@@ -248,7 +267,9 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
             <div className="text-xs text-muted-foreground">Sin propietario registrado.</div>
           )}
           <p className="text-xs text-muted-foreground pt-1">
-            Se creará una nueva ficha {match.ownerId ? 'vinculada al mismo cliente' : 'sin propietario'} (origen: {match.source === 'archive' ? 'archivo' : 'entregado'}).
+            {match.vehicleId
+              ? 'Se reabrirá la ficha existente como nueva recepción (estado: Recibido), manteniendo todo el histórico.'
+              : `Se creará una nueva ficha ${match.ownerId ? 'vinculada al mismo cliente' : 'sin propietario'} (origen: archivo).`}
           </p>
         </div>
       );
@@ -299,7 +320,9 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
             {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Zap className="h-4 w-4 mr-2" />}
             {match?.kind === 'active'
               ? 'Abrir ficha existente'
-              : loading ? 'Creando...' : 'Crear ficha'}
+              : match?.kind === 'history' && match.vehicleId
+                ? loading ? 'Reabriendo...' : 'Reabrir ficha como Recibido'
+                : loading ? 'Creando...' : 'Crear ficha'}
           </Button>
         </form>
       </DialogContent>
