@@ -87,7 +87,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
         // 2) Delivered/archived vehicles (still in vehicles table)
         const { data: delivered } = await supabase
           .from('vehicles')
-          .select('brand, model, owner_id, owner:owners(name, phone)')
+          .select('id, brand, model, owner_id, owner:owners(name, phone)')
           .eq('organization_id', organizationId)
           .ilike('plate', p)
           .order('created_at', { ascending: false })
@@ -97,6 +97,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
         if (delivered) {
           setMatch({
             kind: 'history',
+            vehicleId: delivered.id,
             plate: p,
             brand: delivered.brand,
             model: delivered.model,
@@ -122,6 +123,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
           const snap = (archSnap as any).owner_snapshot || {};
           setMatch({
             kind: 'history',
+            vehicleId: null,
             plate: p,
             brand: archSnap.brand,
             model: archSnap.model,
