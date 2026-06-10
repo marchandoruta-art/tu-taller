@@ -21,7 +21,7 @@ interface QuickPlateDialogProps {
 
 type PlateMatch =
   | { kind: 'active'; vehicleId: string; plate: string; brand: string; model: string; ownerName?: string | null; ownerPhone?: string | null }
-  | { kind: 'history'; plate: string; brand: string; model: string; ownerId: string | null; ownerName?: string | null; ownerPhone?: string | null; source: 'delivered' | 'archive' }
+  | { kind: 'history'; vehicleId: string | null; plate: string; brand: string; model: string; ownerId: string | null; ownerName?: string | null; ownerPhone?: string | null; source: 'delivered' | 'archive' }
   | { kind: 'none' }
   | null;
 
