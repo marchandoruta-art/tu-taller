@@ -163,6 +163,23 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
 
     setLoading(true);
     try {
+      // Reuse existing vehicle row (delivered/facturado/etc) → reset to 'recibido'
+      if (match && match.kind === 'history' && match.vehicleId) {
+        const { error } = await supabase
+          .from('vehicles')
+          .update({ status: 'recibido', archived: false, delivered_at: null, assigned_to: null })
+          .eq('id', match.vehicleId);
+        if (error) throw error;
+        toast.success(`Ficha de ${p} reabierta como nueva recepción`);
+        setOpen(false);
+        const id = match.vehicleId;
+        reset();
+        onSuccess?.();
+        navigate(`/vehicles/${id}`);
+        return;
+      }
+
+      // No active row exists (deep archive or fully new) → create
       const brand = match && match.kind === 'history' ? (match.brand || 'Sin especificar') : 'Sin especificar';
       const model = match && match.kind === 'history' ? (match.model || 'Sin especificar') : 'Sin especificar';
       const ownerId = match && match.kind === 'history' ? match.ownerId : null;
