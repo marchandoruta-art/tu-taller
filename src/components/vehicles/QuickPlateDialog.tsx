@@ -320,7 +320,9 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
             {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Zap className="h-4 w-4 mr-2" />}
             {match?.kind === 'active'
               ? 'Abrir ficha existente'
-              : loading ? 'Creando...' : 'Crear ficha'}
+              : match?.kind === 'history' && match.vehicleId
+                ? loading ? 'Reabriendo...' : 'Reabrir ficha como Recibido'
+                : loading ? 'Creando...' : 'Crear ficha'}
           </Button>
         </form>
       </DialogContent>
