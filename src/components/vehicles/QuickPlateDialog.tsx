@@ -252,9 +252,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
             <div className="text-xs text-muted-foreground">Sin propietario registrado.</div>
           )}
           <p className="text-xs text-muted-foreground pt-1">
-            {match.vehicleId
-              ? 'Se reabrirá la ficha existente como nueva recepción (estado: Recibido), manteniendo todo el histórico.'
-              : `Se creará una nueva ficha ${match.ownerId ? 'vinculada al mismo cliente' : 'sin propietario'} (origen: archivo).`}
+            Se creará una ficha nueva {match.ownerId ? 'vinculada al mismo cliente' : 'sin propietario'}, copiando solo los datos del vehículo (matrícula, marca y modelo). No se arrastra ninguna avería ni historial anterior.
           </p>
         </div>
       );
