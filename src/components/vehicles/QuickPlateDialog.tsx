@@ -163,23 +163,8 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
 
     setLoading(true);
     try {
-      // Reuse existing vehicle row (delivered/facturado/etc) → reset to 'recibido'
-      if (match && match.kind === 'history' && match.vehicleId) {
-        const { error } = await supabase
-          .from('vehicles')
-          .update({ status: 'recibido', archived: false, delivered_at: null, assigned_to: null })
-          .eq('id', match.vehicleId);
-        if (error) throw error;
-        toast.success(`Ficha de ${p} reabierta como nueva recepción`);
-        setOpen(false);
-        const id = match.vehicleId;
-        reset();
-        onSuccess?.();
-        navigate(`/vehicles/${id}`);
-        return;
-      }
-
-      // No active row exists (deep archive or fully new) → create
+      // Always create a NEW vehicle row. Only copy client + vehicle data (plate, brand, model, owner).
+      // No previous description/tasks/parts/history is carried over.
       const brand = match && match.kind === 'history' ? (match.brand || 'Sin especificar') : 'Sin especificar';
       const model = match && match.kind === 'history' ? (match.model || 'Sin especificar') : 'Sin especificar';
       const ownerId = match && match.kind === 'history' ? match.ownerId : null;
@@ -267,9 +252,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
             <div className="text-xs text-muted-foreground">Sin propietario registrado.</div>
           )}
           <p className="text-xs text-muted-foreground pt-1">
-            {match.vehicleId
-              ? 'Se reabrirá la ficha existente como nueva recepción (estado: Recibido), manteniendo todo el histórico.'
-              : `Se creará una nueva ficha ${match.ownerId ? 'vinculada al mismo cliente' : 'sin propietario'} (origen: archivo).`}
+            Se creará una ficha nueva {match.ownerId ? 'vinculada al mismo cliente' : 'sin propietario'}, copiando solo los datos del vehículo (matrícula, marca y modelo). No se arrastra ninguna avería ni historial anterior.
           </p>
         </div>
       );
@@ -320,9 +303,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
             {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Zap className="h-4 w-4 mr-2" />}
             {match?.kind === 'active'
               ? 'Abrir ficha existente'
-              : match?.kind === 'history' && match.vehicleId
-                ? loading ? 'Reabriendo...' : 'Reabrir ficha como Recibido'
-                : loading ? 'Creando...' : 'Crear ficha'}
+              : loading ? 'Creando...' : 'Crear ficha nueva'}
           </Button>
         </form>
       </DialogContent>
