@@ -88,7 +88,8 @@ export function WorkTimer({ vehicleId, vehicleStatus, onUpdate }: WorkTimerProps
       for (const timer of activeTimers) {
         const startedAt = new Date(timer.started_at);
         const now = new Date();
-        const totalMinutes = Math.floor((now.getTime() - startedAt.getTime()) / 60000);
+        const elapsedSec = Math.floor((now.getTime() - startedAt.getTime()) / 1000);
+        const totalMinutes = elapsedSec > 0 ? Math.max(1, Math.ceil(elapsedSec / 60)) : 0;
 
         await executeUpdate('time_logs', timer.id, {
           ended_at: now.toISOString(),
