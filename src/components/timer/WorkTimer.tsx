@@ -141,7 +141,7 @@ export function WorkTimer({ vehicleId, vehicleStatus, onUpdate }: WorkTimerProps
     if (!activeLogId) return;
 
     try {
-      const totalMinutes = Math.floor(elapsed / 60);
+      const totalMinutes = elapsed > 0 ? Math.max(1, Math.ceil(elapsed / 60)) : 0;
 
       const result = await executeUpdate('time_logs', activeLogId, {
         ended_at: new Date().toISOString(),
