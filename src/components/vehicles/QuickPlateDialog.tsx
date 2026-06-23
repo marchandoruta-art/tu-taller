@@ -20,7 +20,7 @@ interface QuickPlateDialogProps {
 }
 
 type PlateMatch =
-  | { kind: 'active'; vehicleId: string; plate: string; brand: string; model: string; ownerName?: string | null; ownerPhone?: string | null }
+  | { kind: 'active'; vehicleId: string; plate: string; brand: string; model: string; ownerId: string | null; ownerName?: string | null; ownerPhone?: string | null }
   | { kind: 'history'; vehicleId: string | null; plate: string; brand: string; model: string; ownerId: string | null; ownerName?: string | null; ownerPhone?: string | null; source: 'delivered' | 'archive' }
   | { kind: 'none' }
   | null;
@@ -63,7 +63,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
         // 1) Active vehicle
         const { data: active } = await supabase
           .from('vehicles')
-          .select('id, plate, brand, model, archived, owner:owners(name, phone)')
+          .select('id, plate, brand, model, archived, owner_id, owner:owners(name, phone)')
           .eq('organization_id', organizationId)
           .ilike('plate', p)
           .eq('archived', false)
@@ -78,6 +78,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
             plate: active.plate,
             brand: active.brand,
             model: active.model,
+            ownerId: active.owner_id,
             ownerName: (active as any).owner?.name ?? null,
             ownerPhone: (active as any).owner?.phone ?? null,
           });
@@ -151,23 +152,14 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
     const p = plate.trim().toUpperCase();
     if (!p || !user || !organizationId) return;
 
-    // Active match → just open
-    if (match && match.kind === 'active') {
-      toast.info(`Abriendo ficha existente de ${match.plate}`);
-      setOpen(false);
-      const id = match.vehicleId;
-      reset();
-      navigate(`/vehicles/${id}`);
-      return;
-    }
-
     setLoading(true);
     try {
       // Always create a NEW vehicle row. Only copy client + vehicle data (plate, brand, model, owner).
       // No previous description/tasks/parts/history is carried over.
-      const brand = match && match.kind === 'history' ? (match.brand || 'Sin especificar') : 'Sin especificar';
-      const model = match && match.kind === 'history' ? (match.model || 'Sin especificar') : 'Sin especificar';
-      const ownerId = match && match.kind === 'history' ? match.ownerId : null;
+      const existingMatch = match && match.kind !== 'none' ? match : null;
+      const brand = existingMatch ? (existingMatch.brand || 'Sin especificar') : 'Sin especificar';
+      const model = existingMatch ? (existingMatch.model || 'Sin especificar') : 'Sin especificar';
+      const ownerId = existingMatch ? existingMatch.ownerId : null;
 
       const { data: created, error } = await supabase
         .from('vehicles')
@@ -185,10 +177,10 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
 
       if (error) throw error;
 
-      if (ownerId && match && match.kind === 'history' && match.ownerName) {
-        toast.success(`Vehículo ${p} creado y vinculado a ${match.ownerName}`);
+      if (ownerId && existingMatch?.ownerName) {
+        toast.success(`Nueva orden de ${p} creada y vinculada a ${existingMatch.ownerName}`);
       } else {
-        toast.success(`Vehículo ${p} creado`);
+        toast.success(`Nueva orden de ${p} creada`);
       }
       setOpen(false);
       reset();
@@ -216,7 +208,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
       return (
         <div className="p-3 rounded-md border border-primary/40 bg-primary/5 space-y-1">
           <div className="flex items-center gap-2 text-sm font-semibold text-primary">
-            <CheckCircle2 className="h-4 w-4" /> Ficha activa encontrada
+            <CheckCircle2 className="h-4 w-4" /> Vehículo encontrado
           </div>
           <div className="text-sm flex items-center gap-2">
             <Car className="h-3.5 w-3.5 text-muted-foreground" />
@@ -228,7 +220,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
               {match.ownerName}{match.ownerPhone ? ` · ${match.ownerPhone}` : ''}
             </div>
           )}
-          <p className="text-xs text-muted-foreground pt-1">Al pulsar se abrirá la ficha existente.</p>
+          <p className="text-xs text-muted-foreground pt-1">Se creará una orden nueva en recibido, copiando solo cliente, matrícula, marca y modelo. No se abre ni se copia la avería anterior.</p>
         </div>
       );
     }
@@ -301,9 +293,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
 
           <Button type="submit" className="w-full" disabled={loading || !plate.trim()}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Zap className="h-4 w-4 mr-2" />}
-            {match?.kind === 'active'
-              ? 'Abrir ficha existente'
-              : loading ? 'Creando...' : 'Crear ficha nueva'}
+            {loading ? 'Creando...' : 'Crear orden nueva'}
           </Button>
         </form>
       </DialogContent>
