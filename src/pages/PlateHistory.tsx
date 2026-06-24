@@ -53,12 +53,12 @@ export default function PlateHistory() {
         supabase
           .from('vehicles')
           .select('*, owner:owners(name)')
-          .or(`plate.ilike.%${q}%`)
+          .ilike('plate', `%${q}%`)
           .order('created_at', { ascending: false }),
         supabase
           .from('vehicle_archives')
           .select('*')
-          .or(`plate.ilike.%${q}%`)
+          .ilike('plate', `%${q}%`)
           .order('archived_at', { ascending: false }),
       ]);
 
