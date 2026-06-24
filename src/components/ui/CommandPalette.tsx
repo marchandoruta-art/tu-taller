@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Car, Search, Calendar, Settings, Loader2, Archive, Trash2 } from 'lucide-react';
+import { Car, Search, Calendar, Settings, Loader2, Archive, Trash2, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { STATUS_LABELS, VehicleStatus } from '@/lib/types';
 
@@ -13,7 +13,7 @@ interface SearchResult {
   title: string;
   subtitle?: string;
   href: string;
-  icon: typeof Car;
+  icon: LucideIcon;
 }
 
 const PAGES: SearchResult[] = [
