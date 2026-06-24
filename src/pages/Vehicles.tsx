@@ -6,9 +6,10 @@ import { VehicleCard } from '@/components/vehicles/VehicleCard';
 import { NewVehicleDialog } from '@/components/vehicles/NewVehicleDialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Search, UserCheck } from 'lucide-react';
+import { Loader2, Search, UserCheck, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { QuickPlateDialog } from '@/components/vehicles/QuickPlateDialog';
 
 export default function Vehicles() {
   const { user } = useAuth();
@@ -33,6 +34,27 @@ export default function Vehicles() {
 
   useEffect(() => {
     fetchVehicles();
+
+    // Refetch when tab regains focus (user comes back from another page/tab)
+    const handleFocus = () => fetchVehicles();
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleFocus);
+
+    // Realtime subscription: refetch on any vehicle change in the org
+    const channel = supabase
+      .channel('vehicles-list-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'vehicles' },
+        () => fetchVehicles()
+      )
+      .subscribe();
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleFocus);
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const myVehiclesCount = vehicles.filter((v) => v.assigned_to === user?.id).length;
@@ -72,7 +94,14 @@ export default function Vehicles() {
               {vehicles.length} vehículos registrados
             </p>
           </div>
-          <NewVehicleDialog onSuccess={fetchVehicles} />
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={fetchVehicles} className="gap-2">
+              <RefreshCw className="h-4 w-4" />
+              Refrescar
+            </Button>
+            <QuickPlateDialog onSuccess={fetchVehicles} triggerLabel="Matrícula rápida" triggerVariant="outline" />
+            <NewVehicleDialog onSuccess={fetchVehicles} />
+          </div>
         </div>
 
         {/* Filters */}
