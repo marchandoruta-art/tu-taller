@@ -34,6 +34,27 @@ export default function Vehicles() {
 
   useEffect(() => {
     fetchVehicles();
+
+    // Refetch when tab regains focus (user comes back from another page/tab)
+    const handleFocus = () => fetchVehicles();
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleFocus);
+
+    // Realtime subscription: refetch on any vehicle change in the org
+    const channel = supabase
+      .channel('vehicles-list-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'vehicles' },
+        () => fetchVehicles()
+      )
+      .subscribe();
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleFocus);
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const myVehiclesCount = vehicles.filter((v) => v.assigned_to === user?.id).length;
