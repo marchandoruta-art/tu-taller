@@ -165,7 +165,7 @@ export default function PlateHistory() {
             className="uppercase font-mono text-base"
             autoFocus
           />
-          <Button onClick={search} disabled={loading || !plate.trim()}>
+          <Button onClick={() => search()} disabled={loading || !plate.trim()}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
             <span className="ml-2 hidden sm:inline">Buscar</span>
           </Button>
