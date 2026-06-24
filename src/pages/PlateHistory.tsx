@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,7 @@ import { es } from 'date-fns/locale';
 import { STATUS_LABELS, VehicleStatus } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 interface Match {
   source: 'live' | 'deleted';
@@ -37,13 +37,14 @@ interface Match {
 
 export default function PlateHistory() {
   const navigate = useNavigate();
-  const [plate, setPlate] = useState('');
+  const [searchParams] = useSearchParams();
+  const [plate, setPlate] = useState(searchParams.get('plate') || '');
   const [loading, setLoading] = useState(false);
   const [matches, setMatches] = useState<Match[]>([]);
   const [searched, setSearched] = useState(false);
 
-  const search = async () => {
-    const q = plate.trim().toUpperCase();
+  const search = async (plateToSearch = plate) => {
+    const q = plateToSearch.trim().toUpperCase().replace(/[\s-]/g, '');
     if (!q) return;
     setLoading(true);
     setSearched(true);
@@ -128,6 +129,15 @@ export default function PlateHistory() {
     }
   };
 
+  useEffect(() => {
+    const plateFromUrl = searchParams.get('plate');
+    if (!plateFromUrl) return;
+    const normalized = plateFromUrl.trim().toUpperCase().replace(/[\s-]/g, '');
+    setPlate(normalized);
+    search(normalized);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
   const formatTime = (minutes: number) => {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
@@ -155,7 +165,7 @@ export default function PlateHistory() {
             className="uppercase font-mono text-base"
             autoFocus
           />
-          <Button onClick={search} disabled={loading || !plate.trim()}>
+          <Button onClick={() => search()} disabled={loading || !plate.trim()}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
             <span className="ml-2 hidden sm:inline">Buscar</span>
           </Button>
