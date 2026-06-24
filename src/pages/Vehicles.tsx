@@ -6,9 +6,10 @@ import { VehicleCard } from '@/components/vehicles/VehicleCard';
 import { NewVehicleDialog } from '@/components/vehicles/NewVehicleDialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Search, UserCheck } from 'lucide-react';
+import { Loader2, Search, UserCheck, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { QuickPlateDialog } from '@/components/vehicles/QuickPlateDialog';
 
 export default function Vehicles() {
   const { user } = useAuth();
