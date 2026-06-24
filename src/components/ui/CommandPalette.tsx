@@ -84,7 +84,7 @@ export function CommandPalette() {
             type: 'vehicle' as const,
             title: v.plate,
             subtitle: `${label} · ${v.brand} ${v.model}${v.owner?.name ? ` · ${v.owner.name}` : ''} — ${STATUS_LABELS[v.status as VehicleStatus] || v.status}`,
-            href: `/vehicles/${v.id}`,
+            href: v.archived ? `/plate-history?plate=${encodeURIComponent(v.plate)}` : `/vehicles/${v.id}`,
             icon: v.archived ? Archive : Car,
           };
       });
