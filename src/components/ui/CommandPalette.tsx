@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Car, Search, User, Calendar, Settings, Loader2 } from 'lucide-react';
+import { Car, Search, Calendar, Settings, Loader2, Archive, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { STATUS_LABELS, VehicleStatus } from '@/lib/types';
 
 interface SearchResult {
   id: string;
-  type: 'vehicle' | 'page';
+  type: 'vehicle' | 'archive' | 'page';
   title: string;
   subtitle?: string;
   href: string;
@@ -19,10 +19,13 @@ interface SearchResult {
 const PAGES: SearchResult[] = [
   { id: 'dashboard', type: 'page', title: 'Dashboard', subtitle: 'Vista general del taller', href: '/', icon: Car },
   { id: 'vehicles', type: 'page', title: 'Vehículos', subtitle: 'Lista de vehículos', href: '/vehicles', icon: Car },
+  { id: 'plate-history', type: 'page', title: 'Buscar Matrícula', subtitle: 'Histórico completo por matrícula', href: '/plate-history', icon: Search },
   { id: 'calendar', type: 'page', title: 'Calendario de Entregas', subtitle: 'Entregas programadas', href: '/calendar', icon: Calendar },
   { id: 'appointments', type: 'page', title: 'Citas Previas', subtitle: 'Gestión de citas', href: '/appointments', icon: Calendar },
   { id: 'settings', type: 'page', title: 'Ajustes', subtitle: 'Configuración', href: '/settings', icon: Settings },
 ];
+
+const normalizePlate = (value: string) => value.trim().toUpperCase().replace(/[\s-]/g, '');
 
 export function CommandPalette() {
   const navigate = useNavigate();
@@ -54,27 +57,58 @@ export function CommandPalette() {
 
     const timer = setTimeout(async () => {
       setLoading(true);
-      const searchTerm = `%${query}%`;
+      const searchTerm = `%${query.trim()}%`;
+      const normalizedPlate = normalizePlate(query);
+      const normalizedPlateTerm = `%${normalizedPlate}%`;
 
-      const { data } = await supabase
-        .from('vehicles')
-        .select('id, plate, brand, model, status, owner:owners(name)')
-        .eq('archived', false)
-        .or(`plate.ilike.${searchTerm},brand.ilike.${searchTerm},model.ilike.${searchTerm}`)
-        .limit(8);
+      const [vehiclesRes, archivesRes] = await Promise.all([
+        supabase
+          .from('vehicles')
+          .select('id, plate, brand, model, status, archived, owner:owners(name)')
+          .or(`plate.ilike.${searchTerm},plate.ilike.${normalizedPlateTerm},brand.ilike.${searchTerm},model.ilike.${searchTerm}`)
+          .order('archived', { ascending: true })
+          .order('created_at', { ascending: false })
+          .limit(10),
+        supabase
+          .from('vehicle_archives')
+          .select('id, vehicle_id, plate, brand, model, archived_at, vehicle_snapshot, owner_snapshot')
+          .or(`plate.ilike.${searchTerm},plate.ilike.${normalizedPlateTerm},brand.ilike.${searchTerm},model.ilike.${searchTerm}`)
+          .order('archived_at', { ascending: false })
+          .limit(5),
+      ]);
 
-      if (data) {
-        setVehicles(
-          data.map((v: any) => ({
+      const liveResults = (vehiclesRes.data || []).map((v: any) => {
+        const label = v.archived ? 'Histórico archivado' : 'En taller';
+        return {
             id: v.id,
             type: 'vehicle' as const,
             title: v.plate,
-            subtitle: `${v.brand} ${v.model}${v.owner?.name ? ` · ${v.owner.name}` : ''} — ${STATUS_LABELS[v.status as VehicleStatus] || v.status}`,
+            subtitle: `${label} · ${v.brand} ${v.model}${v.owner?.name ? ` · ${v.owner.name}` : ''} — ${STATUS_LABELS[v.status as VehicleStatus] || v.status}`,
             href: `/vehicles/${v.id}`,
-            icon: Car,
-          }))
-        );
-      }
+            icon: v.archived ? Archive : Car,
+          };
+      });
+
+      const archiveResults = (archivesRes.data || []).map((a: any) => {
+        const snapshot = a.vehicle_snapshot || {};
+        const owner = a.owner_snapshot || {};
+        return {
+          id: `archive-${a.id}`,
+          type: 'archive' as const,
+          title: a.plate,
+          subtitle: `Histórico eliminado · ${a.brand} ${a.model}${owner?.name ? ` · ${owner.name}` : ''}${snapshot.status ? ` — ${STATUS_LABELS[snapshot.status as VehicleStatus] || snapshot.status}` : ''}`,
+          href: `/plate-history?plate=${encodeURIComponent(a.plate)}`,
+          icon: Trash2,
+        };
+      });
+
+      const seen = new Set<string>();
+      setVehicles([...liveResults, ...archiveResults].filter((result) => {
+        const key = `${result.type}-${result.id}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      }).slice(0, 12));
       setLoading(false);
     }, 250);
 
@@ -131,7 +165,7 @@ export function CommandPalette() {
 
           {vehicles.length > 0 && (
             <div className="px-2 pb-1">
-              <p className="text-xs font-medium text-muted-foreground px-2 py-1">Vehículos</p>
+              <p className="text-xs font-medium text-muted-foreground px-2 py-1">Vehículos e histórico</p>
               {vehicles.map((r, i) => (
                 <button
                   key={r.id}
@@ -141,7 +175,7 @@ export function CommandPalette() {
                     selectedIndex === i ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
                   )}
                 >
-                  <Car className="h-4 w-4 flex-shrink-0" />
+                  <r.icon className="h-4 w-4 flex-shrink-0" />
                   <div className="min-w-0">
                     <p className="font-semibold truncate">{r.title}</p>
                     <p className={cn('text-xs truncate', selectedIndex === i ? 'text-primary-foreground/70' : 'text-muted-foreground')}>{r.subtitle}</p>
