@@ -19,7 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Car, User, Clock, Wrench, Lock, UserCheck, ArrowRight, ChevronRight, Trash2, MessageCircle, AlertTriangle } from 'lucide-react';
+import { Car, User, Clock, Wrench, Lock, UserCheck, ArrowRight, ChevronRight, Trash2, MessageCircle, AlertTriangle, Gauge } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -167,6 +167,20 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
               <Lock className="w-4 h-4 flex-shrink-0" />
               <span className="italic text-xs">Datos restringidos</span>
             </>
+          )}
+        </div>
+
+        {/* Kilometers info - destacar si falta */}
+        <div className={`flex items-center gap-2 text-sm rounded-lg p-1.5 -mx-1.5 ${
+          vehicle.mileage
+            ? 'text-muted-foreground'
+            : 'bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400'
+        }`}>
+          <Gauge className="w-4 h-4 flex-shrink-0" />
+          {vehicle.mileage ? (
+            <span className="text-xs font-medium">{vehicle.mileage.toLocaleString('es-ES')} km</span>
+          ) : (
+            <span className="text-xs font-medium">⚠️ Falta indicar km</span>
           )}
         </div>
 
