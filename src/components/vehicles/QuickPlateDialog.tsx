@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Zap, Loader2, CheckCircle2, User, Car, History } from 'lucide-react';
 import { toast } from 'sonner';
+import { ScanTechnicalSheetButton, ScannedVehicleData } from './ScanTechnicalSheetButton';
 
 interface QuickPlateDialogProps {
   onSuccess?: () => void;
@@ -38,6 +39,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
   const [loading, setLoading] = useState(false);
   const [match, setMatch] = useState<PlateMatch>(null);
   const [searching, setSearching] = useState(false);
+  const [scanned, setScanned] = useState<ScannedVehicleData | null>(null);
   const debounceRef = useRef<number | null>(null);
 
   const reset = () => {
@@ -45,6 +47,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
     setLoading(false);
     setMatch(null);
     setSearching(false);
+    setScanned(null);
   };
 
   // Live lookup as the user types (debounced)
@@ -157,8 +160,8 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
       // Always create a NEW vehicle row. Only copy client + vehicle data (plate, brand, model, owner).
       // No previous description/tasks/parts/history is carried over.
       const existingMatch = match && match.kind !== 'none' ? match : null;
-      const brand = existingMatch ? (existingMatch.brand || 'Sin especificar') : 'Sin especificar';
-      const model = existingMatch ? (existingMatch.model || 'Sin especificar') : 'Sin especificar';
+      const brand = scanned?.brand || (existingMatch ? (existingMatch.brand || 'Sin especificar') : 'Sin especificar');
+      const model = scanned?.model || (existingMatch ? (existingMatch.model || 'Sin especificar') : 'Sin especificar');
       const ownerId = existingMatch ? existingMatch.ownerId : null;
 
       const { data: created, error } = await supabase
@@ -167,6 +170,9 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
           plate: p,
           brand,
           model,
+          year: scanned?.year ?? null,
+          vin: scanned?.vin ?? null,
+          color: scanned?.color ?? null,
           owner_id: ownerId,
           created_by: user.id,
           organization_id: organizationId,
@@ -288,6 +294,33 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
               maxLength={12}
             />
           </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-muted-foreground">o rellena con foto</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+
+          <ScanTechnicalSheetButton
+            className="w-full gap-2"
+            onScanned={(data) => {
+              setScanned(data);
+              if (data.plate) setPlate(data.plate);
+            }}
+          />
+
+          {scanned && (
+            <div className="p-3 rounded-md border bg-primary/5 text-xs space-y-0.5">
+              <div className="font-semibold text-primary flex items-center gap-1">
+                <CheckCircle2 className="h-3 w-3" /> Datos detectados
+              </div>
+              {scanned.brand && <div>Marca: {scanned.brand}</div>}
+              {scanned.model && <div>Modelo: {scanned.model}</div>}
+              {scanned.year && <div>Año: {scanned.year}</div>}
+              {scanned.vin && <div>VIN: {scanned.vin}</div>}
+              {scanned.color && <div>Color: {scanned.color}</div>}
+            </div>
+          )}
 
           {renderMatchInfo()}
 
