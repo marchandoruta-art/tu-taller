@@ -119,25 +119,44 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         {/* Navigation */}
         <nav className="flex-1 space-y-1 px-2 overflow-y-auto">
           <div className="space-y-1">
-            {navigation.map((item) => (
-              <NavLink
-                key={item.name}
-                to={item.href}
-                className={({ isActive }) =>
-                  cn(
-                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                    isActive
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                    collapsed && 'justify-center px-2'
-                  )
-                }
-                title={collapsed ? item.name : undefined}
-              >
-                <item.icon className="h-5 w-5 flex-shrink-0" />
-                {!collapsed && <span>{item.name}</span>}
-              </NavLink>
-            ))}
+            {navigation.map((item) => {
+              const badge = item.badgeKey === 'pending' && pendingCount > 0 ? pendingCount : 0;
+              return (
+                <NavLink
+                  key={item.name}
+                  to={item.href}
+                  className={({ isActive }) =>
+                    cn(
+                      'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors relative',
+                      isActive
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                      collapsed && 'justify-center px-2'
+                    )
+                  }
+                  title={collapsed ? `${item.name}${badge ? ` (${badge} pendientes)` : ''}` : undefined}
+                >
+                  <div className="relative flex-shrink-0">
+                    <item.icon className="h-5 w-5" />
+                    {badge > 0 && collapsed && (
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center leading-none">
+                        {badge > 9 ? '9+' : badge}
+                      </span>
+                    )}
+                  </div>
+                  {!collapsed && (
+                    <>
+                      <span className="flex-1">{item.name}</span>
+                      {badge > 0 && (
+                        <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-xs font-bold flex items-center justify-center leading-none">
+                          {badge > 99 ? '99+' : badge}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </NavLink>
+              );
+            })}
           </div>
 
           {role === 'admin' && (
