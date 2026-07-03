@@ -295,6 +295,33 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
             />
           </div>
 
+          <div className="flex items-center gap-2">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-muted-foreground">o rellena con foto</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+
+          <ScanTechnicalSheetButton
+            className="w-full gap-2"
+            onScanned={(data) => {
+              setScanned(data);
+              if (data.plate) setPlate(data.plate);
+            }}
+          />
+
+          {scanned && (
+            <div className="p-3 rounded-md border bg-primary/5 text-xs space-y-0.5">
+              <div className="font-semibold text-primary flex items-center gap-1">
+                <CheckCircle2 className="h-3 w-3" /> Datos detectados
+              </div>
+              {scanned.brand && <div>Marca: {scanned.brand}</div>}
+              {scanned.model && <div>Modelo: {scanned.model}</div>}
+              {scanned.year && <div>Año: {scanned.year}</div>}
+              {scanned.vin && <div>VIN: {scanned.vin}</div>}
+              {scanned.color && <div>Color: {scanned.color}</div>}
+            </div>
+          )}
+
           {renderMatchInfo()}
 
           <Button type="submit" className="w-full" disabled={loading || !plate.trim()}>
