@@ -39,6 +39,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
   const [loading, setLoading] = useState(false);
   const [match, setMatch] = useState<PlateMatch>(null);
   const [searching, setSearching] = useState(false);
+  const [scanned, setScanned] = useState<ScannedVehicleData | null>(null);
   const debounceRef = useRef<number | null>(null);
 
   const reset = () => {
@@ -46,6 +47,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
     setLoading(false);
     setMatch(null);
     setSearching(false);
+    setScanned(null);
   };
 
   // Live lookup as the user types (debounced)
