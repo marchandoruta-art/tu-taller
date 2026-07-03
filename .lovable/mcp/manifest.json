@@ -12,7 +12,7 @@
   "mcp": {
     "server": {
       "name": "tu-taller-mcp",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "title": "Tu Taller MCP"
     },
     "tools": [
@@ -617,6 +617,76 @@
             "name",
             "quantity"
           ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "send_whatsapp",
+        "title": "Generar enlace WhatsApp",
+        "description": "Genera un enlace wa.me listo para enviar por WhatsApp al cliente propietario del vehículo. Permite plantillas: 'listo' (vehículo terminado), 'presupuesto' (presupuesto listo), 'recepcion' (confirmación de recepción), o mensaje personalizado. Devuelve el enlace clicable y el texto.",
+        "annotations": {
+          "readOnlyHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "vehicle_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "ID del vehículo (o usa plate)"
+            },
+            "plate": {
+              "type": "string",
+              "description": "Matrícula del vehículo (o usa vehicle_id)"
+            },
+            "template": {
+              "type": "string",
+              "enum": [
+                "listo",
+                "presupuesto",
+                "recepcion",
+                "custom"
+              ],
+              "default": "listo"
+            },
+            "custom_message": {
+              "type": "string",
+              "description": "Mensaje personalizado (obligatorio si template=custom)"
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "generate_repair_report",
+        "title": "Generar informe de reparación",
+        "description": "Genera un informe estructurado completo de la reparación de un vehículo, incluyendo datos del cliente, vehículo, tareas realizadas, piezas usadas con importes, tiempo total invertido, notas y fotos. Devuelve un informe en Markdown listo para exportar a PDF, imprimir o enviar al cliente. Ideal para entrega, facturación o histórico.",
+        "annotations": {
+          "readOnlyHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "vehicle_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "plate": {
+              "type": "string",
+              "description": "Matrícula (alternativa a vehicle_id)"
+            },
+            "include_photos": {
+              "type": "boolean",
+              "default": false,
+              "description": "Incluir referencias a fotos"
+            }
+          },
           "additionalProperties": false,
           "$schema": "http://json-schema.org/draft-07/schema#"
         },

@@ -536,12 +536,193 @@ var add_part_default = defineTool18({
   }
 });
 
+// src/lib/mcp/tools/send-whatsapp.ts
+import { defineTool as defineTool19 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z17 } from "npm:zod@^3.25.76";
+var send_whatsapp_default = defineTool19({
+  name: "send_whatsapp",
+  title: "Generar enlace WhatsApp",
+  description: "Genera un enlace wa.me listo para enviar por WhatsApp al cliente propietario del veh\xEDculo. Permite plantillas: 'listo' (veh\xEDculo terminado), 'presupuesto' (presupuesto listo), 'recepcion' (confirmaci\xF3n de recepci\xF3n), o mensaje personalizado. Devuelve el enlace clicable y el texto.",
+  inputSchema: {
+    vehicle_id: z17.string().uuid().optional().describe("ID del veh\xEDculo (o usa plate)"),
+    plate: z17.string().optional().describe("Matr\xEDcula del veh\xEDculo (o usa vehicle_id)"),
+    template: z17.enum(["listo", "presupuesto", "recepcion", "custom"]).default("listo"),
+    custom_message: z17.string().optional().describe("Mensaje personalizado (obligatorio si template=custom)")
+  },
+  annotations: { readOnlyHint: true, openWorldHint: false },
+  handler: async ({ vehicle_id, plate, template, custom_message }, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    if (!vehicle_id && !plate) return fail("Debes indicar vehicle_id o plate");
+    if (template === "custom" && !custom_message) return fail("custom_message obligatorio para template=custom");
+    const sb = supabaseForUser(ctx);
+    let q = sb.from("vehicles").select("id, plate, brand, model, owner:owners(name, phone)").limit(1);
+    q = vehicle_id ? q.eq("id", vehicle_id) : q.eq("plate", plate.toUpperCase());
+    const { data: vehicles, error } = await q;
+    if (error) return fail(error.message);
+    const v = vehicles?.[0];
+    if (!v) return fail("Veh\xEDculo no encontrado");
+    const phone = v.owner?.phone;
+    if (!phone) return fail("El cliente no tiene tel\xE9fono registrado");
+    const { data: settings } = await sb.rpc("get_workshop_contact_settings");
+    const w = settings?.[0] ?? {};
+    const taller = w.nombre_taller ?? "el taller";
+    const clientName = v.owner?.name ?? "";
+    const saludo = clientName ? `Hola ${clientName},` : "Hola,";
+    const veh = `${v.brand} ${v.model} (${v.plate})`;
+    let message = "";
+    switch (template) {
+      case "listo":
+        message = `${saludo} le informamos desde ${taller} que su veh\xEDculo ${veh} ya est\xE1 listo para recoger. ${w.horario ? `Horario: ${w.horario}. ` : ""}${w.telefono ? `Tel: ${w.telefono}. ` : ""}Gracias.`;
+        break;
+      case "presupuesto":
+        message = `${saludo} desde ${taller} le enviamos el presupuesto de su veh\xEDculo ${veh}. Cuando pueda, conf\xEDrmenos si aprueba la reparaci\xF3n. Gracias.`;
+        break;
+      case "recepcion":
+        message = `${saludo} confirmamos la recepci\xF3n de su veh\xEDculo ${veh} en ${taller}. Le mantendremos informado. Gracias.`;
+        break;
+      case "custom":
+        message = custom_message;
+        break;
+    }
+    const cleanPhone = phone.replace(/[^\d+]/g, "").replace(/^\+/, "");
+    const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    return ok({
+      url,
+      phone,
+      client_name: clientName,
+      vehicle: veh,
+      message
+    }, "whatsapp");
+  }
+});
+
+// src/lib/mcp/tools/generate-repair-report.ts
+import { defineTool as defineTool20 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z18 } from "npm:zod@^3.25.76";
+var generate_repair_report_default = defineTool20({
+  name: "generate_repair_report",
+  title: "Generar informe de reparaci\xF3n",
+  description: "Genera un informe estructurado completo de la reparaci\xF3n de un veh\xEDculo, incluyendo datos del cliente, veh\xEDculo, tareas realizadas, piezas usadas con importes, tiempo total invertido, notas y fotos. Devuelve un informe en Markdown listo para exportar a PDF, imprimir o enviar al cliente. Ideal para entrega, facturaci\xF3n o hist\xF3rico.",
+  inputSchema: {
+    vehicle_id: z18.string().uuid().optional(),
+    plate: z18.string().optional().describe("Matr\xEDcula (alternativa a vehicle_id)"),
+    include_photos: z18.boolean().default(false).describe("Incluir referencias a fotos")
+  },
+  annotations: { readOnlyHint: true, openWorldHint: false },
+  handler: async ({ vehicle_id, plate, include_photos }, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    if (!vehicle_id && !plate) return fail("Debes indicar vehicle_id o plate");
+    const sb = supabaseForUser(ctx);
+    let q = sb.from("vehicles").select(`
+        id, plate, brand, model, status, priority, mileage, color, vin,
+        client_description, work_notes, reception_notes, client_tasks,
+        created_at, delivered_at, assigned_to,
+        owner:owners(name, phone, email, address, nif)
+      `).limit(1);
+    q = vehicle_id ? q.eq("id", vehicle_id) : q.eq("plate", plate.toUpperCase());
+    const { data: vehicles, error } = await q;
+    if (error) return fail(error.message);
+    const v = vehicles?.[0];
+    if (!v) return fail("Veh\xEDculo no encontrado");
+    const [{ data: parts }, { data: logs }, { data: photos }, { data: settings }] = await Promise.all([
+      sb.from("parts").select("name, quantity, unit_price, total_price, supplier").eq("vehicle_id", v.id),
+      sb.from("time_logs").select("started_at, ended_at, total_minutes, user_id").eq("vehicle_id", v.id),
+      include_photos ? sb.from("vehicle_photos").select("category, description, created_at").eq("vehicle_id", v.id) : Promise.resolve({ data: [] }),
+      sb.rpc("get_workshop_contact_settings")
+    ]);
+    const w = settings?.[0] ?? {};
+    const totalMinutes = (logs ?? []).reduce((s, l) => s + (l.total_minutes ?? 0), 0);
+    const totalHours = (totalMinutes / 60).toFixed(2);
+    const partsTotal = (parts ?? []).reduce((s, p) => s + Number(p.total_price ?? 0), 0);
+    const tasks = Array.isArray(v.client_tasks) ? v.client_tasks : [];
+    const doneTasks = tasks.filter((t) => t.done);
+    const pendingTasks = tasks.filter((t) => !t.done);
+    const fecha = (/* @__PURE__ */ new Date()).toLocaleDateString("es-ES");
+    const md = [
+      `# Informe de Reparaci\xF3n`,
+      ``,
+      `**${w.nombre_taller ?? "Taller"}**  `,
+      w.telefono ? `Tel: ${w.telefono}  ` : "",
+      w.horario ? `${w.horario}  ` : "",
+      ``,
+      `**Fecha:** ${fecha}`,
+      ``,
+      `## Cliente`,
+      `- **Nombre:** ${v.owner?.name ?? "\u2014"}`,
+      `- **Tel\xE9fono:** ${v.owner?.phone ?? "\u2014"}`,
+      v.owner?.email ? `- **Email:** ${v.owner.email}` : "",
+      v.owner?.nif ? `- **NIF:** ${v.owner.nif}` : "",
+      v.owner?.address ? `- **Direcci\xF3n:** ${v.owner.address}` : "",
+      ``,
+      `## Veh\xEDculo`,
+      `- **Matr\xEDcula:** ${v.plate}`,
+      `- **Marca / Modelo:** ${v.brand} ${v.model}`,
+      v.color ? `- **Color:** ${v.color}` : "",
+      v.mileage ? `- **Kil\xF3metros:** ${v.mileage}` : "",
+      v.vin ? `- **Bastidor:** ${v.vin}` : "",
+      `- **Estado actual:** ${v.status}`,
+      `- **Entrada:** ${new Date(v.created_at).toLocaleDateString("es-ES")}`,
+      v.delivered_at ? `- **Entregado:** ${new Date(v.delivered_at).toLocaleDateString("es-ES")}` : "",
+      ``,
+      `## Descripci\xF3n del cliente`,
+      v.client_description || "_Sin descripci\xF3n_",
+      ``,
+      `## Tareas realizadas (${doneTasks.length}/${tasks.length})`,
+      ...doneTasks.length ? doneTasks.map((t) => `- \u2705 ${t.text}`) : ["_Ninguna_"],
+      ...pendingTasks.length ? ["", `### Pendientes`, ...pendingTasks.map((t) => `- \u23F3 ${t.text}`)] : [],
+      ``,
+      `## Piezas y materiales`
+    ];
+    if (parts && parts.length) {
+      md.push(`| Concepto | Cant. | P. unit. | Total |`, `|---|---:|---:|---:|`);
+      for (const p of parts) {
+        md.push(`| ${p.name} | ${p.quantity} | ${Number(p.unit_price ?? 0).toFixed(2)} \u20AC | ${Number(p.total_price ?? 0).toFixed(2)} \u20AC |`);
+      }
+      md.push(`| **Total piezas** | | | **${partsTotal.toFixed(2)} \u20AC** |`);
+    } else {
+      md.push("_Sin piezas registradas_");
+    }
+    md.push(
+      ``,
+      `## Tiempo invertido`,
+      `- **Total:** ${totalHours} h (${totalMinutes} min)`,
+      `- **Sesiones de trabajo:** ${logs?.length ?? 0}`,
+      ``
+    );
+    if (v.reception_notes) md.push(`## Notas de recepci\xF3n`, v.reception_notes, ``);
+    if (v.work_notes) md.push(`## Notas de trabajo`, v.work_notes, ``);
+    if (include_photos && photos && photos.length) {
+      md.push(`## Fotos documentadas (${photos.length})`);
+      const byCat = photos.reduce((acc, p) => {
+        acc[p.category] = (acc[p.category] ?? 0) + 1;
+        return acc;
+      }, {});
+      for (const [cat, n] of Object.entries(byCat)) md.push(`- **${cat}:** ${n} foto(s)`);
+      md.push("");
+    }
+    md.push(`---`, `_Informe generado autom\xE1ticamente por ${w.nombre_taller ?? "Tu Taller"}_`);
+    const markdown = md.filter((l) => l !== "").join("\n").replace(/\n{3,}/g, "\n\n");
+    return ok({
+      vehicle_id: v.id,
+      plate: v.plate,
+      markdown,
+      totals: {
+        parts_eur: Number(partsTotal.toFixed(2)),
+        time_minutes: totalMinutes,
+        time_hours: Number(totalHours),
+        tasks_done: doneTasks.length,
+        tasks_pending: pendingTasks.length
+      }
+    }, "report");
+  }
+});
+
 // src/lib/mcp/index.ts
 var projectRef = "vzinqlkktnzgciigtycx";
 var mcp_default = defineMcp({
   name: "tu-taller-mcp",
   title: "Tu Taller MCP",
-  version: "0.2.0",
+  version: "0.3.0",
   instructions: "Herramientas del taller Tu Taller. Consulta y gestiona veh\xEDculos (\xF3rdenes de trabajo), citas, clientes, tareas de cliente, piezas y productividad del usuario autenticado. Los datos est\xE1n limitados por la organizaci\xF3n del usuario mediante RLS. Herramientas de escritura: cambian estado, prioridad, asignaci\xF3n, notas, tareas, citas y piezas.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
@@ -567,7 +748,9 @@ var mcp_default = defineMcp({
     toggle_client_task_default,
     add_vehicle_note_default,
     create_appointment_default,
-    add_part_default
+    add_part_default,
+    send_whatsapp_default,
+    generate_repair_report_default
   ]
 });
 
