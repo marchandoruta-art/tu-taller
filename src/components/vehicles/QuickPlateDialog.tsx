@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Zap, Loader2, CheckCircle2, User, Car, History } from 'lucide-react';
 import { toast } from 'sonner';
+import { ScanTechnicalSheetButton, ScannedVehicleData } from './ScanTechnicalSheetButton';
 
 interface QuickPlateDialogProps {
   onSuccess?: () => void;
