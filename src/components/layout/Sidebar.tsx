@@ -66,6 +66,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { profile, role, signOut } = useAuth();
   const { organization } = useOrganization();
   const location = useLocation();
+  const pendingCount = usePendingAssignedCount();
 
   const getInitials = (name: string) => {
     return name
