@@ -22,6 +22,7 @@ import { VehicleDiagram, ExteriorDamage } from './reception/VehicleDiagram';
 import { InteriorChecklist, InteriorCheckData } from './reception/InteriorChecklist';
 import { SignaturePad } from './reception/SignaturePad';
 import { DepositReceipt } from './reception/DepositReceipt';
+import { ScanTechnicalSheetButton } from './ScanTechnicalSheetButton';
 
 interface NewVehicleDialogProps {
   onSuccess?: () => void;
