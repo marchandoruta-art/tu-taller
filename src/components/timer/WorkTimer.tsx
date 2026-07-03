@@ -71,42 +71,55 @@ export function WorkTimer({ vehicleId, vehicleStatus, onUpdate }: WorkTimerProps
     return () => clearInterval(interval);
   }, [isRunning, startTime]);
 
-  // Pause any other active timers before starting a new one
-  const pauseOtherTimers = async () => {
-    if (!user) return;
+  // Stop other active timers for this user, returns true if user confirmed / no conflict
+  const stopOtherTimersWithConfirm = async (): Promise<boolean> => {
+    if (!user) return false;
 
-    // Find all active timers for this user on OTHER vehicles
+    // Find all active timers for this user on OTHER vehicles (with plate for the prompt)
     const { data: activeTimers } = await supabase
       .from('time_logs')
-      .select('*')
+      .select('id, started_at, vehicle_id, vehicles(plate)')
       .eq('user_id', user.id)
       .is('ended_at', null)
       .neq('vehicle_id', vehicleId);
 
-    if (activeTimers && activeTimers.length > 0) {
-      // Stop each active timer
-      for (const timer of activeTimers) {
-        const startedAt = new Date(timer.started_at);
-        const now = new Date();
-        const elapsedSec = Math.floor((now.getTime() - startedAt.getTime()) / 1000);
-        const totalMinutes = elapsedSec > 0 ? Math.max(1, Math.ceil(elapsedSec / 60)) : 0;
+    if (!activeTimers || activeTimers.length === 0) return true;
 
-        await executeUpdate('time_logs', timer.id, {
-          ended_at: now.toISOString(),
-          total_minutes: totalMinutes,
-        }, { showToast: false });
-      }
+    const plates = activeTimers
+      .map((t: any) => t.vehicles?.plate)
+      .filter(Boolean)
+      .join(', ');
 
-      toast.info(`Se pausó automáticamente ${activeTimers.length} tarea(s) anterior(es)`);
+    const ok = window.confirm(
+      `Ya tienes un cronómetro activo en ${plates || 'otro vehículo'}.\n\n` +
+      `Un operario no puede trabajar en dos coches a la vez.\n\n` +
+      `¿Detener el cronómetro anterior y empezar este?`
+    );
+    if (!ok) return false;
+
+    for (const timer of activeTimers) {
+      const startedAt = new Date(timer.started_at);
+      const now = new Date();
+      const elapsedSec = Math.floor((now.getTime() - startedAt.getTime()) / 1000);
+      const totalMinutes = elapsedSec > 0 ? Math.max(1, Math.ceil(elapsedSec / 60)) : 0;
+
+      await executeUpdate('time_logs', timer.id, {
+        ended_at: now.toISOString(),
+        total_minutes: totalMinutes,
+      }, { showToast: false });
     }
+
+    toast.info(`Cronómetro anterior detenido (${plates})`);
+    return true;
   };
 
   const startTimer = async () => {
     if (!user) return;
 
     try {
-      // First, pause any other active timers
-      await pauseOtherTimers();
+      // Block if another timer is running until user confirms
+      const canStart = await stopOtherTimersWithConfirm();
+      if (!canStart) return;
 
       const now = new Date();
       const result = await executeInsert('time_logs', {
