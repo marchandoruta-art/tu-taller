@@ -17,13 +17,15 @@ import toggleClientTaskTool from "./tools/toggle-client-task";
 import addVehicleNoteTool from "./tools/add-vehicle-note";
 import createAppointmentTool from "./tools/create-appointment";
 import addPartTool from "./tools/add-part";
+import sendWhatsappTool from "./tools/send-whatsapp";
+import generateRepairReportTool from "./tools/generate-repair-report";
 
 const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID ?? "project-ref-unset";
 
 export default defineMcp({
   name: "tu-taller-mcp",
   title: "Tu Taller MCP",
-  version: "0.2.0",
+  version: "0.3.0",
   instructions:
     "Herramientas del taller Tu Taller. Consulta y gestiona vehículos (órdenes de trabajo), citas, clientes, tareas de cliente, piezas y productividad del usuario autenticado. Los datos están limitados por la organización del usuario mediante RLS. Herramientas de escritura: cambian estado, prioridad, asignación, notas, tareas, citas y piezas.",
   auth: auth.oauth.issuer({
@@ -51,5 +53,7 @@ export default defineMcp({
     addVehicleNoteTool,
     createAppointmentTool,
     addPartTool,
+    sendWhatsappTool,
+    generateRepairReportTool,
   ],
 });
