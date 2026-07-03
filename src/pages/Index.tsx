@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
 import { AuthForm } from '@/components/auth/AuthForm';
@@ -8,6 +9,16 @@ import { Loader2 } from 'lucide-react';
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const { hasOrganization, loading: orgLoading } = useOrganization();
+
+  // Post-login redirect: honor ?next=<same-origin relative path>
+  useEffect(() => {
+    if (!user) return;
+    const params = new URLSearchParams(window.location.search);
+    const next = params.get('next');
+    if (next && next.startsWith('/') && !next.startsWith('//')) {
+      window.location.replace(next);
+    }
+  }, [user]);
 
   if (authLoading || (user && orgLoading)) {
     return (
@@ -30,3 +41,4 @@ const Index = () => {
 };
 
 export default Index;
+

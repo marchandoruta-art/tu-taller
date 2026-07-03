@@ -42,6 +42,7 @@ import TextosLegales from "./pages/legal/TextosLegales";
 import LegalIndex from "./pages/legal/LegalIndex";
 import TaskTemplates from "./pages/TaskTemplates";
 import PortalView from "./pages/PortalView";
+import OAuthConsent from "./pages/OAuthConsent";
 
 const queryClient = new QueryClient();
 
@@ -96,6 +97,7 @@ const App = () => (
                 <Route path="/admin/workload" element={<Workload />} />
                 <Route path="/settings/templates" element={<TaskTemplates />} />
                 <Route path="/c/:token" element={<PortalView />} />
+                <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
                 <Route path="/legal" element={<LegalIndex />} />
                 <Route path="/aviso-legal" element={<AvisoLegal />} />
                 <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
