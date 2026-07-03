@@ -160,8 +160,8 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
       // Always create a NEW vehicle row. Only copy client + vehicle data (plate, brand, model, owner).
       // No previous description/tasks/parts/history is carried over.
       const existingMatch = match && match.kind !== 'none' ? match : null;
-      const brand = existingMatch ? (existingMatch.brand || 'Sin especificar') : 'Sin especificar';
-      const model = existingMatch ? (existingMatch.model || 'Sin especificar') : 'Sin especificar';
+      const brand = scanned?.brand || (existingMatch ? (existingMatch.brand || 'Sin especificar') : 'Sin especificar');
+      const model = scanned?.model || (existingMatch ? (existingMatch.model || 'Sin especificar') : 'Sin especificar');
       const ownerId = existingMatch ? existingMatch.ownerId : null;
 
       const { data: created, error } = await supabase
@@ -170,6 +170,9 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
           plate: p,
           brand,
           model,
+          year: scanned?.year ?? null,
+          vin: scanned?.vin ?? null,
+          color: scanned?.color ?? null,
           owner_id: ownerId,
           created_by: user.id,
           organization_id: organizationId,
