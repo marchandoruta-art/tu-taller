@@ -113,7 +113,7 @@ export default defineTool({
 
     if (include_photos && photos && photos.length) {
       md.push(`## Fotos documentadas (${photos.length})`);
-      const byCat = photos.reduce((acc: Record<string, number>, p: any) => {
+      const byCat = (photos as any[]).reduce<Record<string, number>>((acc, p) => {
         acc[p.category] = (acc[p.category] ?? 0) + 1;
         return acc;
       }, {});
