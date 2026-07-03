@@ -30,10 +30,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import { usePendingAssignedCount } from '@/hooks/usePendingAssignedCount';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Vehículos', href: '/vehicles', icon: Car },
+  { name: 'Vehículos', href: '/vehicles', icon: Car, badgeKey: 'pending' as const },
   { name: 'Buscar Matrícula', href: '/plate-history', icon: Search },
   { name: 'Archivados', href: '/repair-history', icon: Archive },
   { name: 'Entregas', href: '/calendar', icon: Calendar },
