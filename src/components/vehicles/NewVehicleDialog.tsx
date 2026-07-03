@@ -374,6 +374,21 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
 
             {step === 'vehicle' && (
               <>
+                <ScanTechnicalSheetButton
+                  className="w-full gap-2"
+                  variant="outline"
+                  onScanned={(data) => {
+                    setVehicleData((prev) => ({
+                      ...prev,
+                      plate: data.plate || prev.plate,
+                      brand: data.brand || prev.brand,
+                      model: data.model || prev.model,
+                      year: data.year ? String(data.year) : prev.year,
+                      vin: data.vin || prev.vin,
+                      color: data.color || prev.color,
+                    }));
+                  }}
+                />
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="vehicle-plate">Matrícula *</Label>
