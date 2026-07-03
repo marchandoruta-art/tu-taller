@@ -1118,6 +1118,7 @@ export type Database = {
           slug: string
         }[]
       }
+      trigger_pending_reminder: { Args: { _slot: string }; Returns: undefined }
       user_belongs_to_org: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
