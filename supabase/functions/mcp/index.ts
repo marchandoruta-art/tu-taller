@@ -6,120 +6,533 @@
 import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@0.20.0";
 
 // src/lib/mcp/tools/list-vehicles.ts
-import { createClient } from "npm:@supabase/supabase-js@^2.90.1";
 import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { z } from "npm:zod@^3.25.76";
+
+// src/lib/mcp/tools/_shared.ts
+import { createClient } from "npm:@supabase/supabase-js@^2.90.1";
 function supabaseForUser(ctx) {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
     global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
     auth: { persistSession: false, autoRefreshToken: false }
   });
 }
+function unauth() {
+  return { content: [{ type: "text", text: "No autenticado" }], isError: true };
+}
+function ok(data, key = "result") {
+  return {
+    content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+    structuredContent: { [key]: data }
+  };
+}
+function fail(msg) {
+  return { content: [{ type: "text", text: msg }], isError: true };
+}
+var VEHICLE_STATUSES = [
+  "recibido",
+  "presupuestar",
+  "presupuestado",
+  "en_reparacion",
+  "pendiente_piezas",
+  "terminado",
+  "facturado",
+  "entregado"
+];
+var PRIORITIES = ["baja", "normal", "alta", "urgente"];
+var APPOINTMENT_TYPES = ["mecanica", "chapa_pintura"];
+
+// src/lib/mcp/tools/list-vehicles.ts
 var list_vehicles_default = defineTool({
   name: "list_vehicles",
   title: "Listar veh\xEDculos",
   description: "Lista veh\xEDculos del taller del usuario autenticado. Permite filtrar por estado y buscar por matr\xEDcula/marca/modelo.",
   inputSchema: {
-    status: z.enum(["recibido", "en_reparacion", "pendiente_piezas", "terminado", "entregado", "facturado"]).optional().describe("Filtra por estado del veh\xEDculo."),
-    search: z.string().trim().min(1).max(50).optional().describe("B\xFAsqueda por matr\xEDcula, marca o modelo."),
-    include_archived: z.boolean().optional().describe("Incluir veh\xEDculos archivados. Por defecto false."),
-    limit: z.number().int().min(1).max(100).optional().describe("M\xE1ximo de resultados (por defecto 25).")
+    status: z.enum(["recibido", "en_reparacion", "pendiente_piezas", "terminado", "entregado", "facturado", "presupuestar", "presupuestado"]).optional(),
+    search: z.string().trim().min(1).max(50).optional(),
+    only_mine: z.boolean().optional().describe("Solo veh\xEDculos asignados al usuario actual."),
+    include_archived: z.boolean().optional(),
+    limit: z.number().int().min(1).max(100).optional()
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: async ({ status, search, include_archived, limit }, ctx) => {
-    if (!ctx.isAuthenticated()) {
-      return { content: [{ type: "text", text: "No autenticado" }], isError: true };
-    }
-    const supabase = supabaseForUser(ctx);
-    let q = supabase.from("vehicles").select("id, plate, brand, model, year, status, priority, assigned_to, created_at, updated_at").order("updated_at", { ascending: false }).limit(limit ?? 25);
+  handler: async ({ status, search, only_mine, include_archived, limit }, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    let q = supabaseForUser(ctx).from("vehicles").select("id, plate, brand, model, year, status, priority, assigned_to, owner_id, created_at, updated_at").order("updated_at", { ascending: false }).limit(limit ?? 25);
     if (!include_archived) q = q.eq("archived", false);
     if (status) q = q.eq("status", status);
+    if (only_mine) q = q.eq("assigned_to", ctx.getUserId());
     if (search) {
       const s = search.replace(/[%,]/g, "");
       q = q.or(`plate.ilike.%${s}%,brand.ilike.%${s}%,model.ilike.%${s}%`);
     }
     const { data, error } = await q;
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
-    return {
-      content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
-      structuredContent: { vehicles: data ?? [] }
-    };
+    if (error) return fail(error.message);
+    return ok(data ?? [], "vehicles");
   }
 });
 
 // src/lib/mcp/tools/get-vehicle.ts
-import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.90.1";
 import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { z as z2 } from "npm:zod@^3.25.76";
-function supabaseForUser2(ctx) {
-  return createClient2(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
-    global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
-    auth: { persistSession: false, autoRefreshToken: false }
-  });
-}
 var get_vehicle_default = defineTool2({
   name: "get_vehicle",
   title: "Obtener veh\xEDculo",
   description: "Devuelve el detalle completo de un veh\xEDculo por su id o por su matr\xEDcula.",
   inputSchema: {
-    id: z2.string().uuid().optional().describe("ID del veh\xEDculo."),
-    plate: z2.string().trim().min(1).max(20).optional().describe("Matr\xEDcula del veh\xEDculo.")
+    id: z2.string().uuid().optional(),
+    plate: z2.string().trim().min(1).max(20).optional()
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ id, plate }, ctx) => {
-    if (!ctx.isAuthenticated()) {
-      return { content: [{ type: "text", text: "No autenticado" }], isError: true };
-    }
-    if (!id && !plate) {
-      return { content: [{ type: "text", text: "Debe indicar id o plate" }], isError: true };
-    }
-    const supabase = supabaseForUser2(ctx);
-    let q = supabase.from("vehicles").select("*").limit(1);
+    if (!ctx.isAuthenticated()) return unauth();
+    if (!id && !plate) return fail("Debe indicar id o plate");
+    let q = supabaseForUser(ctx).from("vehicles").select("*").limit(1);
     if (id) q = q.eq("id", id);
     else q = q.eq("plate", plate.toUpperCase().replace(/\s+/g, ""));
     const { data, error } = await q.maybeSingle();
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
-    if (!data) return { content: [{ type: "text", text: "Veh\xEDculo no encontrado" }], isError: true };
-    return {
-      content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
-      structuredContent: { vehicle: data }
-    };
+    if (error) return fail(error.message);
+    if (!data) return fail("Veh\xEDculo no encontrado");
+    return ok(data, "vehicle");
   }
 });
 
 // src/lib/mcp/tools/list-appointments.ts
-import { createClient as createClient3 } from "npm:@supabase/supabase-js@^2.90.1";
 import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { z as z3 } from "npm:zod@^3.25.76";
-function supabaseForUser3(ctx) {
-  return createClient3(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
-    global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
-    auth: { persistSession: false, autoRefreshToken: false }
-  });
-}
 var list_appointments_default = defineTool3({
   name: "list_appointments",
   title: "Listar citas",
   description: "Lista citas del taller en un rango de fechas (por defecto pr\xF3ximos 7 d\xEDas).",
   inputSchema: {
-    from: z3.string().datetime().optional().describe("Fecha inicial ISO 8601."),
-    to: z3.string().datetime().optional().describe("Fecha final ISO 8601."),
+    from: z3.string().optional().describe("Fecha inicial YYYY-MM-DD o ISO."),
+    to: z3.string().optional().describe("Fecha final YYYY-MM-DD o ISO."),
     limit: z3.number().int().min(1).max(200).optional()
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ from, to, limit }, ctx) => {
-    if (!ctx.isAuthenticated()) {
-      return { content: [{ type: "text", text: "No autenticado" }], isError: true };
+    if (!ctx.isAuthenticated()) return unauth();
+    const start = (from ?? (/* @__PURE__ */ new Date()).toISOString()).slice(0, 10);
+    const end = (to ?? new Date(Date.now() + 7 * 24 * 3600 * 1e3).toISOString()).slice(0, 10);
+    const { data, error } = await supabaseForUser(ctx).from("appointments").select("*").gte("appointment_date", start).lte("appointment_date", end).order("appointment_date", { ascending: true }).order("appointment_time", { ascending: true, nullsFirst: true }).limit(limit ?? 50);
+    if (error) return fail(error.message);
+    return ok(data ?? [], "appointments");
+  }
+});
+
+// src/lib/mcp/tools/search-owners.ts
+import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z4 } from "npm:zod@^3.25.76";
+var search_owners_default = defineTool4({
+  name: "search_owners",
+  title: "Buscar clientes",
+  description: "Busca clientes (propietarios) por nombre, tel\xE9fono o email.",
+  inputSchema: {
+    search: z4.string().trim().min(1).max(80).describe("Texto a buscar."),
+    limit: z4.number().int().min(1).max(50).optional()
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ search, limit }, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    const s = search.replace(/[%,]/g, "");
+    const { data, error } = await supabaseForUser(ctx).from("owners").select("id, name, phone, email, dni, address").or(`name.ilike.%${s}%,phone.ilike.%${s}%,email.ilike.%${s}%`).limit(limit ?? 20);
+    if (error) return fail(error.message);
+    return ok(data ?? [], "owners");
+  }
+});
+
+// src/lib/mcp/tools/get-client-history.ts
+import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z5 } from "npm:zod@^3.25.76";
+var get_client_history_default = defineTool5({
+  name: "get_client_history",
+  title: "Historial de cliente",
+  description: "Devuelve todos los veh\xEDculos y visitas de un cliente por su id.",
+  inputSchema: { owner_id: z5.string().uuid() },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ owner_id }, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    const supabase = supabaseForUser(ctx);
+    const { data: owner, error: e1 } = await supabase.from("owners").select("*").eq("id", owner_id).maybeSingle();
+    if (e1) return fail(e1.message);
+    if (!owner) return fail("Cliente no encontrado");
+    const { data: vehicles, error: e2 } = await supabase.from("vehicles").select("id, plate, brand, model, status, created_at, delivered_at, work_summary, archived").eq("owner_id", owner_id).order("created_at", { ascending: false });
+    if (e2) return fail(e2.message);
+    return ok({ owner, vehicles: vehicles ?? [] }, "client");
+  }
+});
+
+// src/lib/mcp/tools/get-workload-summary.ts
+import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@0.20.0";
+var get_workload_summary_default = defineTool6({
+  name: "get_workload_summary",
+  title: "Resumen de carga de trabajo",
+  description: "Devuelve, por operario, el n\xBA de veh\xEDculos activos (recibido, en_reparacion, pendiente_piezas) y una cuenta por estado.",
+  inputSchema: {},
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async (_args, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    const supabase = supabaseForUser(ctx);
+    const { data, error } = await supabase.from("vehicles").select("id, plate, status, assigned_to, priority").eq("archived", false).in("status", ["recibido", "en_reparacion", "pendiente_piezas", "terminado"]);
+    if (error) return fail(error.message);
+    const byUser = {};
+    for (const v of data ?? []) {
+      const uid = v.assigned_to ?? "unassigned";
+      byUser[uid] ??= { total: 0, by_status: {}, plates: [] };
+      byUser[uid].total++;
+      byUser[uid].by_status[v.status] = (byUser[uid].by_status[v.status] ?? 0) + 1;
+      byUser[uid].plates.push(v.plate);
     }
-    const supabase = supabaseForUser3(ctx);
-    const start = from ?? (/* @__PURE__ */ new Date()).toISOString();
-    const end = to ?? new Date(Date.now() + 7 * 24 * 3600 * 1e3).toISOString();
-    const { data, error } = await supabase.from("appointments").select("*").gte("appointment_date", start).lte("appointment_date", end).order("appointment_date", { ascending: true }).limit(limit ?? 50);
-    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
-    return {
-      content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
-      structuredContent: { appointments: data ?? [] }
-    };
+    const userIds = Object.keys(byUser).filter((u) => u !== "unassigned");
+    let names = {};
+    if (userIds.length) {
+      const { data: profs } = await supabase.from("profiles").select("user_id, full_name").in("user_id", userIds);
+      names = Object.fromEntries((profs ?? []).map((p) => [p.user_id, p.full_name]));
+    }
+    const summary = Object.entries(byUser).map(([uid, s]) => ({
+      user_id: uid === "unassigned" ? null : uid,
+      name: uid === "unassigned" ? "Sin asignar" : names[uid] ?? "(desconocido)",
+      ...s
+    }));
+    return ok(summary, "workload");
+  }
+});
+
+// src/lib/mcp/tools/list-pending-client-tasks.ts
+import { defineTool as defineTool7 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z6 } from "npm:zod@^3.25.76";
+var list_pending_client_tasks_default = defineTool7({
+  name: "list_pending_client_tasks",
+  title: "Tareas de cliente pendientes",
+  description: "Lista tareas del cliente (checklist) pendientes en veh\xEDculos activos.",
+  inputSchema: {
+    only_mine: z6.boolean().optional().describe("Solo veh\xEDculos asignados al usuario actual."),
+    limit: z6.number().int().min(1).max(200).optional()
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ only_mine, limit }, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    const supabase = supabaseForUser(ctx);
+    let q = supabase.from("vehicles").select("id, plate, brand, model, status, client_tasks, assigned_to").eq("archived", false).in("status", ["recibido", "en_reparacion", "pendiente_piezas"]).limit(limit ?? 100);
+    if (only_mine) q = q.eq("assigned_to", ctx.getUserId());
+    const { data, error } = await q;
+    if (error) return fail(error.message);
+    const rows = [];
+    for (const v of data ?? []) {
+      const tasks = Array.isArray(v.client_tasks) ? v.client_tasks : [];
+      const pending = tasks.filter((t) => t && t.done === false);
+      if (pending.length) rows.push({ vehicle_id: v.id, plate: v.plate, brand: v.brand, model: v.model, status: v.status, pending_tasks: pending });
+    }
+    return ok(rows, "pending");
+  }
+});
+
+// src/lib/mcp/tools/list-pending-parts.ts
+import { defineTool as defineTool8 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z7 } from "npm:zod@^3.25.76";
+var list_pending_parts_default = defineTool8({
+  name: "list_vehicle_parts",
+  title: "Piezas de un veh\xEDculo",
+  description: "Lista las piezas/materiales asociados a un veh\xEDculo con su coste total.",
+  inputSchema: {
+    vehicle_id: z7.string().uuid()
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ vehicle_id }, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    const { data, error } = await supabaseForUser(ctx).from("parts").select("id, name, reference, quantity, unit_price, notes, created_at").eq("vehicle_id", vehicle_id).order("created_at", { ascending: true });
+    if (error) return fail(error.message);
+    const parts = data ?? [];
+    const total = parts.reduce((s, p) => s + Number(p.quantity ?? 0) * Number(p.unit_price ?? 0), 0);
+    return ok({ parts, total_cost: Number(total.toFixed(2)) }, "vehicle_parts");
+  }
+});
+
+// src/lib/mcp/tools/get-productivity-summary.ts
+import { defineTool as defineTool9 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z8 } from "npm:zod@^3.25.76";
+var get_productivity_summary_default = defineTool9({
+  name: "get_productivity_summary",
+  title: "Resumen de productividad",
+  description: "Devuelve minutos trabajados por operario en un rango de fechas (por defecto \xFAltimos 7 d\xEDas).",
+  inputSchema: {
+    from: z8.string().optional().describe("Fecha inicio ISO/YYYY-MM-DD."),
+    to: z8.string().optional().describe("Fecha fin ISO/YYYY-MM-DD.")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true },
+  handler: async ({ from, to }, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    const start = from ? new Date(from) : new Date(Date.now() - 7 * 24 * 3600 * 1e3);
+    const end = to ? new Date(to) : /* @__PURE__ */ new Date();
+    const supabase = supabaseForUser(ctx);
+    const { data, error } = await supabase.from("time_logs").select("user_id, total_minutes, started_at, ended_at").gte("started_at", start.toISOString()).lte("started_at", end.toISOString());
+    if (error) return fail(error.message);
+    const agg = {};
+    for (const t of data ?? []) {
+      const uid = t.user_id;
+      agg[uid] ??= { minutes: 0, sessions: 0 };
+      agg[uid].minutes += t.total_minutes ?? 0;
+      agg[uid].sessions++;
+    }
+    const uids = Object.keys(agg);
+    let names = {};
+    if (uids.length) {
+      const { data: profs } = await supabase.from("profiles").select("user_id, full_name").in("user_id", uids);
+      names = Object.fromEntries((profs ?? []).map((p) => [p.user_id, p.full_name]));
+    }
+    const rows = Object.entries(agg).map(([uid, s]) => ({
+      user_id: uid,
+      name: names[uid] ?? "(desconocido)",
+      minutes: s.minutes,
+      hours: Number((s.minutes / 60).toFixed(2)),
+      sessions: s.sessions
+    })).sort((a, b) => b.minutes - a.minutes);
+    return ok({ from: start.toISOString(), to: end.toISOString(), rows }, "productivity");
+  }
+});
+
+// src/lib/mcp/tools/list-team.ts
+import { defineTool as defineTool10 } from "npm:@lovable.dev/mcp-js@0.20.0";
+var list_team_default = defineTool10({
+  name: "list_team",
+  title: "Listar equipo",
+  description: "Lista los usuarios del taller con su rol (para conocer IDs de operarios a asignar).",
+  inputSchema: {},
+  annotations: { readOnlyHint: true, idempotentHint: true },
+  handler: async (_a, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    const supabase = supabaseForUser(ctx);
+    const { data: profs, error } = await supabase.from("profiles").select("user_id, full_name, organization_id");
+    if (error) return fail(error.message);
+    const ids = (profs ?? []).map((p) => p.user_id);
+    const roles = ids.length ? (await supabase.from("user_roles").select("user_id, role").in("user_id", ids)).data ?? [] : [];
+    const roleMap = Object.fromEntries(roles.map((r) => [r.user_id, r.role]));
+    return ok(
+      (profs ?? []).map((p) => ({ user_id: p.user_id, name: p.full_name, role: roleMap[p.user_id] ?? null })),
+      "team"
+    );
+  }
+});
+
+// src/lib/mcp/tools/update-vehicle-status.ts
+import { defineTool as defineTool11 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z9 } from "npm:zod@^3.25.76";
+var update_vehicle_status_default = defineTool11({
+  name: "update_vehicle_status",
+  title: "Cambiar estado de veh\xEDculo",
+  description: "Actualiza el estado de un veh\xEDculo (recibido, en_reparacion, pendiente_piezas, terminado, entregado, facturado, presupuestar, presupuestado).",
+  inputSchema: {
+    vehicle_id: z9.string().uuid(),
+    status: z9.enum(VEHICLE_STATUSES)
+  },
+  annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false },
+  handler: async ({ vehicle_id, status }, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    const { data, error } = await supabaseForUser(ctx).from("vehicles").update({ status }).eq("id", vehicle_id).select("id, plate, status").maybeSingle();
+    if (error) return fail(error.message);
+    if (!data) return fail("Veh\xEDculo no encontrado o sin permisos");
+    return ok(data, "vehicle");
+  }
+});
+
+// src/lib/mcp/tools/update-vehicle-priority.ts
+import { defineTool as defineTool12 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z10 } from "npm:zod@^3.25.76";
+var update_vehicle_priority_default = defineTool12({
+  name: "update_vehicle_priority",
+  title: "Cambiar prioridad",
+  description: "Actualiza la prioridad de un veh\xEDculo (baja, normal, alta, urgente).",
+  inputSchema: {
+    vehicle_id: z10.string().uuid(),
+    priority: z10.enum(PRIORITIES)
+  },
+  annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false },
+  handler: async ({ vehicle_id, priority }, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    const { data, error } = await supabaseForUser(ctx).from("vehicles").update({ priority }).eq("id", vehicle_id).select("id, plate, priority").maybeSingle();
+    if (error) return fail(error.message);
+    if (!data) return fail("Veh\xEDculo no encontrado o sin permisos");
+    return ok(data, "vehicle");
+  }
+});
+
+// src/lib/mcp/tools/assign-vehicle.ts
+import { defineTool as defineTool13 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z11 } from "npm:zod@^3.25.76";
+var assign_vehicle_default = defineTool13({
+  name: "assign_vehicle",
+  title: "Asignar operario",
+  description: "Asigna (o desasigna con user_id=null) un veh\xEDculo a un operario.",
+  inputSchema: {
+    vehicle_id: z11.string().uuid(),
+    user_id: z11.string().uuid().nullable().describe("ID del operario o null para desasignar.")
+  },
+  annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true },
+  handler: async ({ vehicle_id, user_id }, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    const { data, error } = await supabaseForUser(ctx).from("vehicles").update({ assigned_to: user_id }).eq("id", vehicle_id).select("id, plate, assigned_to").maybeSingle();
+    if (error) return fail(error.message);
+    if (!data) return fail("Veh\xEDculo no encontrado o sin permisos");
+    return ok(data, "vehicle");
+  }
+});
+
+// src/lib/mcp/tools/add-client-task.ts
+import { defineTool as defineTool14 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z12 } from "npm:zod@^3.25.76";
+var add_client_task_default = defineTool14({
+  name: "add_client_task",
+  title: "A\xF1adir tarea de cliente",
+  description: "A\xF1ade una nueva tarea al checklist del cliente en un veh\xEDculo.",
+  inputSchema: {
+    vehicle_id: z12.string().uuid(),
+    text: z12.string().trim().min(1).max(300)
+  },
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
+  handler: async ({ vehicle_id, text }, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    const supabase = supabaseForUser(ctx);
+    const { data: v, error: e1 } = await supabase.from("vehicles").select("client_tasks").eq("id", vehicle_id).maybeSingle();
+    if (e1) return fail(e1.message);
+    if (!v) return fail("Veh\xEDculo no encontrado");
+    const tasks = Array.isArray(v.client_tasks) ? v.client_tasks : [];
+    const next = [...tasks, { text, done: false }];
+    const { error: e2 } = await supabase.from("vehicles").update({ client_tasks: next }).eq("id", vehicle_id);
+    if (e2) return fail(e2.message);
+    return ok({ vehicle_id, tasks: next }, "vehicle");
+  }
+});
+
+// src/lib/mcp/tools/toggle-client-task.ts
+import { defineTool as defineTool15 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z13 } from "npm:zod@^3.25.76";
+var toggle_client_task_default = defineTool15({
+  name: "toggle_client_task",
+  title: "Marcar/desmarcar tarea",
+  description: "Marca como hecha o pendiente una tarea del cliente por su texto exacto (o \xEDndice 0-based).",
+  inputSchema: {
+    vehicle_id: z13.string().uuid(),
+    task_text: z13.string().trim().min(1).max(300).optional(),
+    task_index: z13.number().int().min(0).optional(),
+    done: z13.boolean()
+  },
+  annotations: { readOnlyHint: false, idempotentHint: true },
+  handler: async ({ vehicle_id, task_text, task_index, done }, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    if (task_text == null && task_index == null) return fail("Indica task_text o task_index");
+    const supabase = supabaseForUser(ctx);
+    const { data: v, error: e1 } = await supabase.from("vehicles").select("client_tasks").eq("id", vehicle_id).maybeSingle();
+    if (e1) return fail(e1.message);
+    if (!v) return fail("Veh\xEDculo no encontrado");
+    const tasks = Array.isArray(v.client_tasks) ? [...v.client_tasks] : [];
+    let idx = task_index ?? -1;
+    if (idx < 0 && task_text) idx = tasks.findIndex((t) => (t?.text ?? "").trim() === task_text.trim());
+    if (idx < 0 || idx >= tasks.length) return fail("Tarea no encontrada");
+    tasks[idx] = { ...tasks[idx], done };
+    const { error: e2 } = await supabase.from("vehicles").update({ client_tasks: tasks }).eq("id", vehicle_id);
+    if (e2) return fail(e2.message);
+    return ok({ vehicle_id, updated: tasks[idx], tasks }, "vehicle");
+  }
+});
+
+// src/lib/mcp/tools/add-vehicle-note.ts
+import { defineTool as defineTool16 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z14 } from "npm:zod@^3.25.76";
+var add_vehicle_note_default = defineTool16({
+  name: "add_vehicle_note",
+  title: "A\xF1adir nota al veh\xEDculo",
+  description: "A\xF1ade una nota al resumen de trabajo (work_summary) o a las notas de recepci\xF3n (reception_notes). Se a\xF1ade al final con marca de tiempo.",
+  inputSchema: {
+    vehicle_id: z14.string().uuid(),
+    note: z14.string().trim().min(1).max(2e3),
+    field: z14.enum(["work_summary", "reception_notes"]).optional().describe("Por defecto work_summary.")
+  },
+  annotations: { readOnlyHint: false, idempotentHint: false },
+  handler: async ({ vehicle_id, note, field }, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    const col = field ?? "work_summary";
+    const supabase = supabaseForUser(ctx);
+    const { data: v, error: e1 } = await supabase.from("vehicles").select(col).eq("id", vehicle_id).maybeSingle();
+    if (e1) return fail(e1.message);
+    if (!v) return fail("Veh\xEDculo no encontrado");
+    const prev = v[col] ?? "";
+    const stamp = (/* @__PURE__ */ new Date()).toLocaleString("es-ES", { timeZone: "Europe/Madrid" });
+    const appended = prev ? `${prev}
+
+[${stamp}] ${note}` : `[${stamp}] ${note}`;
+    const { error: e2 } = await supabase.from("vehicles").update({ [col]: appended }).eq("id", vehicle_id);
+    if (e2) return fail(e2.message);
+    return ok({ vehicle_id, field: col, value: appended }, "vehicle");
+  }
+});
+
+// src/lib/mcp/tools/create-appointment.ts
+import { defineTool as defineTool17 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z15 } from "npm:zod@^3.25.76";
+var create_appointment_default = defineTool17({
+  name: "create_appointment",
+  title: "Crear cita",
+  description: "Crea una cita previa en la agenda del taller.",
+  inputSchema: {
+    appointment_date: z15.string().describe("Fecha en formato YYYY-MM-DD."),
+    appointment_time: z15.string().optional().describe("Hora HH:MM (opcional)."),
+    client_name: z15.string().trim().min(1).max(150),
+    client_phone: z15.string().trim().max(30).optional(),
+    vehicle_plate: z15.string().trim().max(20).optional(),
+    vehicle_brand: z15.string().trim().max(60).optional(),
+    vehicle_model: z15.string().trim().max(60).optional(),
+    issue_description: z15.string().trim().max(2e3).optional(),
+    appointment_type: z15.enum(APPOINTMENT_TYPES).optional(),
+    assigned_to: z15.string().uuid().optional(),
+    notes: z15.string().trim().max(1e3).optional()
+  },
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
+  handler: async (args, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    const supabase = supabaseForUser(ctx);
+    const { data: prof, error: eP } = await supabase.from("profiles").select("organization_id").eq("user_id", ctx.getUserId()).maybeSingle();
+    if (eP) return fail(eP.message);
+    if (!prof?.organization_id) return fail("Usuario sin organizaci\xF3n");
+    const { data, error } = await supabase.from("appointments").insert({
+      ...args,
+      appointment_type: args.appointment_type ?? "mecanica",
+      organization_id: prof.organization_id,
+      created_by: ctx.getUserId()
+    }).select().maybeSingle();
+    if (error) return fail(error.message);
+    return ok(data, "appointment");
+  }
+});
+
+// src/lib/mcp/tools/add-part.ts
+import { defineTool as defineTool18 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z16 } from "npm:zod@^3.25.76";
+var add_part_default = defineTool18({
+  name: "add_part",
+  title: "A\xF1adir pieza / material",
+  description: "Registra una pieza o material usado en un veh\xEDculo con cantidad y precio unitario.",
+  inputSchema: {
+    vehicle_id: z16.string().uuid(),
+    name: z16.string().trim().min(1).max(200),
+    quantity: z16.number().positive(),
+    unit_price: z16.number().min(0).optional(),
+    reference: z16.string().trim().max(100).optional(),
+    notes: z16.string().trim().max(500).optional()
+  },
+  annotations: { readOnlyHint: false, idempotentHint: false },
+  handler: async (args, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    const supabase = supabaseForUser(ctx);
+    const { data: v, error: eV } = await supabase.from("vehicles").select("organization_id").eq("id", args.vehicle_id).maybeSingle();
+    if (eV) return fail(eV.message);
+    if (!v) return fail("Veh\xEDculo no encontrado");
+    const { data, error } = await supabase.from("parts").insert({
+      ...args,
+      unit_price: args.unit_price ?? 0,
+      organization_id: v.organization_id,
+      added_by: ctx.getUserId()
+    }).select().maybeSingle();
+    if (error) return fail(error.message);
+    return ok(data, "part");
   }
 });
 
@@ -128,13 +541,34 @@ var projectRef = "vzinqlkktnzgciigtycx";
 var mcp_default = defineMcp({
   name: "tu-taller-mcp",
   title: "Tu Taller MCP",
-  version: "0.1.0",
-  instructions: "Herramientas del taller Tu Taller. Consulta veh\xEDculos (\xF3rdenes de trabajo), su estado y las citas del taller del usuario autenticado. Los datos est\xE1n limitados por la organizaci\xF3n del usuario mediante RLS.",
+  version: "0.2.0",
+  instructions: "Herramientas del taller Tu Taller. Consulta y gestiona veh\xEDculos (\xF3rdenes de trabajo), citas, clientes, tareas de cliente, piezas y productividad del usuario autenticado. Los datos est\xE1n limitados por la organizaci\xF3n del usuario mediante RLS. Herramientas de escritura: cambian estado, prioridad, asignaci\xF3n, notas, tareas, citas y piezas.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated"
   }),
-  tools: [list_vehicles_default, get_vehicle_default, list_appointments_default]
+  tools: [
+    // Lectura
+    list_vehicles_default,
+    get_vehicle_default,
+    list_appointments_default,
+    search_owners_default,
+    get_client_history_default,
+    get_workload_summary_default,
+    list_pending_client_tasks_default,
+    list_pending_parts_default,
+    get_productivity_summary_default,
+    list_team_default,
+    // Escritura
+    update_vehicle_status_default,
+    update_vehicle_priority_default,
+    assign_vehicle_default,
+    add_client_task_default,
+    toggle_client_task_default,
+    add_vehicle_note_default,
+    create_appointment_default,
+    add_part_default
+  ]
 });
 
 // lovable-mcp-supabase-entry.ts

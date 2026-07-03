@@ -12,7 +12,7 @@
   "mcp": {
     "server": {
       "name": "tu-taller-mcp",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "title": "Tu Taller MCP"
     },
     "tools": [
@@ -36,25 +36,27 @@
                 "pendiente_piezas",
                 "terminado",
                 "entregado",
-                "facturado"
-              ],
-              "description": "Filtra por estado del vehículo."
+                "facturado",
+                "presupuestar",
+                "presupuestado"
+              ]
             },
             "search": {
               "type": "string",
               "minLength": 1,
-              "maxLength": 50,
-              "description": "Búsqueda por matrícula, marca o modelo."
+              "maxLength": 50
+            },
+            "only_mine": {
+              "type": "boolean",
+              "description": "Solo vehículos asignados al usuario actual."
             },
             "include_archived": {
-              "type": "boolean",
-              "description": "Incluir vehículos archivados. Por defecto false."
+              "type": "boolean"
             },
             "limit": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 100,
-              "description": "Máximo de resultados (por defecto 25)."
+              "maximum": 100
             }
           },
           "additionalProperties": false,
@@ -76,14 +78,12 @@
           "properties": {
             "id": {
               "type": "string",
-              "format": "uuid",
-              "description": "ID del vehículo."
+              "format": "uuid"
             },
             "plate": {
               "type": "string",
               "minLength": 1,
-              "maxLength": 20,
-              "description": "Matrícula del vehículo."
+              "maxLength": 20
             }
           },
           "additionalProperties": false,
@@ -105,13 +105,11 @@
           "properties": {
             "from": {
               "type": "string",
-              "format": "date-time",
-              "description": "Fecha inicial ISO 8601."
+              "description": "Fecha inicial YYYY-MM-DD o ISO."
             },
             "to": {
               "type": "string",
-              "format": "date-time",
-              "description": "Fecha final ISO 8601."
+              "description": "Fecha final YYYY-MM-DD o ISO."
             },
             "limit": {
               "type": "integer",
@@ -119,6 +117,506 @@
               "maximum": 200
             }
           },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_owners",
+        "title": "Buscar clientes",
+        "description": "Busca clientes (propietarios) por nombre, teléfono o email.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "search": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80,
+              "description": "Texto a buscar."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          "required": [
+            "search"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_client_history",
+        "title": "Historial de cliente",
+        "description": "Devuelve todos los vehículos y visitas de un cliente por su id.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "owner_id": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "owner_id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_workload_summary",
+        "title": "Resumen de carga de trabajo",
+        "description": "Devuelve, por operario, el nº de vehículos activos (recibido, en_reparacion, pendiente_piezas) y una cuenta por estado.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_pending_client_tasks",
+        "title": "Tareas de cliente pendientes",
+        "description": "Lista tareas del cliente (checklist) pendientes en vehículos activos.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "only_mine": {
+              "type": "boolean",
+              "description": "Solo vehículos asignados al usuario actual."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_vehicle_parts",
+        "title": "Piezas de un vehículo",
+        "description": "Lista las piezas/materiales asociados a un vehículo con su coste total.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "vehicle_id": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "vehicle_id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_productivity_summary",
+        "title": "Resumen de productividad",
+        "description": "Devuelve minutos trabajados por operario en un rango de fechas (por defecto últimos 7 días).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "string",
+              "description": "Fecha inicio ISO/YYYY-MM-DD."
+            },
+            "to": {
+              "type": "string",
+              "description": "Fecha fin ISO/YYYY-MM-DD."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_team",
+        "title": "Listar equipo",
+        "description": "Lista los usuarios del taller con su rol (para conocer IDs de operarios a asignar).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "update_vehicle_status",
+        "title": "Cambiar estado de vehículo",
+        "description": "Actualiza el estado de un vehículo (recibido, en_reparacion, pendiente_piezas, terminado, entregado, facturado, presupuestar, presupuestado).",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "vehicle_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "recibido",
+                "presupuestar",
+                "presupuestado",
+                "en_reparacion",
+                "pendiente_piezas",
+                "terminado",
+                "facturado",
+                "entregado"
+              ]
+            }
+          },
+          "required": [
+            "vehicle_id",
+            "status"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "update_vehicle_priority",
+        "title": "Cambiar prioridad",
+        "description": "Actualiza la prioridad de un vehículo (baja, normal, alta, urgente).",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "vehicle_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "priority": {
+              "type": "string",
+              "enum": [
+                "baja",
+                "normal",
+                "alta",
+                "urgente"
+              ]
+            }
+          },
+          "required": [
+            "vehicle_id",
+            "priority"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "assign_vehicle",
+        "title": "Asignar operario",
+        "description": "Asigna (o desasigna con user_id=null) un vehículo a un operario.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "vehicle_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "user_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "ID del operario o null para desasignar."
+            }
+          },
+          "required": [
+            "vehicle_id",
+            "user_id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "add_client_task",
+        "title": "Añadir tarea de cliente",
+        "description": "Añade una nueva tarea al checklist del cliente en un vehículo.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "vehicle_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            }
+          },
+          "required": [
+            "vehicle_id",
+            "text"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "toggle_client_task",
+        "title": "Marcar/desmarcar tarea",
+        "description": "Marca como hecha o pendiente una tarea del cliente por su texto exacto (o índice 0-based).",
+        "annotations": {
+          "readOnlyHint": false,
+          "idempotentHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "vehicle_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "task_text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            },
+            "task_index": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "done": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "vehicle_id",
+            "done"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "add_vehicle_note",
+        "title": "Añadir nota al vehículo",
+        "description": "Añade una nota al resumen de trabajo (work_summary) o a las notas de recepción (reception_notes). Se añade al final con marca de tiempo.",
+        "annotations": {
+          "readOnlyHint": false,
+          "idempotentHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "vehicle_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "field": {
+              "type": "string",
+              "enum": [
+                "work_summary",
+                "reception_notes"
+              ],
+              "description": "Por defecto work_summary."
+            }
+          },
+          "required": [
+            "vehicle_id",
+            "note"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_appointment",
+        "title": "Crear cita",
+        "description": "Crea una cita previa en la agenda del taller.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "appointment_date": {
+              "type": "string",
+              "description": "Fecha en formato YYYY-MM-DD."
+            },
+            "appointment_time": {
+              "type": "string",
+              "description": "Hora HH:MM (opcional)."
+            },
+            "client_name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 150
+            },
+            "client_phone": {
+              "type": "string",
+              "maxLength": 30
+            },
+            "vehicle_plate": {
+              "type": "string",
+              "maxLength": 20
+            },
+            "vehicle_brand": {
+              "type": "string",
+              "maxLength": 60
+            },
+            "vehicle_model": {
+              "type": "string",
+              "maxLength": 60
+            },
+            "issue_description": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "appointment_type": {
+              "type": "string",
+              "enum": [
+                "mecanica",
+                "chapa_pintura"
+              ]
+            },
+            "assigned_to": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "notes": {
+              "type": "string",
+              "maxLength": 1000
+            }
+          },
+          "required": [
+            "appointment_date",
+            "client_name"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "add_part",
+        "title": "Añadir pieza / material",
+        "description": "Registra una pieza o material usado en un vehículo con cantidad y precio unitario.",
+        "annotations": {
+          "readOnlyHint": false,
+          "idempotentHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "vehicle_id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "quantity": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "unit_price": {
+              "type": "number",
+              "minimum": 0
+            },
+            "reference": {
+              "type": "string",
+              "maxLength": 100
+            },
+            "notes": {
+              "type": "string",
+              "maxLength": 500
+            }
+          },
+          "required": [
+            "vehicle_id",
+            "name",
+            "quantity"
+          ],
           "additionalProperties": false,
           "$schema": "http://json-schema.org/draft-07/schema#"
         },
