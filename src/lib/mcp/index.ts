@@ -27,7 +27,7 @@ const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID ?? "project-ref-unse
 export default defineMcp({
   name: "tu-taller-mcp",
   title: "Tu Taller MCP",
-  version: "0.3.0",
+  version: "0.4.0",
   instructions:
     "Herramientas del taller Tu Taller. Consulta y gestiona vehículos (órdenes de trabajo), citas, clientes, tareas de cliente, piezas y productividad del usuario autenticado. Los datos están limitados por la organización del usuario mediante RLS. Herramientas de escritura: cambian estado, prioridad, asignación, notas, tareas, citas y piezas.",
   auth: auth.oauth.issuer({

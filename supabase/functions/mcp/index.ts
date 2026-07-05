@@ -724,7 +724,7 @@ var projectRef = "vzinqlkktnzgciigtycx";
 var mcp_default = defineMcp({
   name: "tu-taller-mcp",
   title: "Tu Taller MCP",
-  version: "0.3.0",
+  version: "0.4.0",
   instructions: "Herramientas del taller Tu Taller. Consulta y gestiona veh\xEDculos (\xF3rdenes de trabajo), citas, clientes, tareas de cliente, piezas y productividad del usuario autenticado. Los datos est\xE1n limitados por la organizaci\xF3n del usuario mediante RLS. Herramientas de escritura: cambian estado, prioridad, asignaci\xF3n, notas, tareas, citas y piezas.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
