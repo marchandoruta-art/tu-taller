@@ -57,5 +57,7 @@ export default defineMcp({
     addPartTool,
     sendWhatsappTool,
     generateRepairReportTool,
+    createVehicleTool,
+    identifyPlateFromImageTool,
   ],
 });

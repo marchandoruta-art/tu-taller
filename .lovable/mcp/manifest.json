@@ -691,6 +691,128 @@
           "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
+      },
+      {
+        "name": "create_vehicle",
+        "title": "Crear vehículo (ficha de recepción)",
+        "description": "Crea directamente un vehículo (orden de trabajo) en estado 'recibido'. Opcionalmente crea el propietario si se pasa client_name. Ideal cuando llega un coche nuevo al taller y quieres saltarte la cita previa.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "plate": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20,
+              "description": "Matrícula del vehículo."
+            },
+            "brand": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "model": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "year": {
+              "type": "integer",
+              "minimum": 1900,
+              "maximum": 2100
+            },
+            "color": {
+              "type": "string",
+              "maxLength": 40
+            },
+            "vin": {
+              "type": "string",
+              "maxLength": 30
+            },
+            "mileage": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "client_description": {
+              "type": "string",
+              "maxLength": 2000,
+              "description": "Descripción del cliente / motivo de entrada."
+            },
+            "client_tasks": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": "Lista de tareas solicitadas por el cliente (una por línea)."
+            },
+            "priority": {
+              "type": "string",
+              "enum": [
+                "baja",
+                "normal",
+                "alta",
+                "urgente"
+              ]
+            },
+            "assigned_to": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "client_name": {
+              "type": "string",
+              "maxLength": 150,
+              "description": "Si se pasa, se crea o busca el propietario."
+            },
+            "client_phone": {
+              "type": "string",
+              "maxLength": 30
+            },
+            "client_email": {
+              "type": "string",
+              "maxLength": 150
+            }
+          },
+          "required": [
+            "plate",
+            "brand",
+            "model"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "identify_plate_from_image",
+        "title": "Identificar matrícula desde imagen",
+        "description": "Analiza una imagen (URL pública o data URL base64) para reconocer la matrícula del vehículo. Devuelve la matrícula normalizada y comprueba si ya existe un vehículo con esa matrícula en el taller.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "image_url": {
+              "type": "string",
+              "minLength": 1,
+              "description": "URL https pública de la imagen o data URL (data:image/...;base64,...)."
+            }
+          },
+          "required": [
+            "image_url"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
       }
     ]
   }
