@@ -2,7 +2,15 @@ import { createClient } from "@supabase/supabase-js";
 import type { ToolContext } from "@lovable.dev/mcp-js";
 
 export function supabaseForUser(ctx: ToolContext) {
-  return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+  // In Supabase Edge Functions only SUPABASE_URL / SUPABASE_ANON_KEY /
+  // SUPABASE_SERVICE_ROLE_KEY are injected by default. Custom SUPABASE_* secrets
+  // are filtered out, so we must use SUPABASE_ANON_KEY here.
+  const url = process.env.SUPABASE_URL ?? "";
+  const key =
+    process.env.SUPABASE_ANON_KEY ??
+    process.env.SUPABASE_PUBLISHABLE_KEY ??
+    "";
+  return createClient(url, key, {
     global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
     auth: { persistSession: false, autoRefreshToken: false },
   });

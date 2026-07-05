@@ -12,7 +12,9 @@ import { z } from "npm:zod@^3.25.76";
 // src/lib/mcp/tools/_shared.ts
 import { createClient } from "npm:@supabase/supabase-js@^2.90.1";
 function supabaseForUser(ctx) {
-  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
+  const url = process.env.SUPABASE_URL ?? "";
+  const key = process.env.SUPABASE_ANON_KEY ?? process.env.SUPABASE_PUBLISHABLE_KEY ?? "";
+  return createClient(url, key, {
     global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
     auth: { persistSession: false, autoRefreshToken: false }
   });
