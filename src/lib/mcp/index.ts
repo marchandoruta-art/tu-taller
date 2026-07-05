@@ -19,6 +19,8 @@ import createAppointmentTool from "./tools/create-appointment";
 import addPartTool from "./tools/add-part";
 import sendWhatsappTool from "./tools/send-whatsapp";
 import generateRepairReportTool from "./tools/generate-repair-report";
+import createVehicleTool from "./tools/create-vehicle";
+import identifyPlateFromImageTool from "./tools/identify-plate-from-image";
 
 const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID ?? "project-ref-unset";
 
