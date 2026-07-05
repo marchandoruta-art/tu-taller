@@ -719,12 +719,149 @@ var generate_repair_report_default = defineTool20({
   }
 });
 
+// src/lib/mcp/tools/create-vehicle.ts
+import { defineTool as defineTool21 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z19 } from "npm:zod@^3.25.76";
+var create_vehicle_default = defineTool21({
+  name: "create_vehicle",
+  title: "Crear veh\xEDculo (ficha de recepci\xF3n)",
+  description: "Crea directamente un veh\xEDculo (orden de trabajo) en estado 'recibido'. Opcionalmente crea el propietario si se pasa client_name. Ideal cuando llega un coche nuevo al taller y quieres saltarte la cita previa.",
+  inputSchema: {
+    plate: z19.string().trim().min(1).max(20).describe("Matr\xEDcula del veh\xEDculo."),
+    brand: z19.string().trim().min(1).max(60),
+    model: z19.string().trim().min(1).max(60),
+    year: z19.number().int().min(1900).max(2100).optional(),
+    color: z19.string().trim().max(40).optional(),
+    vin: z19.string().trim().max(30).optional(),
+    mileage: z19.number().int().min(0).optional(),
+    client_description: z19.string().trim().max(2e3).optional().describe("Descripci\xF3n del cliente / motivo de entrada."),
+    client_tasks: z19.array(z19.string().trim().min(1)).optional().describe("Lista de tareas solicitadas por el cliente (una por l\xEDnea)."),
+    priority: z19.enum(PRIORITIES).optional(),
+    assigned_to: z19.string().uuid().optional(),
+    client_name: z19.string().trim().max(150).optional().describe("Si se pasa, se crea o busca el propietario."),
+    client_phone: z19.string().trim().max(30).optional(),
+    client_email: z19.string().trim().max(150).optional()
+  },
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  handler: async (args, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    const supabase = supabaseForUser(ctx);
+    const { data: prof, error: eP } = await supabase.from("profiles").select("organization_id").eq("user_id", ctx.getUserId()).maybeSingle();
+    if (eP) return fail(eP.message);
+    if (!prof?.organization_id) return fail("Usuario sin organizaci\xF3n");
+    let owner_id = null;
+    if (args.client_name) {
+      const { data: owner, error: eO } = await supabase.from("owners").insert({
+        name: args.client_name,
+        phone: args.client_phone ?? null,
+        email: args.client_email ?? null,
+        organization_id: prof.organization_id
+      }).select("id").maybeSingle();
+      if (eO) return fail(`Error creando propietario: ${eO.message}`);
+      owner_id = owner?.id ?? null;
+    }
+    const tasks = (args.client_tasks ?? []).map((t) => ({ text: t, done: false }));
+    const { data, error } = await supabase.from("vehicles").insert({
+      plate: args.plate.toUpperCase(),
+      brand: args.brand,
+      model: args.model,
+      year: args.year ?? null,
+      color: args.color ?? null,
+      vin: args.vin ?? null,
+      mileage: args.mileage ?? null,
+      client_description: args.client_description ?? null,
+      client_tasks: tasks,
+      priority: args.priority ?? "normal",
+      assigned_to: args.assigned_to ?? null,
+      owner_id,
+      status: "recibido",
+      organization_id: prof.organization_id,
+      created_by: ctx.getUserId(),
+      reception_date: (/* @__PURE__ */ new Date()).toISOString()
+    }).select().maybeSingle();
+    if (error) return fail(error.message);
+    return ok(data, "vehicle");
+  }
+});
+
+// src/lib/mcp/tools/identify-plate-from-image.ts
+import { defineTool as defineTool22 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z20 } from "npm:zod@^3.25.76";
+var identify_plate_from_image_default = defineTool22({
+  name: "identify_plate_from_image",
+  title: "Identificar matr\xEDcula desde imagen",
+  description: "Analiza una imagen (URL p\xFAblica o data URL base64) para reconocer la matr\xEDcula del veh\xEDculo. Devuelve la matr\xEDcula normalizada y comprueba si ya existe un veh\xEDculo con esa matr\xEDcula en el taller.",
+  inputSchema: {
+    image_url: z20.string().min(1).describe("URL https p\xFAblica de la imagen o data URL (data:image/...;base64,...).")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
+  handler: async ({ image_url }, ctx) => {
+    if (!ctx.isAuthenticated()) return unauth();
+    const apiKey = process.env.LOVABLE_API_KEY;
+    if (!apiKey) return fail("LOVABLE_API_KEY no configurada en el servidor.");
+    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          {
+            role: "system",
+            content: 'Eres un OCR de matr\xEDculas de coche. Devuelve SOLO un JSON v\xE1lido con la forma: {"plate": "XXXXYYY", "confidence": "high|medium|low", "notes": "..."}. La matr\xEDcula debe ir en MAY\xDASCULAS sin espacios ni guiones. Si no puedes leerla, plate = null.'
+          },
+          {
+            role: "user",
+            content: [
+              { type: "text", text: "Lee la matr\xEDcula de este veh\xEDculo." },
+              { type: "image_url", image_url: { url: image_url } }
+            ]
+          }
+        ]
+      })
+    });
+    if (!aiRes.ok) {
+      const t = await aiRes.text();
+      return fail(`Fallo de IA (${aiRes.status}): ${t.slice(0, 300)}`);
+    }
+    const aiJson = await aiRes.json();
+    const raw = aiJson?.choices?.[0]?.message?.content ?? "";
+    let parsed = { plate: null };
+    try {
+      const match = raw.match(/\{[\s\S]*\}/);
+      parsed = JSON.parse(match ? match[0] : raw);
+    } catch {
+      const m = raw.toUpperCase().match(/\b\d{4}\s?[A-Z]{3}\b|\b[A-Z]{1,2}\s?\d{4}\s?[A-Z]{1,3}\b/);
+      parsed = { plate: m ? m[0].replace(/\s+/g, "") : null, notes: raw.slice(0, 200) };
+    }
+    const plate = parsed.plate ? parsed.plate.toUpperCase().replace(/[\s-]+/g, "") : null;
+    let existing = [];
+    if (plate) {
+      const supabase = supabaseForUser(ctx);
+      const { data } = await supabase.from("vehicles").select("id, plate, brand, model, status, priority, assigned_to, archived, created_at").ilike("plate", plate).limit(5);
+      existing = data ?? [];
+    }
+    return ok(
+      {
+        plate,
+        confidence: parsed.confidence ?? null,
+        notes: parsed.notes ?? null,
+        existing_vehicles: existing,
+        exists_in_workshop: existing.length > 0
+      },
+      "identification"
+    );
+  }
+});
+
 // src/lib/mcp/index.ts
 var projectRef = "vzinqlkktnzgciigtycx";
 var mcp_default = defineMcp({
   name: "tu-taller-mcp",
   title: "Tu Taller MCP",
-  version: "0.3.0",
+  version: "0.4.0",
   instructions: "Herramientas del taller Tu Taller. Consulta y gestiona veh\xEDculos (\xF3rdenes de trabajo), citas, clientes, tareas de cliente, piezas y productividad del usuario autenticado. Los datos est\xE1n limitados por la organizaci\xF3n del usuario mediante RLS. Herramientas de escritura: cambian estado, prioridad, asignaci\xF3n, notas, tareas, citas y piezas.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
@@ -752,7 +889,9 @@ var mcp_default = defineMcp({
     create_appointment_default,
     add_part_default,
     send_whatsapp_default,
-    generate_repair_report_default
+    generate_repair_report_default,
+    create_vehicle_default,
+    identify_plate_from_image_default
   ]
 });
 
