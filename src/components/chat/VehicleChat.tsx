@@ -130,23 +130,42 @@ export function VehicleChat({ vehicleId }: VehicleChatProps) {
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !user) return;
+    if (!user) return;
+
+    const kmNumber = km.trim() ? Number(km.replace(/[^\d]/g, '')) : null;
+    const hasKm = kmNumber !== null && Number.isFinite(kmNumber) && kmNumber > 0;
+    const trimmed = newMessage.trim();
+    if (!trimmed && !hasKm) return;
 
     setSending(true);
+
+    const finalMessage = hasKm
+      ? `🛣️ KM: ${kmNumber!.toLocaleString('es-ES')}${trimmed ? ` — ${trimmed}` : ''}`
+      : trimmed;
+
     const { error } = await supabase.from('vehicle_messages').insert([
       {
         vehicle_id: vehicleId,
         user_id: user.id,
-        message: newMessage.trim(),
+        message: finalMessage,
         organization_id: organizationId,
       },
     ]);
 
     if (!error) {
+      if (hasKm) {
+        await supabase
+          .from('vehicles')
+          .update({ mileage: kmNumber })
+          .eq('id', vehicleId);
+        setCurrentKm(kmNumber);
+      }
       setNewMessage('');
+      setKm('');
     }
     setSending(false);
   };
+
 
   const getInitials = (name: string) => {
     return name
