@@ -117,12 +117,20 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Barlow', system-ui, sans-serif;
+    background-image:
+      linear-gradient(hsl(var(--foreground) / 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--foreground) / 0.025) 1px, transparent 1px);
+    background-size: 32px 32px;
+    background-attachment: fixed;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
+    font-family: 'Bebas Neue', 'Barlow Condensed', system-ui, sans-serif;
+    @apply tracking-wide font-normal;
+    letter-spacing: 0.02em;
   }
+
 }
 
 @layer components {
