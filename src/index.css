@@ -118,45 +118,46 @@
   html, body {
     @apply text-foreground font-sans antialiased;
     font-family: 'Barlow', system-ui, sans-serif;
-    background-color: transparent;
   }
   html {
     background-color: hsl(var(--background));
   }
+  body {
+    background-color: transparent;
+    position: relative;
+    min-height: 100vh;
+  }
 
-
-  /* Workshop backdrop: blurred photo of car parts + grid overlay + dark scrim */
-  .workshop-backdrop {
+  /* Workshop backdrop: blurred workshop photo + dark scrim, fixed behind everything */
+  body::before {
+    content: "";
     position: fixed;
     inset: 0;
-    z-index: -1;
+    z-index: 0;
     pointer-events: none;
-    background-color: hsl(var(--background));
+    background-image:
+      linear-gradient(hsl(var(--background) / 0.82), hsl(var(--background) / 0.92)),
+      var(--workshop-bg-image, none);
+    background-size: cover, cover;
+    background-position: center, center;
+    background-repeat: no-repeat, no-repeat;
   }
-  .workshop-backdrop::before {
+  body::after {
     content: "";
-    position: absolute;
+    position: fixed;
     inset: 0;
-    background-image: var(--workshop-bg-image);
-    background-size: cover;
-    background-position: center;
-    filter: blur(14px) saturate(1.05);
-    transform: scale(1.08);
-    opacity: 0.28;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(hsl(var(--foreground) / 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--foreground) / 0.035) 1px, transparent 1px);
+    background-size: 32px 32px;
   }
-  .dark .workshop-backdrop::before {
-    opacity: 0.35;
+  #root {
+    position: relative;
+    z-index: 1;
   }
-  .workshop-backdrop::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(ellipse at 20% 10%, hsl(var(--background) / 0.55), hsl(var(--background) / 0.9) 60%),
-      linear-gradient(hsl(var(--foreground) / 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--foreground) / 0.03) 1px, transparent 1px);
-    background-size: auto, 32px 32px, 32px 32px;
-  }
+
 
 
   h1, h2, h3, h4, h5, h6 {
