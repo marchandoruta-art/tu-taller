@@ -71,11 +71,11 @@
 
   .dark {
     /* Graphite / steel garage */
-    --background: 220 14% 7%;
-    --foreground: 30 10% 94%;
+    --background: 220 14% 6%;
+    --foreground: 30 12% 95%;
 
-    --card: 220 14% 11%;
-    --card-foreground: 30 10% 94%;
+    --card: 220 16% 10%;
+    --card-foreground: 30 12% 95%;
 
     --popover: 220 14% 11%;
     --popover-foreground: 30 10% 94%;
