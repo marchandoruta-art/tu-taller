@@ -6,7 +6,7 @@ import { VehicleMessage } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Send, Loader2 } from 'lucide-react';
+import { Send, Loader2, Gauge } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
