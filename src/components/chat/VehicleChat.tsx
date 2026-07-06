@@ -236,21 +236,48 @@ export function VehicleChat({ vehicleId }: VehicleChatProps) {
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={sendMessage} className="p-3 border-t border-border flex gap-2">
-        <Input
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Escribe un mensaje..."
-          disabled={sending}
-        />
-        <Button type="submit" size="icon" disabled={sending || !newMessage.trim()}>
-          {sending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Send className="h-4 w-4" />
-          )}
-        </Button>
+      <form onSubmit={sendMessage} className="p-3 border-t border-border flex flex-col gap-2">
+        <div className="flex gap-2">
+          <Input
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder="Escribe un mensaje..."
+            disabled={sending}
+          />
+          <Button
+            type="submit"
+            size="icon"
+            disabled={sending || (!newMessage.trim() && !km.trim())}
+          >
+            {sending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Gauge className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            <Input
+              type="number"
+              inputMode="numeric"
+              min={0}
+              value={km}
+              onChange={(e) => setKm(e.target.value)}
+              placeholder={
+                currentKm != null
+                  ? `KM actuales: ${currentKm.toLocaleString('es-ES')}`
+                  : 'Añadir KM (opcional)'
+              }
+              disabled={sending}
+              className="pl-8 h-9 text-sm"
+            />
+          </div>
+          <span className="text-xs text-muted-foreground whitespace-nowrap">km</span>
+        </div>
       </form>
+
     </div>
   );
 }
