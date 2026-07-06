@@ -51,7 +51,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Mobile overlay */}
       {isMobile && mobileOpen && (
         <div 
