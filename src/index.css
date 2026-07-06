@@ -115,10 +115,15 @@
     @apply border-border;
   }
 
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
+  html, body {
+    @apply text-foreground font-sans antialiased;
     font-family: 'Barlow', system-ui, sans-serif;
+    background-color: transparent;
   }
+  html {
+    background-color: hsl(var(--background));
+  }
+
 
   /* Workshop backdrop: blurred photo of car parts + grid overlay + dark scrim */
   .workshop-backdrop {
