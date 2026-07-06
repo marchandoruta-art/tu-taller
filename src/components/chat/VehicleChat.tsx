@@ -19,9 +19,21 @@ export function VehicleChat({ vehicleId }: VehicleChatProps) {
   const { organizationId } = useOrganization();
   const [messages, setMessages] = useState<VehicleMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
+  const [km, setKm] = useState('');
+  const [currentKm, setCurrentKm] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    supabase
+      .from('vehicles')
+      .select('mileage')
+      .eq('id', vehicleId)
+      .maybeSingle()
+      .then(({ data }) => setCurrentKm((data?.mileage as number | null) ?? null));
+  }, [vehicleId]);
+
 
   useEffect(() => {
     fetchMessages();
