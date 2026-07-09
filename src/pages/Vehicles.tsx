@@ -68,6 +68,26 @@ export default function Vehicles() {
     };
   }, [shouldIncludeArchived]);
 
+  // Search in deleted archives too when user types
+  useEffect(() => {
+    const q = search.trim();
+    if (q.length < 2) {
+      setDeletedMatches([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      const term = `%${q}%`;
+      const { data } = await supabase
+        .from('vehicle_archives')
+        .select('id, vehicle_id, plate, brand, model, archived_at, owner_snapshot')
+        .or(`plate.ilike.${term},brand.ilike.${term},model.ilike.${term}`)
+        .order('archived_at', { ascending: false })
+        .limit(20);
+      setDeletedMatches(data || []);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const myVehiclesCount = vehicles.filter((v) => v.assigned_to === user?.id).length;
 
   const filteredVehicles = vehicles.filter((v) => {
