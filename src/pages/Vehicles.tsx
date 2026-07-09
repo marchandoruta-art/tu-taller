@@ -14,7 +14,9 @@ import { QuickPlateDialog } from '@/components/vehicles/QuickPlateDialog';
 
 export default function Vehicles() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [vehicles, setVehicles] = useState<VehicleWithOwner[]>([]);
+  const [deletedMatches, setDeletedMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
