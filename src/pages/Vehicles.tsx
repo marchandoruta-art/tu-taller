@@ -18,13 +18,21 @@ export default function Vehicles() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showOnlyMine, setShowOnlyMine] = useState(false);
+  const [includeArchived, setIncludeArchived] = useState(false);
+
+  const shouldIncludeArchived = includeArchived || search.trim().length > 0;
 
   const fetchVehicles = async () => {
-    const { data } = await supabase
+    let query = supabase
       .from('vehicles')
       .select('*, owner:owners(*)')
-      .eq('archived', false)
       .order('created_at', { ascending: false });
+
+    if (!shouldIncludeArchived) {
+      query = query.eq('archived', false);
+    }
+
+    const { data } = await query;
 
     if (data) {
       setVehicles(data as any);
