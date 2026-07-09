@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { VehicleWithOwner, STATUS_LABELS } from '@/lib/types';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -6,7 +7,7 @@ import { VehicleCard } from '@/components/vehicles/VehicleCard';
 import { NewVehicleDialog } from '@/components/vehicles/NewVehicleDialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Search, UserCheck, RefreshCw, Archive } from 'lucide-react';
+import { Loader2, Search, UserCheck, RefreshCw, Archive, History, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { QuickPlateDialog } from '@/components/vehicles/QuickPlateDialog';
