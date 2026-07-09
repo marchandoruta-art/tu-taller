@@ -183,13 +183,45 @@ export default function Vehicles() {
         {/* Grid */}
         {filteredVehicles.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">No se encontraron vehículos</p>
+            <p className="text-muted-foreground">No se encontraron vehículos activos ni archivados</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {filteredVehicles.map((vehicle) => (
               <VehicleCard key={vehicle.id} vehicle={vehicle} onStatusChange={fetchVehicles} />
             ))}
+          </div>
+        )}
+
+        {/* Deleted vehicles (from archive snapshots) */}
+        {search.trim().length >= 2 && deletedMatches.length > 0 && (
+          <div className="space-y-2 pt-4 border-t border-border">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <History className="h-4 w-4" />
+              <span>Encontrados en histórico eliminado ({deletedMatches.length})</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+              {deletedMatches.map((a) => (
+                <button
+                  key={a.id}
+                  onClick={() => navigate(`/plate-history?plate=${encodeURIComponent(a.plate)}`)}
+                  className="text-left rounded-xl border border-border bg-card/60 hover:bg-card hover:border-primary/50 transition-colors p-4 space-y-1"
+                >
+                  <div className="flex items-center gap-2">
+                    <Trash2 className="h-4 w-4 text-destructive shrink-0" />
+                    <span className="font-mono font-bold">{a.plate}</span>
+                    <span className="text-xs uppercase tracking-wide px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">
+                      Eliminado
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {a.brand} {a.model}
+                    {a.owner_snapshot?.name && ` · ${a.owner_snapshot.name}`}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Ver histórico completo →</p>
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
