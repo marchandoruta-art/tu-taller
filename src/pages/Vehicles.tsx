@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { VehicleWithOwner, STATUS_LABELS } from '@/lib/types';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -6,14 +7,16 @@ import { VehicleCard } from '@/components/vehicles/VehicleCard';
 import { NewVehicleDialog } from '@/components/vehicles/NewVehicleDialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Search, UserCheck, RefreshCw, Archive } from 'lucide-react';
+import { Loader2, Search, UserCheck, RefreshCw, Archive, History, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { QuickPlateDialog } from '@/components/vehicles/QuickPlateDialog';
 
 export default function Vehicles() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [vehicles, setVehicles] = useState<VehicleWithOwner[]>([]);
+  const [deletedMatches, setDeletedMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -64,6 +67,26 @@ export default function Vehicles() {
       supabase.removeChannel(channel);
     };
   }, [shouldIncludeArchived]);
+
+  // Search in deleted archives too when user types
+  useEffect(() => {
+    const q = search.trim();
+    if (q.length < 2) {
+      setDeletedMatches([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      const term = `%${q}%`;
+      const { data } = await supabase
+        .from('vehicle_archives')
+        .select('id, vehicle_id, plate, brand, model, archived_at, owner_snapshot')
+        .or(`plate.ilike.${term},brand.ilike.${term},model.ilike.${term}`)
+        .order('archived_at', { ascending: false })
+        .limit(20);
+      setDeletedMatches(data || []);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const myVehiclesCount = vehicles.filter((v) => v.assigned_to === user?.id).length;
 
@@ -160,13 +183,45 @@ export default function Vehicles() {
         {/* Grid */}
         {filteredVehicles.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">No se encontraron vehículos</p>
+            <p className="text-muted-foreground">No se encontraron vehículos activos ni archivados</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {filteredVehicles.map((vehicle) => (
               <VehicleCard key={vehicle.id} vehicle={vehicle} onStatusChange={fetchVehicles} />
             ))}
+          </div>
+        )}
+
+        {/* Deleted vehicles (from archive snapshots) */}
+        {search.trim().length >= 2 && deletedMatches.length > 0 && (
+          <div className="space-y-2 pt-4 border-t border-border">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <History className="h-4 w-4" />
+              <span>Encontrados en histórico eliminado ({deletedMatches.length})</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+              {deletedMatches.map((a) => (
+                <button
+                  key={a.id}
+                  onClick={() => navigate(`/plate-history?plate=${encodeURIComponent(a.plate)}`)}
+                  className="text-left rounded-xl border border-border bg-card/60 hover:bg-card hover:border-primary/50 transition-colors p-4 space-y-1"
+                >
+                  <div className="flex items-center gap-2">
+                    <Trash2 className="h-4 w-4 text-destructive shrink-0" />
+                    <span className="font-mono font-bold">{a.plate}</span>
+                    <span className="text-xs uppercase tracking-wide px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">
+                      Eliminado
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {a.brand} {a.model}
+                    {a.owner_snapshot?.name && ` · ${a.owner_snapshot.name}`}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Ver histórico completo →</p>
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
