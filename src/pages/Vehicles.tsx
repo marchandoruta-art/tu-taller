@@ -6,7 +6,7 @@ import { VehicleCard } from '@/components/vehicles/VehicleCard';
 import { NewVehicleDialog } from '@/components/vehicles/NewVehicleDialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Search, UserCheck, RefreshCw } from 'lucide-react';
+import { Loader2, Search, UserCheck, RefreshCw, Archive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { QuickPlateDialog } from '@/components/vehicles/QuickPlateDialog';
@@ -18,13 +18,21 @@ export default function Vehicles() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showOnlyMine, setShowOnlyMine] = useState(false);
+  const [includeArchived, setIncludeArchived] = useState(false);
+
+  const shouldIncludeArchived = includeArchived || search.trim().length > 0;
 
   const fetchVehicles = async () => {
-    const { data } = await supabase
+    let query = supabase
       .from('vehicles')
       .select('*, owner:owners(*)')
-      .eq('archived', false)
       .order('created_at', { ascending: false });
+
+    if (!shouldIncludeArchived) {
+      query = query.eq('archived', false);
+    }
+
+    const { data } = await query;
 
     if (data) {
       setVehicles(data as any);
@@ -55,7 +63,7 @@ export default function Vehicles() {
       document.removeEventListener('visibilitychange', handleFocus);
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [shouldIncludeArchived]);
 
   const myVehiclesCount = vehicles.filter((v) => v.assigned_to === user?.id).length;
 
@@ -136,6 +144,16 @@ export default function Vehicles() {
           >
             <UserCheck className="h-4 w-4" />
             Mis vehículos {myVehiclesCount > 0 && `(${myVehiclesCount})`}
+          </Button>
+          <Button
+            variant={includeArchived ? "default" : "outline"}
+            size="sm"
+            onClick={() => setIncludeArchived(!includeArchived)}
+            className="gap-2 h-10"
+            title="Incluye vehículos entregados hace más de 24h"
+          >
+            <Archive className="h-4 w-4" />
+            Archivados
           </Button>
         </div>
 
