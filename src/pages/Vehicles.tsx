@@ -145,6 +145,16 @@ export default function Vehicles() {
             <UserCheck className="h-4 w-4" />
             Mis vehículos {myVehiclesCount > 0 && `(${myVehiclesCount})`}
           </Button>
+          <Button
+            variant={includeArchived ? "default" : "outline"}
+            size="sm"
+            onClick={() => setIncludeArchived(!includeArchived)}
+            className="gap-2 h-10"
+            title="Incluye vehículos entregados hace más de 24h"
+          >
+            <Archive className="h-4 w-4" />
+            Archivados
+          </Button>
         </div>
 
         {/* Grid */}
