@@ -63,7 +63,7 @@ export default function Vehicles() {
       document.removeEventListener('visibilitychange', handleFocus);
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [shouldIncludeArchived]);
 
   const myVehiclesCount = vehicles.filter((v) => v.assigned_to === user?.id).length;
 
