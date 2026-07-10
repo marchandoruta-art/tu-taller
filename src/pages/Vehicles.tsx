@@ -191,6 +191,22 @@ export default function Vehicles() {
               ))}
             </SelectContent>
           </Select>
+          {isAdmin && (
+            <Select value={assignedFilter} onValueChange={setAssignedFilter}>
+              <SelectTrigger className="w-56">
+                <SelectValue placeholder="Filtrar por operario" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los operarios</SelectItem>
+                <SelectItem value="unassigned">Sin asignar</SelectItem>
+                {operators.map((o) => (
+                  <SelectItem key={o.user_id} value={o.user_id}>
+                    {o.full_name} ({o.count})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           <Button
             variant={showOnlyMine ? "default" : "outline"}
             size="sm"
