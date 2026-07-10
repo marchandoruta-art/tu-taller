@@ -13,7 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { QuickPlateDialog } from '@/components/vehicles/QuickPlateDialog';
 
 export default function Vehicles() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const navigate = useNavigate();
   const [vehicles, setVehicles] = useState<VehicleWithOwner[]>([]);
   const [deletedMatches, setDeletedMatches] = useState<any[]>([]);
@@ -22,6 +22,10 @@ export default function Vehicles() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showOnlyMine, setShowOnlyMine] = useState(false);
   const [includeArchived, setIncludeArchived] = useState(false);
+  const [assignedFilter, setAssignedFilter] = useState<string>('all');
+  const [operators, setOperators] = useState<{ user_id: string; full_name: string; count: number }[]>([]);
+  const isAdmin = role === 'admin';
+
 
   const shouldIncludeArchived = includeArchived || search.trim().length > 0;
 
