@@ -92,6 +92,30 @@ export default function Vehicles() {
     return () => clearTimeout(timer);
   }, [search]);
 
+  // Load operators list for admin filter
+  useEffect(() => {
+    if (!isAdmin) return;
+    (async () => {
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .in('role', ['mecanico', 'chapista', 'admin']);
+      const ids = (roles || []).map((r: any) => r.user_id);
+      if (!ids.length) return;
+      const { data: profs } = await supabase
+        .from('profiles')
+        .select('user_id, full_name')
+        .in('user_id', ids);
+      const list = (profs || []).map((p: any) => ({
+        user_id: p.user_id,
+        full_name: p.full_name || 'Sin nombre',
+        count: vehicles.filter((v) => v.assigned_to === p.user_id).length,
+      }));
+      list.sort((a, b) => b.count - a.count);
+      setOperators(list);
+    })();
+  }, [isAdmin, vehicles]);
+
   const myVehiclesCount = vehicles.filter((v) => v.assigned_to === user?.id).length;
 
   const filteredVehicles = vehicles.filter((v) => {
@@ -104,9 +128,13 @@ export default function Vehicles() {
 
     const matchesStatus = statusFilter === 'all' || v.status === statusFilter;
     const matchesMine = !showOnlyMine || v.assigned_to === user?.id;
+    const matchesAssigned =
+      assignedFilter === 'all' ||
+      (assignedFilter === 'unassigned' ? !v.assigned_to : v.assigned_to === assignedFilter);
 
-    return matchesSearch && matchesStatus && matchesMine;
+    return matchesSearch && matchesStatus && matchesMine && matchesAssigned;
   });
+
 
   if (loading) {
     return (
