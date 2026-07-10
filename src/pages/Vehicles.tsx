@@ -13,7 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { QuickPlateDialog } from '@/components/vehicles/QuickPlateDialog';
 
 export default function Vehicles() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const navigate = useNavigate();
   const [vehicles, setVehicles] = useState<VehicleWithOwner[]>([]);
   const [deletedMatches, setDeletedMatches] = useState<any[]>([]);
@@ -22,6 +22,10 @@ export default function Vehicles() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showOnlyMine, setShowOnlyMine] = useState(false);
   const [includeArchived, setIncludeArchived] = useState(false);
+  const [assignedFilter, setAssignedFilter] = useState<string>('all');
+  const [operators, setOperators] = useState<{ user_id: string; full_name: string; count: number }[]>([]);
+  const isAdmin = role === 'admin';
+
 
   const shouldIncludeArchived = includeArchived || search.trim().length > 0;
 
@@ -88,6 +92,30 @@ export default function Vehicles() {
     return () => clearTimeout(timer);
   }, [search]);
 
+  // Load operators list for admin filter
+  useEffect(() => {
+    if (!isAdmin) return;
+    (async () => {
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .in('role', ['mecanico', 'chapista', 'admin']);
+      const ids = (roles || []).map((r: any) => r.user_id);
+      if (!ids.length) return;
+      const { data: profs } = await supabase
+        .from('profiles')
+        .select('user_id, full_name')
+        .in('user_id', ids);
+      const list = (profs || []).map((p: any) => ({
+        user_id: p.user_id,
+        full_name: p.full_name || 'Sin nombre',
+        count: vehicles.filter((v) => v.assigned_to === p.user_id).length,
+      }));
+      list.sort((a, b) => b.count - a.count);
+      setOperators(list);
+    })();
+  }, [isAdmin, vehicles]);
+
   const myVehiclesCount = vehicles.filter((v) => v.assigned_to === user?.id).length;
 
   const filteredVehicles = vehicles.filter((v) => {
@@ -100,9 +128,13 @@ export default function Vehicles() {
 
     const matchesStatus = statusFilter === 'all' || v.status === statusFilter;
     const matchesMine = !showOnlyMine || v.assigned_to === user?.id;
+    const matchesAssigned =
+      assignedFilter === 'all' ||
+      (assignedFilter === 'unassigned' ? !v.assigned_to : v.assigned_to === assignedFilter);
 
-    return matchesSearch && matchesStatus && matchesMine;
+    return matchesSearch && matchesStatus && matchesMine && matchesAssigned;
   });
+
 
   if (loading) {
     return (
@@ -159,6 +191,22 @@ export default function Vehicles() {
               ))}
             </SelectContent>
           </Select>
+          {isAdmin && (
+            <Select value={assignedFilter} onValueChange={setAssignedFilter}>
+              <SelectTrigger className="w-56">
+                <SelectValue placeholder="Filtrar por operario" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los operarios</SelectItem>
+                <SelectItem value="unassigned">Sin asignar</SelectItem>
+                {operators.map((o) => (
+                  <SelectItem key={o.user_id} value={o.user_id}>
+                    {o.full_name} ({o.count})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           <Button
             variant={showOnlyMine ? "default" : "outline"}
             size="sm"
