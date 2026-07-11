@@ -22,7 +22,6 @@ serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // 1) Resolve token -> vehicle
     const { data: tokenRow, error: tErr } = await supabase
       .from("client_portal_tokens")
       .select("id, vehicle_id, organization_id, expires_at, revoked")
@@ -33,7 +32,6 @@ serve(async (req) => {
     if (tokenRow.revoked) return json({ error: "Enlace revocado" }, 403);
     if (new Date(tokenRow.expires_at) < new Date()) return json({ error: "Enlace caducado" }, 410);
 
-    // 2) Fetch vehicle (limited fields, no client PII, no prices)
     const { data: vehicle, error: vErr } = await supabase
       .from("vehicles")
       .select("plate, brand, model, year, color, status, work_summary, client_tasks, delivered_at")
@@ -42,7 +40,6 @@ serve(async (req) => {
 
     if (vErr || !vehicle) return json({ error: "Vehículo no disponible" }, 404);
 
-    // 3) Workshop public info
     const { data: org } = await supabase
       .from("organizations")
       .select("name")
@@ -63,6 +60,13 @@ serve(async (req) => {
       : [];
     const done = tasks.filter((t) => t.done).length;
 
+    // Pending approvals
+    const { data: approvals } = await supabase
+      .from("client_approvals")
+      .select("id, description, estimated_info, status, created_at, client_response_at")
+      .eq("vehicle_id", tokenRow.vehicle_id)
+      .order("created_at", { ascending: false });
+
     return json({
       vehicle: {
         plate: vehicle.plate,
@@ -82,6 +86,8 @@ serve(async (req) => {
         horario: s.taller_horario,
       },
       progress: { done, total: tasks.length },
+      approvals: approvals || [],
+      portal_token: token,
     }, 200);
   } catch (e: any) {
     return json({ error: e?.message || "Error" }, 500);
