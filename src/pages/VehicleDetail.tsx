@@ -14,6 +14,8 @@ import { ClientTasksChecklist, ClientTask } from '@/components/vehicles/ClientTa
 import { PortalShareDialog } from '@/components/vehicles/PortalShareDialog';
 import { PrioritySelector } from '@/components/vehicles/PrioritySelector';
 import { AIRepairEstimateButton } from '@/components/vehicles/AIRepairEstimateButton';
+import { ClientApprovalsPanel } from '@/components/vehicles/ClientApprovalsPanel';
+import { ScanVinButton } from '@/components/vehicles/ScanVinButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
