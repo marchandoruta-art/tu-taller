@@ -57,6 +57,9 @@ export type Database = {
           assigned_to: string | null
           client_name: string
           client_phone: string | null
+          confirmation_status: Database["public"]["Enums"]["appointment_confirmation_status"]
+          confirmation_token: string | null
+          confirmed_at: string | null
           created_at: string
           created_by: string | null
           id: string
@@ -76,6 +79,9 @@ export type Database = {
           assigned_to?: string | null
           client_name: string
           client_phone?: string | null
+          confirmation_status?: Database["public"]["Enums"]["appointment_confirmation_status"]
+          confirmation_token?: string | null
+          confirmed_at?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -95,6 +101,9 @@ export type Database = {
           assigned_to?: string | null
           client_name?: string
           client_phone?: string | null
+          confirmation_status?: Database["public"]["Enums"]["appointment_confirmation_status"]
+          confirmation_token?: string | null
+          confirmed_at?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -161,6 +170,89 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json
+          entity_id: string | null
+          entity_type: string
+          id: string
+          organization_id: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          organization_id: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          organization_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      client_approvals: {
+        Row: {
+          client_note: string | null
+          client_response_at: string | null
+          created_at: string
+          description: string
+          estimated_info: string | null
+          id: string
+          organization_id: string
+          requested_by: string | null
+          status: Database["public"]["Enums"]["client_approval_status"]
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          client_note?: string | null
+          client_response_at?: string | null
+          created_at?: string
+          description: string
+          estimated_info?: string | null
+          id?: string
+          organization_id: string
+          requested_by?: string | null
+          status?: Database["public"]["Enums"]["client_approval_status"]
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          client_note?: string | null
+          client_response_at?: string | null
+          created_at?: string
+          description?: string
+          estimated_info?: string | null
+          id?: string
+          organization_id?: string
+          requested_by?: string | null
+          status?: Database["public"]["Enums"]["client_approval_status"]
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_approvals_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]
@@ -1125,7 +1217,9 @@ export type Database = {
       }
     }
     Enums: {
+      appointment_confirmation_status: "pendiente" | "confirmada" | "cancelada"
       appointment_type: "mecanica" | "chapa_pintura"
+      client_approval_status: "pendiente" | "aprobado" | "rechazado"
       user_role: "mecanico" | "chapista" | "oficina" | "admin"
       vehicle_priority: "baja" | "normal" | "alta" | "urgente"
       vehicle_status:
@@ -1264,7 +1358,9 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      appointment_confirmation_status: ["pendiente", "confirmada", "cancelada"],
       appointment_type: ["mecanica", "chapa_pintura"],
+      client_approval_status: ["pendiente", "aprobado", "rechazado"],
       user_role: ["mecanico", "chapista", "oficina", "admin"],
       vehicle_priority: ["baja", "normal", "alta", "urgente"],
       vehicle_status: [
