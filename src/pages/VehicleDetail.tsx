@@ -14,6 +14,8 @@ import { ClientTasksChecklist, ClientTask } from '@/components/vehicles/ClientTa
 import { PortalShareDialog } from '@/components/vehicles/PortalShareDialog';
 import { PrioritySelector } from '@/components/vehicles/PrioritySelector';
 import { AIRepairEstimateButton } from '@/components/vehicles/AIRepairEstimateButton';
+import { ClientApprovalsPanel } from '@/components/vehicles/ClientApprovalsPanel';
+import { ScanVinButton } from '@/components/vehicles/ScanVinButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -564,6 +566,19 @@ export default function VehicleDetail() {
           </div>
         </div>
 
+        {/* Pickup overdue badge */}
+        {vehicle.status === 'terminado' && (() => {
+          const hours = (Date.now() - new Date(vehicle.updated_at).getTime()) / 3600000;
+          if (hours < 48) return null;
+          const days = Math.floor(hours / 24);
+          return (
+            <div className="flex items-center gap-2 p-3 rounded-lg border border-amber-500/40 bg-amber-500/10 text-sm">
+              <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0"/>
+              <span>⏰ Cliente sin recoger hace <strong>{days} día{days !== 1 ? 's' : ''}</strong>. Recuérdele la recogida.</span>
+            </div>
+          );
+        })()}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
@@ -590,6 +605,13 @@ export default function VehicleDetail() {
               tasks={clientTasks}
               clientDescription={vehicle.client_description}
               onUpdate={(updated) => setClientTasks(updated)}
+            />
+
+            {/* Client approvals */}
+            <ClientApprovalsPanel
+              vehicleId={vehicle.id}
+              vehiclePlate={vehicle.plate}
+              ownerPhone={vehicle.owner?.phone}
             />
 
             {/* Description */}

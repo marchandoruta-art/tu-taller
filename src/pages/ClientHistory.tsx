@@ -9,8 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { 
   ArrowLeft, User, Car, Clock, Wrench, Euro, Phone, Mail, 
-  FileText, Calendar, Loader2, ChevronRight 
+  FileText, Calendar, Loader2, ChevronRight, Download
 } from 'lucide-react';
+import { downloadCsv } from '@/lib/exportCsv';
 import { VehicleStatusBadge } from '@/components/vehicles/VehicleStatusBadge';
 import { Owner, VehicleStatus, STATUS_LABELS } from '@/lib/types';
 
@@ -151,10 +152,27 @@ export default function ClientHistory() {
           <div className="p-3 rounded-xl bg-primary/10">
             <User className="h-6 w-6 text-primary" />
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="text-2xl font-bold">{owner?.name}</h1>
             <p className="text-sm text-muted-foreground">Historial completo del cliente</p>
           </div>
+          <Button variant="outline" className="gap-2" onClick={() => {
+            if (!owner) return;
+            downloadCsv(`historial-${owner.name.replace(/\s+/g, '-')}`, vehicles, [
+              { key: 'plate', label: 'Matrícula', value: (v) => v.plate },
+              { key: 'brand', label: 'Marca', value: (v) => v.brand },
+              { key: 'model', label: 'Modelo', value: (v) => v.model },
+              { key: 'status', label: 'Estado', value: (v) => v.status },
+              { key: 'created_at', label: 'Ingreso', value: (v) => new Date(v.created_at).toLocaleDateString('es-ES') },
+              { key: 'delivered_at', label: 'Entrega', value: (v) => v.delivered_at ? new Date(v.delivered_at).toLocaleDateString('es-ES') : '' },
+              { key: 'minutes', label: 'Minutos', value: (v) => v.totalMinutes },
+              { key: 'parts', label: 'Nº piezas', value: (v) => v.partsCount },
+              { key: 'cost', label: 'Coste piezas (€)', value: (v) => v.partsCost.toFixed(2) },
+              { key: 'summary', label: 'Trabajo', value: (v) => v.work_summary || '' },
+            ]);
+          }}>
+            <Download className="h-4 w-4"/> Exportar
+          </Button>
         </div>
 
         {/* Owner Contact Info */}
