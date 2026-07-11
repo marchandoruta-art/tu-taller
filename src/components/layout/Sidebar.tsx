@@ -26,6 +26,7 @@ import {
   Archive,
   Search,
   ClipboardList,
+  ShieldCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -52,6 +53,7 @@ const adminNavigation = [
   { name: 'Productividad', href: '/admin/productivity', icon: BarChart3 },
   { name: 'Alertas', href: '/admin/alerts', icon: AlertTriangle },
   { name: 'Gestión Datos', href: '/admin/data', icon: Database },
+  { name: 'Log Auditoría', href: '/admin/audit', icon: ShieldCheck },
   { name: 'Legal', href: '/legal', icon: Scale },
   { name: 'Plantillas Tareas', href: '/settings/templates', icon: ClipboardList },
   { name: 'Ajustes', href: '/settings', icon: Settings },
