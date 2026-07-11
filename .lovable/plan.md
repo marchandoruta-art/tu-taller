@@ -1,97 +1,88 @@
+# Plan: mejoras 12, 13, 14, 15, 17, 21, 23, 25
 
-# Plan de implementación
-
-Voy a entregar estas 6 mejoras en bloques independientes para que se puedan revisar/usar a medida que avanzan.
-
----
-
-## 1. Exportación de datos (CSV / Excel)
-
-**Dónde:** Dashboard, Histórico de Reparaciones, Productividad, Control de Carga, Asistencia.
-
-- Botón **"Exportar"** en la cabecera de cada listado (icono Download).
-- Genera **CSV** directamente desde el navegador (sin dependencias nuevas) usando los datos ya cargados + filtros activos.
-- Para Excel real (.xlsx) en exportes importantes (Histórico y Productividad) añado la librería `xlsx` (SheetJS) y genero hoja con cabeceras, formato fecha y totales.
-- Exporta lo visible tras filtros (rango de fechas, técnico, estado).
+Voy a entregarlas en 3 bloques para poder revisarlas por partes.
 
 ---
 
-## 2. Etiquetas de prioridad en Kanban (#6)
+## Bloque A — Cliente y comunicación
 
-**Dónde:** Tabla `vehicles`, `VehicleCard`, `Dashboard`.
+### 14. Notificación automática al marcar "Terminado"
+- Ya existe el trigger `notify_vehicle_completed_push` que avisa a los admins.
+- Añadir: al pasar a `terminado`, la ficha ofrece un botón visible **"Avisar al cliente por WhatsApp"** con plantilla ya rellenada (cliente, matrícula, taller, horario). Configurable desde Ajustes → Mensajes (`whatsapp_ready_template`).
+- Registro en el timeline del vehículo cuando se pulsa (para saber si ya se avisó).
 
-- Nueva columna `priority` en `vehicles`: enum `baja | normal | alta | urgente` (default `normal`).
-- Selector de prioridad en la ficha del vehículo (admin/oficina) y menú rápido en la tarjeta.
-- En las tarjetas Kanban/Lista: borde/etiqueta de color (urgente = rojo pulsante, alta = naranja, baja = gris) y un icono ⚡ para urgentes.
-- Filtro "Solo urgentes/altas" en el Dashboard.
-- Orden por prioridad descendente como opción.
+### 15. Recordatorio de vehículos sin recoger
+- Extender `remind-pending-vehicles` (o nuevo bloque en la misma) para detectar vehículos en estado `terminado` con más de **48h** sin pasar a `entregado`.
+- A las 10:00h Europe/Madrid crea notificación interna para admin/oficina: "Cliente sin recoger el vehículo XXX (2 días)".
+- En la ficha aparece badge amarillo "⏰ Sin recoger hace X días" cuando `terminado > 48h`.
+- Botón 1-click WhatsApp con plantilla `whatsapp_pickup_reminder_template`.
 
----
-
-## 3. Portal cliente de solo lectura (#7)
-
-**Dónde:** Ruta pública `/c/:token`.
-
-- Nueva tabla `client_portal_tokens` (vehicle_id, token uuid, expires_at, organization_id).
-- Botón en la ficha del vehículo (admin/oficina): **"Compartir con cliente"** → genera link único + botón WhatsApp con plantilla.
-- Página pública sin login que muestra: matrícula, marca/modelo, estado actual con barra de progreso, resumen de trabajo, fotos (antes/después si las marcamos como compartibles), tareas del checklist completadas, fecha estimada y datos de contacto del taller.
-- **No** muestra precios, propietario completo, ni datos internos.
-- Edge function `get-portal-vehicle` valida token y devuelve solo datos permitidos (signed URLs para fotos).
-- Token caducable (default 30 días) y revocable.
+### 13. Portal cliente para aprobar trabajos adicionales
+- Reutilizo `client_portal_tokens` + `PortalView` que ya existen.
+- Nueva tabla `client_approvals` (id, vehicle_id, description, requested_by, status enum `pendiente|aprobado|rechazado`, client_response_at, organization_id).
+- En la ficha vehículo, botón **"Solicitar aprobación al cliente"** → crea entrada + genera enlace portal + botón WhatsApp con el enlace.
+- En `PortalView` (público, sin login) el cliente ve la lista de aprobaciones pendientes con botones **Aprobar / Rechazar**. Firma no requerida (queda registrado token + timestamp + IP).
+- Edge function `respond-approval` valida token del portal, guarda respuesta, notifica al admin (toast + push).
+- Registro en timeline del vehículo.
 
 ---
 
-## 4. Recordatorios WhatsApp automáticos de citas (#9)
+## Bloque B — Citas, búsqueda y notificaciones
 
-**Dónde:** Edge function programada + UI de citas.
+### 17. Confirmación de cita por el cliente
+- Nueva columna en `appointments`: `confirmation_status` enum `pendiente|confirmada|cancelada`, `confirmation_token` uuid, `confirmed_at`.
+- Al crear cita, botón **"Pedir confirmación por WhatsApp"** con link único `/cita/:token`.
+- Página pública `AppointmentConfirm` mostrando datos de la cita + botones **Confirmar / Cancelar** (edge function `respond-appointment` valida token y actualiza estado).
+- En la lista de Citas, badge de estado con color (gris pendiente, verde confirmada, rojo cancelada).
+- Recordatorio del día antes (17:00h) solo se envía si no ha sido confirmada.
 
-- Extender la función `reminder-appointments` ya existente para generar a las **17:00h del día anterior** una notificación interna por cita con un **link WhatsApp pre-rellenado** (1 click) por cita pendiente.
-- Plantilla configurable desde Ajustes → bloque "Mensajes": `whatsapp_reminder_template` con variables `{cliente}`, `{matricula}`, `{fecha}`, `{hora}`, `{taller}`.
-- En la página Citas: badge "Recordatorio listo" + botón **Enviar WhatsApp** que abre `wa.me` con el mensaje.
-- Cron pg_cron a las 17:00 Europe/Madrid.
+### 21. Exportar historial de cliente
+- En `ClientHistory.tsx` añadir botón **"Exportar historial"** que genera CSV con: todos los vehículos del cliente, fechas, matrículas, trabajos realizados, piezas, horas totales.
+- Reutiliza `src/lib/exportCsv.ts` (ya existe).
+- Formato limpio, listo para adjuntar por email al cliente si lo pide.
+
+### 23. Notificaciones agrupadas
+- En `Notifications.tsx` y en el dropdown de la campana: agrupar por tipo y vehículo.
+- Ejemplo: en vez de 8 líneas "Nueva foto añadida" mostrar "8 fotos añadidas al vehículo XXX".
+- Grupo colapsable: click expande y muestra las notificaciones individuales.
+- Botón "Marcar grupo como leído".
+- Sin cambios en la tabla `notifications`, solo en la capa de presentación.
 
 ---
 
-## 5. Plantillas de tareas recurrentes (#10)
+## Bloque C — Seguridad y admin
 
-**Dónde:** Nueva sección en Ajustes + ficha vehículo.
+### 12. Reconocimiento de VIN por cámara
+- Ya existe `ScanTechnicalSheetButton` (usa Lovable AI para leer ficha técnica).
+- Añadir botón hermano **"Escanear VIN"** en la ficha del vehículo y en el diálogo de recepción.
+- Usa Lovable AI Gateway (`google/gemini-2.5-flash`) para leer VIN de foto/etiqueta del parabrisas.
+- Rellena automáticamente los campos `vin`, `brand`, `model`, `year` si los detecta.
+- Edge function `scan-vin` (nueva) similar a `scan-vehicle-document` pero con prompt específico para VIN.
 
-- Nueva tabla `task_templates` (id, organization_id, name, tasks jsonb, created_by).
-- En Ajustes nueva pestaña **"Plantillas de tareas"**: crear/editar/borrar plantillas tipo "Revisión ITV", "Cambio de aceite + filtros", "Pre-entrega", con su lista de tareas.
-- En la ficha del vehículo, en el checklist, botón **"Aplicar plantilla"** → desplegable que añade las tareas de la plantilla a `client_tasks`.
-
----
-
-## 6. Crear vehículo rápido por matrícula
-
-**Dónde:** Diálogo "Nuevo vehículo" + atajo Cmd+K.
-
-- En `NewVehicleDialog`: al introducir la matrícula y pulsar **Enter** o el botón **"Crear rápido"**:
-  - Comprueba si ya existe vehículo activo con esa matrícula → abre directamente su ficha.
-  - Si no existe pero hay un **archivo** o vehículo entregado previo con esa matrícula → pre-rellena marca, modelo, propietario y permite confirmar en 1 click.
-  - Si no existe en absoluto → crea vehículo con `status='recibido'`, marca/modelo `Sin especificar` (editables después), y abre la ficha.
-- En la paleta global (Cmd+K) y en el Dashboard, una caja "Crear/abrir matrícula" que hace lo mismo en una sola línea.
-- Botón flotante en móvil "+ Matrícula" para entrada ultra-rápida en el taller.
+### 25. Log de auditoría visible
+- Ya tenemos datos: `vehicle_status_history`, `notifications`, `time_logs`, `attendance_logs`.
+- Nueva página **`/admin/audit`** (solo admin) con timeline unificado filtrable por: usuario, tipo (cambios estado, timers, asistencia, aprobaciones cliente, borrados), rango de fechas.
+- Vista de lista con paginación (50 items).
+- CSV export del log filtrado.
+- Añadir tabla `audit_log` (id, user_id, organization_id, action, entity_type, entity_id, details jsonb, created_at) para eventos que hoy no se registran (borrados, cambios de asignación, aprobaciones portal). Trigger en `vehicles` para DELETE/UPDATE de `assigned_to`.
 
 ---
 
 ## Detalles técnicos
 
-- **DB:** 3 migraciones (priority enum + columna, `client_portal_tokens`, `task_templates`) con GRANT + RLS por `organization_id` y `is_org_admin()`/`is_org_owner()` según corresponda. Token portal con policy pública SOLO desde edge function (service_role).
-- **Edge functions:** nueva `get-portal-vehicle` (pública con validación de token); ampliar `reminder-appointments`.
-- **Cron:** pg_cron 17:00 Europe/Madrid → `reminder-appointments`.
-- **Dependencia nueva:** `xlsx` (SheetJS) para exportes Excel.
-- **Permisos:** prioridad editable por admin/oficina; portal y plantillas solo admin/oficina; mecánico/chapista solo ven.
-- **Mobile-first:** todos los nuevos controles funcionan a 430px (caja matrícula rápida, selector prioridad, botones exportar accesibles desde menú "más").
+- **DB (migraciones):** `client_approvals`, `audit_log`, columnas nuevas en `appointments` (`confirmation_status`, `confirmation_token`, `confirmed_at`). Todas con GRANT + RLS por `organization_id`. Tokens con policy pública SOLO desde edge function (service_role).
+- **Edge functions nuevas:** `respond-approval`, `respond-appointment`, `scan-vin`. Extender `remind-pending-vehicles`.
+- **Rutas públicas nuevas:** `/aprobacion/:token`, `/cita/:token`.
+- **Ajustes:** 3 plantillas nuevas de WhatsApp (`whatsapp_ready_template`, `whatsapp_pickup_reminder_template`, `whatsapp_appointment_confirm_template`).
+- **Permisos:** todo lo administrativo (audit, aprobaciones) restringido a admin/oficina. Portal cliente sigue siendo público con token.
+- **Mobile-first:** todos los botones nuevos accesibles a 430px.
 
 ---
 
-## Orden de entrega sugerido
+## Orden de entrega
 
-1. Matrícula rápida + Prioridades (impacto inmediato en el día a día)
-2. Exportación de datos
-3. Plantillas de tareas
-4. Recordatorios WhatsApp
-5. Portal cliente (lo más grande, último)
+1. Bloque A (comunicación cliente) — mayor impacto operativo
+2. Bloque B (citas, exportes, notificaciones agrupadas)
+3. Bloque C (VIN + auditoría)
 
-¿Lo lanzo en este orden o prefieres otro? ¿Confirmo todo o quitamos/cambiamos algo?
+¿Lanzo en este orden los tres bloques seguidos, o prefieres validar Bloque A antes de pasar al B?
