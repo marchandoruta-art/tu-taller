@@ -216,8 +216,41 @@ export default function AppointmentsPage() {
     }
   };
 
-  const getAppointmentsForDate = (date: Date) =>
-    appointments.filter((a) => isSameDay(new Date(a.appointment_date), date));
+  const getAppointmentsForDate = (date: Date) => {
+    const list = appointments.filter((a) => isSameDay(new Date(a.appointment_date), date));
+    if (confirmationFilter === 'todas') return list;
+    return list.filter((a) => a.confirmation_status === confirmationFilter);
+  };
+
+  const requestConfirmation = async (apt: Appointment) => {
+    if (!apt.client_phone) {
+      toast.error('El cliente no tiene teléfono');
+      return;
+    }
+    let token = apt.confirmation_token;
+    if (!token) {
+      token = safeUUID();
+      const { error } = await supabase
+        .from('appointments')
+        .update({ confirmation_token: token })
+        .eq('id', apt.id);
+      if (error) {
+        toast.error('Error al generar enlace');
+        return;
+      }
+      setAppointments((prev) => prev.map((a) => (a.id === apt.id ? { ...a, confirmation_token: token } : a)));
+    }
+    const url = `${window.location.origin}/cita/${token}`;
+    const dateStr = format(new Date(apt.appointment_date), "d 'de' MMMM", { locale: es });
+    const timeStr = apt.appointment_time ? ` a las ${apt.appointment_time.slice(0, 5)}` : '';
+    const msg = encodeURIComponent(
+      `Hola ${apt.client_name}, le confirmamos su cita el ${dateStr}${timeStr} para su vehículo ${apt.vehicle_plate || ''}. Por favor confirme o cancele aquí: ${url}`
+    );
+    const cleanPhone = apt.client_phone.replace(/[\s\-\(\)]/g, '');
+    const phoneWithCode = cleanPhone.startsWith('+') ? cleanPhone : `+34${cleanPhone}`;
+    window.open(`https://wa.me/${phoneWithCode.replace('+', '')}?text=${msg}`, '_blank');
+  };
+
 
   const getDaysWithAppointments = () => {
     const days: Date[] = [];
