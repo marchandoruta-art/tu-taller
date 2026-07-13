@@ -324,6 +324,26 @@ export default function AppointmentsPage() {
           </div>
         </div>
 
+        {/* Confirmation filter */}
+        <div className="flex flex-wrap gap-2">
+          {([
+            ['todas', 'Todas'],
+            ['pendiente', 'Pendientes'],
+            ['confirmada', 'Confirmadas'],
+            ['cancelada', 'Canceladas'],
+          ] as const).map(([key, label]) => (
+            <Button
+              key={key}
+              size="sm"
+              variant={confirmationFilter === key ? 'default' : 'outline'}
+              onClick={() => setConfirmationFilter(key)}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
+
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Calendar */}
           <Card className="lg:col-span-2">
