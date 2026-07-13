@@ -449,14 +449,42 @@ export default function AppointmentsPage() {
                           </div>
                         </div>
 
-                        <Badge variant="outline" className={`text-xs ${colors.text} ${colors.border}`}>
-                          {apt.appointment_type === 'mecanica' ? (
-                            <Wrench className="h-3 w-3 mr-1" />
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <Badge variant="outline" className={`text-xs ${colors.text} ${colors.border}`}>
+                            {apt.appointment_type === 'mecanica' ? (
+                              <Wrench className="h-3 w-3 mr-1" />
+                            ) : (
+                              <Paintbrush className="h-3 w-3 mr-1" />
+                            )}
+                            {APPOINTMENT_TYPE_LABELS[apt.appointment_type]}
+                          </Badge>
+                          {apt.confirmation_status === 'confirmada' ? (
+                            <Badge variant="outline" className="text-xs border-green-500/40 text-green-600 dark:text-green-400">
+                              <CheckCircle2 className="h-3 w-3 mr-1" /> Confirmada
+                            </Badge>
+                          ) : apt.confirmation_status === 'cancelada' ? (
+                            <Badge variant="outline" className="text-xs border-red-500/40 text-red-600 dark:text-red-400">
+                              <XCircle className="h-3 w-3 mr-1" /> Cancelada
+                            </Badge>
                           ) : (
-                            <Paintbrush className="h-3 w-3 mr-1" />
+                            <Badge variant="outline" className="text-xs border-muted-foreground/40 text-muted-foreground">
+                              <HelpCircle className="h-3 w-3 mr-1" /> Pendiente
+                            </Badge>
                           )}
-                          {APPOINTMENT_TYPE_LABELS[apt.appointment_type]}
-                        </Badge>
+                        </div>
+
+                        {apt.confirmation_status !== 'confirmada' && apt.client_phone && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full gap-2 border-green-500/40 text-green-600 hover:bg-green-500/10 dark:text-green-400"
+                            onClick={() => requestConfirmation(apt)}
+                          >
+                            <MessageCircle className="h-3.5 w-3.5" />
+                            Pedir confirmación por WhatsApp
+                          </Button>
+                        )}
+
 
                         {apt.appointment_time && (
                           <div className="flex items-center gap-1 text-sm text-muted-foreground">
