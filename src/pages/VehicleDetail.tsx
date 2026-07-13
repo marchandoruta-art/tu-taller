@@ -1006,6 +1006,44 @@ export default function VehicleDetail() {
             {/* Deposit Receipt */}
             <ViewDepositReceipt vehicle={vehicle} />
 
+            {/* Datos técnicos / VIN */}
+            {(role === 'admin' || role === 'oficina' || role === 'mecanico') && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <FileText className="h-5 w-5" />
+                    Datos técnicos
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">VIN / Bastidor</p>
+                    <p className="font-mono text-sm break-all">
+                      {(vehicle as any).vin || <span className="italic text-muted-foreground">Sin registrar</span>}
+                    </p>
+                  </div>
+                  <ScanVinButton
+                    variant="outline"
+                    size="sm"
+                    className="w-full gap-2"
+                    label={(vehicle as any).vin ? 'Re-escanear VIN' : 'Escanear VIN con cámara'}
+                    onScanned={async (data) => {
+                      if (!data.vin) return;
+                      const update: any = { vin: data.vin };
+                      if (data.brand && !vehicle.brand) update.brand = data.brand;
+                      if (data.year && !vehicle.year) update.year = data.year;
+                      const { error } = await supabase.from('vehicles').update(update).eq('id', vehicle.id);
+                      if (error) { toast.error('Error al guardar VIN'); return; }
+                      toast.success('VIN guardado');
+                      fetchVehicleData();
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+
+
             {/* Owner Info */}
             <Card>
               <CardHeader className="pb-3">

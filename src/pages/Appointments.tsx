@@ -27,10 +27,16 @@ import {
   Car,
   Edit,
   AlertCircle,
+  MessageCircle,
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isSameDay, addMonths, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { safeUUID } from '@/lib/uuid';
+
 
 interface Appointment {
   id: string;
@@ -50,7 +56,11 @@ interface Appointment {
   created_at: string;
   updated_at: string;
   vehicle_id: string | null;
+  confirmation_status: 'pendiente' | 'confirmada' | 'cancelada';
+  confirmation_token: string | null;
+  confirmed_at: string | null;
 }
+
 
 const APPOINTMENT_TYPE_LABELS: Record<string, string> = {
   mecanica: 'Mecánica',
@@ -97,10 +107,12 @@ export default function AppointmentsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [confirmationFilter, setConfirmationFilter] = useState<'todas' | 'pendiente' | 'confirmada' | 'cancelada'>('todas');
 
   useEffect(() => {
     fetchData();
   }, [currentMonth]);
+
 
   const fetchData = async () => {
     setLoading(true);
@@ -204,8 +216,41 @@ export default function AppointmentsPage() {
     }
   };
 
-  const getAppointmentsForDate = (date: Date) =>
-    appointments.filter((a) => isSameDay(new Date(a.appointment_date), date));
+  const getAppointmentsForDate = (date: Date) => {
+    const list = appointments.filter((a) => isSameDay(new Date(a.appointment_date), date));
+    if (confirmationFilter === 'todas') return list;
+    return list.filter((a) => a.confirmation_status === confirmationFilter);
+  };
+
+  const requestConfirmation = async (apt: Appointment) => {
+    if (!apt.client_phone) {
+      toast.error('El cliente no tiene teléfono');
+      return;
+    }
+    let token = apt.confirmation_token;
+    if (!token) {
+      token = safeUUID();
+      const { error } = await supabase
+        .from('appointments')
+        .update({ confirmation_token: token })
+        .eq('id', apt.id);
+      if (error) {
+        toast.error('Error al generar enlace');
+        return;
+      }
+      setAppointments((prev) => prev.map((a) => (a.id === apt.id ? { ...a, confirmation_token: token } : a)));
+    }
+    const url = `${window.location.origin}/cita/${token}`;
+    const dateStr = format(new Date(apt.appointment_date), "d 'de' MMMM", { locale: es });
+    const timeStr = apt.appointment_time ? ` a las ${apt.appointment_time.slice(0, 5)}` : '';
+    const msg = encodeURIComponent(
+      `Hola ${apt.client_name}, le confirmamos su cita el ${dateStr}${timeStr} para su vehículo ${apt.vehicle_plate || ''}. Por favor confirme o cancele aquí: ${url}`
+    );
+    const cleanPhone = apt.client_phone.replace(/[\s\-\(\)]/g, '');
+    const phoneWithCode = cleanPhone.startsWith('+') ? cleanPhone : `+34${cleanPhone}`;
+    window.open(`https://wa.me/${phoneWithCode.replace('+', '')}?text=${msg}`, '_blank');
+  };
+
 
   const getDaysWithAppointments = () => {
     const days: Date[] = [];
@@ -278,6 +323,26 @@ export default function AppointmentsPage() {
             <span className="text-sm text-muted-foreground">Chapa y Pintura</span>
           </div>
         </div>
+
+        {/* Confirmation filter */}
+        <div className="flex flex-wrap gap-2">
+          {([
+            ['todas', 'Todas'],
+            ['pendiente', 'Pendientes'],
+            ['confirmada', 'Confirmadas'],
+            ['cancelada', 'Canceladas'],
+          ] as const).map(([key, label]) => (
+            <Button
+              key={key}
+              size="sm"
+              variant={confirmationFilter === key ? 'default' : 'outline'}
+              onClick={() => setConfirmationFilter(key)}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
+
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Calendar */}
@@ -384,14 +449,42 @@ export default function AppointmentsPage() {
                           </div>
                         </div>
 
-                        <Badge variant="outline" className={`text-xs ${colors.text} ${colors.border}`}>
-                          {apt.appointment_type === 'mecanica' ? (
-                            <Wrench className="h-3 w-3 mr-1" />
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <Badge variant="outline" className={`text-xs ${colors.text} ${colors.border}`}>
+                            {apt.appointment_type === 'mecanica' ? (
+                              <Wrench className="h-3 w-3 mr-1" />
+                            ) : (
+                              <Paintbrush className="h-3 w-3 mr-1" />
+                            )}
+                            {APPOINTMENT_TYPE_LABELS[apt.appointment_type]}
+                          </Badge>
+                          {apt.confirmation_status === 'confirmada' ? (
+                            <Badge variant="outline" className="text-xs border-green-500/40 text-green-600 dark:text-green-400">
+                              <CheckCircle2 className="h-3 w-3 mr-1" /> Confirmada
+                            </Badge>
+                          ) : apt.confirmation_status === 'cancelada' ? (
+                            <Badge variant="outline" className="text-xs border-red-500/40 text-red-600 dark:text-red-400">
+                              <XCircle className="h-3 w-3 mr-1" /> Cancelada
+                            </Badge>
                           ) : (
-                            <Paintbrush className="h-3 w-3 mr-1" />
+                            <Badge variant="outline" className="text-xs border-muted-foreground/40 text-muted-foreground">
+                              <HelpCircle className="h-3 w-3 mr-1" /> Pendiente
+                            </Badge>
                           )}
-                          {APPOINTMENT_TYPE_LABELS[apt.appointment_type]}
-                        </Badge>
+                        </div>
+
+                        {apt.confirmation_status !== 'confirmada' && apt.client_phone && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full gap-2 border-green-500/40 text-green-600 hover:bg-green-500/10 dark:text-green-400"
+                            onClick={() => requestConfirmation(apt)}
+                          >
+                            <MessageCircle className="h-3.5 w-3.5" />
+                            Pedir confirmación por WhatsApp
+                          </Button>
+                        )}
+
 
                         {apt.appointment_time && (
                           <div className="flex items-center gap-1 text-sm text-muted-foreground">
