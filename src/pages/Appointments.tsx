@@ -50,7 +50,11 @@ interface Appointment {
   created_at: string;
   updated_at: string;
   vehicle_id: string | null;
+  confirmation_status: 'pendiente' | 'confirmada' | 'cancelada';
+  confirmation_token: string | null;
+  confirmed_at: string | null;
 }
+
 
 const APPOINTMENT_TYPE_LABELS: Record<string, string> = {
   mecanica: 'Mecánica',
