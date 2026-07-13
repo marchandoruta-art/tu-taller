@@ -27,10 +27,16 @@ import {
   Car,
   Edit,
   AlertCircle,
+  MessageCircle,
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, isSameDay, addMonths, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { safeUUID } from '@/lib/uuid';
+
 
 interface Appointment {
   id: string;
