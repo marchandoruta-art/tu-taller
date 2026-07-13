@@ -107,10 +107,12 @@ export default function AppointmentsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [confirmationFilter, setConfirmationFilter] = useState<'todas' | 'pendiente' | 'confirmada' | 'cancelada'>('todas');
 
   useEffect(() => {
     fetchData();
   }, [currentMonth]);
+
 
   const fetchData = async () => {
     setLoading(true);
