@@ -114,6 +114,7 @@ export default function VehicleDetail() {
       setWorkSummary(vehicleRes.data.work_summary || '');
       setClientDescription(vehicleRes.data.client_description || '');
       setClientTasks(Array.isArray(vehicleRes.data.client_tasks) ? (vehicleRes.data.client_tasks as unknown as ClientTask[]) : []);
+      setMaintenanceItems(Array.isArray((vehicleRes.data as any).maintenance_checklist) ? ((vehicleRes.data as any).maintenance_checklist as MaintenanceItem[]) : []);
       
       
       // Fetch assigned user
