@@ -11,6 +11,7 @@ import { ViewDepositReceipt } from '@/components/vehicles/reception/ViewDepositR
 import { EditReceptionDataDialog } from '@/components/vehicles/EditReceptionDataDialog';
 import { VehiclePhotos } from '@/components/vehicles/VehiclePhotos';
 import { ClientTasksChecklist, ClientTask } from '@/components/vehicles/ClientTasksChecklist';
+import { MaintenanceChecklist, MaintenanceItem } from '@/components/vehicles/MaintenanceChecklist';
 import { PortalShareDialog } from '@/components/vehicles/PortalShareDialog';
 import { PrioritySelector } from '@/components/vehicles/PrioritySelector';
 import { AIRepairEstimateButton } from '@/components/vehicles/AIRepairEstimateButton';
@@ -74,7 +75,8 @@ export default function VehicleDetail() {
    const [clientDescription, setClientDescription] = useState('');
    const [savingDescription, setSavingDescription] = useState(false);
    const [editingDescription, setEditingDescription] = useState(false);
-   const [clientTasks, setClientTasks] = useState<ClientTask[]>([]);
+  const [clientTasks, setClientTasks] = useState<ClientTask[]>([]);
+  const [maintenanceItems, setMaintenanceItems] = useState<MaintenanceItem[]>([]);
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
   const topRef = useRef<HTMLDivElement>(null);
 
@@ -112,6 +114,7 @@ export default function VehicleDetail() {
       setWorkSummary(vehicleRes.data.work_summary || '');
       setClientDescription(vehicleRes.data.client_description || '');
       setClientTasks(Array.isArray(vehicleRes.data.client_tasks) ? (vehicleRes.data.client_tasks as unknown as ClientTask[]) : []);
+      setMaintenanceItems(Array.isArray((vehicleRes.data as any).maintenance_checklist) ? ((vehicleRes.data as any).maintenance_checklist as MaintenanceItem[]) : []);
       
       
       // Fetch assigned user
@@ -605,6 +608,13 @@ export default function VehicleDetail() {
               tasks={clientTasks}
               clientDescription={vehicle.client_description}
               onUpdate={(updated) => setClientTasks(updated)}
+            />
+
+            {/* Maintenance Checklist */}
+            <MaintenanceChecklist
+              vehicleId={vehicle.id}
+              items={maintenanceItems}
+              onUpdate={(updated) => setMaintenanceItems(updated)}
             />
 
             {/* Client approvals */}

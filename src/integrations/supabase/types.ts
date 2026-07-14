@@ -1065,6 +1065,7 @@ export type Database = {
           fuel_level: number | null
           id: string
           interior_check: Json | null
+          maintenance_checklist: Json
           mileage: number | null
           model: string
           organization_id: string | null
@@ -1097,6 +1098,7 @@ export type Database = {
           fuel_level?: number | null
           id?: string
           interior_check?: Json | null
+          maintenance_checklist?: Json
           mileage?: number | null
           model: string
           organization_id?: string | null
@@ -1129,6 +1131,7 @@ export type Database = {
           fuel_level?: number | null
           id?: string
           interior_check?: Json | null
+          maintenance_checklist?: Json
           mileage?: number | null
           model?: string
           organization_id?: string | null

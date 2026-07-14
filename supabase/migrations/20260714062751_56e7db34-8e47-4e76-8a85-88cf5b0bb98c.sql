@@ -1,0 +1,1 @@
+ALTER TABLE public.vehicles ADD COLUMN IF NOT EXISTS maintenance_checklist jsonb NOT NULL DEFAULT '[]'::jsonb;
