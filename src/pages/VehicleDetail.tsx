@@ -610,6 +610,13 @@ export default function VehicleDetail() {
               onUpdate={(updated) => setClientTasks(updated)}
             />
 
+            {/* Maintenance Checklist */}
+            <MaintenanceChecklist
+              vehicleId={vehicle.id}
+              items={maintenanceItems}
+              onUpdate={(updated) => setMaintenanceItems(updated)}
+            />
+
             {/* Client approvals */}
             <ClientApprovalsPanel
               vehicleId={vehicle.id}
