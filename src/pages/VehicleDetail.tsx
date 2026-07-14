@@ -75,7 +75,8 @@ export default function VehicleDetail() {
    const [clientDescription, setClientDescription] = useState('');
    const [savingDescription, setSavingDescription] = useState(false);
    const [editingDescription, setEditingDescription] = useState(false);
-   const [clientTasks, setClientTasks] = useState<ClientTask[]>([]);
+  const [clientTasks, setClientTasks] = useState<ClientTask[]>([]);
+  const [maintenanceItems, setMaintenanceItems] = useState<MaintenanceItem[]>([]);
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
   const topRef = useRef<HTMLDivElement>(null);
 
