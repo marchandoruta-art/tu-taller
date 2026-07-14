@@ -446,12 +446,28 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="vehicle-vin">Nº Bastidor</Label>
-                    <Input
-                      id="vehicle-vin"
-                      value={vehicleData.vin}
-                      onChange={(e) => setVehicleData({ ...vehicleData, vin: e.target.value })}
-                      placeholder="VIN"
-                    />
+                    <div className="flex gap-2">
+                      <Input
+                        id="vehicle-vin"
+                        value={vehicleData.vin}
+                        onChange={(e) => setVehicleData({ ...vehicleData, vin: e.target.value.toUpperCase() })}
+                        placeholder="VIN"
+                        className="flex-1"
+                      />
+                      <ScanVinButton
+                        size="default"
+                        label=""
+                        className="shrink-0"
+                        onScanned={(data) => {
+                          setVehicleData((prev) => ({
+                            ...prev,
+                            vin: data.vin || prev.vin,
+                            brand: data.brand || prev.brand,
+                            year: data.year ? String(data.year) : prev.year,
+                          }));
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="space-y-2">
