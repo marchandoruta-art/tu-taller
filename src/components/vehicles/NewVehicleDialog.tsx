@@ -23,6 +23,7 @@ import { InteriorChecklist, InteriorCheckData } from './reception/InteriorCheckl
 import { SignaturePad } from './reception/SignaturePad';
 import { DepositReceipt } from './reception/DepositReceipt';
 import { ScanTechnicalSheetButton } from './ScanTechnicalSheetButton';
+import { ScanVinButton } from './ScanVinButton';
 
 interface NewVehicleDialogProps {
   onSuccess?: () => void;
