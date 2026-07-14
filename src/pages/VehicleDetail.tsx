@@ -11,6 +11,7 @@ import { ViewDepositReceipt } from '@/components/vehicles/reception/ViewDepositR
 import { EditReceptionDataDialog } from '@/components/vehicles/EditReceptionDataDialog';
 import { VehiclePhotos } from '@/components/vehicles/VehiclePhotos';
 import { ClientTasksChecklist, ClientTask } from '@/components/vehicles/ClientTasksChecklist';
+import { MaintenanceChecklist, MaintenanceItem } from '@/components/vehicles/MaintenanceChecklist';
 import { PortalShareDialog } from '@/components/vehicles/PortalShareDialog';
 import { PrioritySelector } from '@/components/vehicles/PrioritySelector';
 import { AIRepairEstimateButton } from '@/components/vehicles/AIRepairEstimateButton';
