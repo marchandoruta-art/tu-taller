@@ -1062,6 +1062,7 @@ export type Database = {
           deposit_receipt_generated: boolean | null
           estimated_cost: number | null
           exterior_damages: Json | null
+          finished_at: string | null
           fuel_level: number | null
           id: string
           interior_check: Json | null
@@ -1095,6 +1096,7 @@ export type Database = {
           deposit_receipt_generated?: boolean | null
           estimated_cost?: number | null
           exterior_damages?: Json | null
+          finished_at?: string | null
           fuel_level?: number | null
           id?: string
           interior_check?: Json | null
@@ -1128,6 +1130,7 @@ export type Database = {
           deposit_receipt_generated?: boolean | null
           estimated_cost?: number | null
           exterior_damages?: Json | null
+          finished_at?: string | null
           fuel_level?: number | null
           id?: string
           interior_check?: Json | null
