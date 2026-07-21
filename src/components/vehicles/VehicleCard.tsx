@@ -19,7 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Car, User, Clock, Wrench, Lock, UserCheck, ArrowRight, ChevronRight, Trash2, MessageCircle, AlertTriangle, Gauge } from 'lucide-react';
+import { Car, User, Clock, Wrench, Lock, UserCheck, ArrowRight, ChevronRight, Trash2, MessageCircle, AlertTriangle, Gauge, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
