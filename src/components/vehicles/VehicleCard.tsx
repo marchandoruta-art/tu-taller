@@ -164,6 +164,12 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
         <p className="text-xs md:text-sm text-muted-foreground truncate">
           {vehicle.brand} {vehicle.model}
         </p>
+        {(vehicle.status === 'terminado' || vehicle.status === 'facturado' || vehicle.status === 'entregado') && vehicle.finished_at && (
+          <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400 bg-green-500/10 border border-green-500/20 rounded-md px-2 py-1 -mx-1">
+            <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+            <span className="font-medium">Terminado el {formatFinishedDate(vehicle.finished_at)}</span>
+          </div>
+        )}
       </CardHeader>
       <CardContent className="space-y-3">
         {/* Owner info */}
