@@ -63,6 +63,7 @@ export interface Vehicle {
   reception_date?: string;
   deposit_receipt_generated?: boolean;
   // Archive fields
+  finished_at?: string;
   delivered_at?: string;
   archived?: boolean;
 }
