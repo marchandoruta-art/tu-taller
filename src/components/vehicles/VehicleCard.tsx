@@ -119,6 +119,17 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
     return `${hours}h ${mins}m`;
   };
 
+  const formatFinishedDate = (date?: string) => {
+    if (!date) return null;
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return null;
+    return d.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
