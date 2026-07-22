@@ -79,6 +79,9 @@ export default function VehicleDetail() {
   const [clientTasks, setClientTasks] = useState<ClientTask[]>([]);
   const [maintenanceItems, setMaintenanceItems] = useState<MaintenanceItem[]>([]);
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
+  const [kmInput, setKmInput] = useState('');
+  const [kmSaving, setKmSaving] = useState(false);
+  const [kmEditing, setKmEditing] = useState(false);
   const topRef = useRef<HTMLDivElement>(null);
 
   // Scroll to top on mount/id change
