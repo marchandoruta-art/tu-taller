@@ -117,6 +117,7 @@ export default function VehicleDetail() {
       setVehicle(vehicleRes.data as VehicleWithOwner);
       setWorkSummary(vehicleRes.data.work_summary || '');
       setClientDescription(vehicleRes.data.client_description || '');
+      setKmInput(vehicleRes.data.mileage?.toString() || '');
       setClientTasks(Array.isArray(vehicleRes.data.client_tasks) ? (vehicleRes.data.client_tasks as unknown as ClientTask[]) : []);
       setMaintenanceItems(Array.isArray((vehicleRes.data as any).maintenance_checklist) ? ((vehicleRes.data as any).maintenance_checklist as MaintenanceItem[]) : []);
       
