@@ -47,6 +47,7 @@ import {
   Image,
   File,
   X,
+  Gauge,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -78,6 +79,9 @@ export default function VehicleDetail() {
   const [clientTasks, setClientTasks] = useState<ClientTask[]>([]);
   const [maintenanceItems, setMaintenanceItems] = useState<MaintenanceItem[]>([]);
   const [assignedUser, setAssignedUser] = useState<(Profile & { role?: UserRole }) | null>(null);
+  const [kmInput, setKmInput] = useState('');
+  const [kmSaving, setKmSaving] = useState(false);
+  const [kmEditing, setKmEditing] = useState(false);
   const topRef = useRef<HTMLDivElement>(null);
 
   // Scroll to top on mount/id change
@@ -113,6 +117,7 @@ export default function VehicleDetail() {
       setVehicle(vehicleRes.data as VehicleWithOwner);
       setWorkSummary(vehicleRes.data.work_summary || '');
       setClientDescription(vehicleRes.data.client_description || '');
+      setKmInput(vehicleRes.data.mileage?.toString() || '');
       setClientTasks(Array.isArray(vehicleRes.data.client_tasks) ? (vehicleRes.data.client_tasks as unknown as ClientTask[]) : []);
       setMaintenanceItems(Array.isArray((vehicleRes.data as any).maintenance_checklist) ? ((vehicleRes.data as any).maintenance_checklist as MaintenanceItem[]) : []);
       
@@ -218,6 +223,28 @@ export default function VehicleDetail() {
       }
     } catch (error) {
       console.error('Error notifying admins:', error);
+    }
+  };
+
+  const saveKm = async () => {
+    if (!vehicle) return;
+    const parsed = kmInput.trim() ? parseInt(kmInput.replace(/[^\d]/g, ''), 10) : null;
+    if (parsed !== null && (!Number.isFinite(parsed) || parsed < 0)) {
+      toast.error('Introduce un kilometraje válido');
+      return;
+    }
+    setKmSaving(true);
+    const { error } = await supabase
+      .from('vehicles')
+      .update({ mileage: parsed })
+      .eq('id', vehicle.id);
+    setKmSaving(false);
+    if (error) {
+      toast.error('Error al guardar el kilometraje');
+    } else {
+      setVehicle({ ...vehicle, mileage: parsed ?? undefined });
+      setKmEditing(false);
+      toast.success('Kilometraje actualizado');
     }
   };
 
@@ -678,6 +705,55 @@ export default function VehicleDetail() {
 
 
             <VehiclePhotos vehicleId={vehicle.id} />
+
+            {/* Kilometraje — visible justo encima de piezas */}
+            <Card className={vehicle.mileage ? '' : 'border-amber-500/40'}>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Gauge className={`h-5 w-5 ${vehicle.mileage ? 'text-primary' : 'text-amber-500'}`} />
+                  Kilometraje
+                  {!vehicle.mileage && (
+                    <span className="text-xs font-normal text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
+                      Falta indicar
+                    </span>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {kmEditing ? (
+                  <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="Ej. 123456"
+                      value={kmInput}
+                      onChange={(e) => setKmInput(e.target.value.replace(/[^\d]/g, ''))}
+                      className="flex-1"
+                      autoFocus
+                    />
+                    <span className="self-center text-sm text-muted-foreground">km</span>
+                    <Button size="icon" variant="outline" onClick={() => setKmEditing(false)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" onClick={saveKm} disabled={kmSaving}>
+                      {kmSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-baseline gap-2">
+                      <span className={`text-2xl font-bold ${vehicle.mileage ? 'text-foreground' : 'text-amber-600 dark:text-amber-400'}`}>
+                        {vehicle.mileage ? vehicle.mileage.toLocaleString('es-ES') : '--'}
+                      </span>
+                      <span className="text-sm text-muted-foreground">km</span>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => setKmEditing(true)}>
+                      {vehicle.mileage ? 'Actualizar' : 'Añadir'}
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
             {/* Parts */}
             <Card>
