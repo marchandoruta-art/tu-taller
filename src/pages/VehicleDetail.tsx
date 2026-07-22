@@ -226,6 +226,28 @@ export default function VehicleDetail() {
     }
   };
 
+  const saveKm = async () => {
+    if (!vehicle) return;
+    const parsed = kmInput.trim() ? parseInt(kmInput.replace(/[^\d]/g, ''), 10) : null;
+    if (parsed !== null && (!Number.isFinite(parsed) || parsed < 0)) {
+      toast.error('Introduce un kilometraje válido');
+      return;
+    }
+    setKmSaving(true);
+    const { error } = await supabase
+      .from('vehicles')
+      .update({ mileage: parsed })
+      .eq('id', vehicle.id);
+    setKmSaving(false);
+    if (error) {
+      toast.error('Error al guardar el kilometraje');
+    } else {
+      setVehicle({ ...vehicle, mileage: parsed ?? undefined });
+      setKmEditing(false);
+      toast.success('Kilometraje actualizado');
+    }
+  };
+
   const addPart = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!vehicle || !newPart.name || !user) return;
