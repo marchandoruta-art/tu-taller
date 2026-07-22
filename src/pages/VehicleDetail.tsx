@@ -47,6 +47,7 @@ import {
   Image,
   File,
   X,
+  Gauge,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
