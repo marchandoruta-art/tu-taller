@@ -15,6 +15,7 @@ import { MaintenanceChecklist, MaintenanceItem } from '@/components/vehicles/Mai
 import { PortalShareDialog } from '@/components/vehicles/PortalShareDialog';
 import { PrioritySelector } from '@/components/vehicles/PrioritySelector';
 import { AIRepairEstimateButton } from '@/components/vehicles/AIRepairEstimateButton';
+import { AIDiagnosticDialog } from '@/components/vehicles/AIDiagnosticDialog';
 import { ClientApprovalsPanel } from '@/components/vehicles/ClientApprovalsPanel';
 import { ScanVinButton } from '@/components/vehicles/ScanVinButton';
 import { Button } from '@/components/ui/button';
@@ -900,10 +901,13 @@ export default function VehicleDetail() {
             {/* Anomalies */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <AlertTriangle className="h-5 w-5 text-orange-500" />
-                  Anomalías Encontradas
-                </CardTitle>
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <AlertTriangle className="h-5 w-5 text-orange-500" />
+                    Anomalías Encontradas
+                  </CardTitle>
+                  <AIDiagnosticDialog vehicleId={vehicle.id} initialSymptoms={newAnomaly} />
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <form onSubmit={addAnomaly} className="flex gap-2">
