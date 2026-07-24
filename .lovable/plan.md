@@ -1,26 +1,41 @@
-## Completar las 4 tareas pendientes
 
-### 1. Botón "Escanear VIN" visible en detalle de vehículo
-En `src/pages/VehicleDetail.tsx`, junto a los campos de datos técnicos (VIN/bastidor), añadir `<ScanVinButton />` que rellene automáticamente el VIN, marca y año detectados. Solo visible para admin/oficina/mecánico con permiso de edición.
+## Objetivo
+Que admin/oficina pueda ver en tiempo real qué vehículos están siendo trabajados ahora mismo (cronómetro corriendo), quién los trabaja y desde cuándo.
 
-### 2. Botón "Avisar cliente por WhatsApp" al marcar `terminado`
-En `VehicleDetail.tsx`, cuando `status === 'terminado'` y el vehículo tiene `owner.phone`, mostrar un botón destacado verde "Avisar cliente por WhatsApp" que use el hook existente `useWhatsAppMessage` con la plantilla actual. Registrar el envío como entrada en el timeline/mensajes internos del vehículo.
+## Qué se construye
 
-### 3. Confirmación de citas por WhatsApp en página Citas
-En `src/pages/Appointments.tsx`:
-- Añadir badge de estado (`Pendiente` / `Confirmada` / `Cancelada`) leyendo `confirmation_status`.
-- Botón "Pedir confirmación por WhatsApp" que abre `wa.me` con mensaje que incluye el enlace público `/cita/:token` (generando token si no existe aún).
-- Filtro rápido por estado de confirmación.
+**Nueva página `/en-curso` (Trabajo en curso)**
+- Accesible desde la Sidebar (solo admin/oficina) con un badge que muestra el número de timers activos.
+- Lista en tiempo real de los `time_logs` con `ended_at IS NULL` de la organización.
+- Cada fila muestra:
+  - Matrícula + marca/modelo (clicable → ficha del vehículo)
+  - Operario asignado (nombre + rol)
+  - Hora de inicio + cronómetro corriendo (HH:MM:SS actualizado cada segundo)
+  - Estado actual del vehículo (badge)
+  - Prioridad (con color)
+- Estado vacío: "Ahora mismo no hay ningún cronómetro activo".
+- Filtro rápido: por operario.
 
-### 4. Notificaciones agrupadas por tipo y vehículo
-En `src/pages/Notifications.tsx`:
-- Agrupar el array por clave `type + entity_id` (o por vehículo cuando el mensaje lo referencie).
-- Cada grupo se muestra como una tarjeta colapsable con contador ("3 mensajes de MAT-1234"), fecha más reciente y expandible.
-- "Marcar todo el grupo como leído" además del actual "marcar todas".
-- Sin cambios de esquema en la tabla `notifications`.
+**Actualización en tiempo real**
+- Suscripción Realtime a la tabla `time_logs` (INSERT/UPDATE/DELETE) → recarga la lista al instante cuando alguien inicia o detiene un timer.
+- El contador HH:MM:SS de cada fila se actualiza localmente cada segundo.
 
-### Detalles técnicos
-- No hay migraciones nuevas: `confirmation_status`/`token` ya existen en `appointments`, y `notifications` no cambia.
-- Reutilizar `useWhatsAppMessage`, `ScanVinButton`, y el patrón de `PortalShareDialog` para generar tokens de cita si faltan.
-- El registro del aviso WhatsApp al cliente se guarda en `vehicle_messages` con un tipo `client_notification` para verlo en el timeline.
-- Mobile-first, dark mode, sin tocar lógica de facturación.
+**Badge en Sidebar**
+- Nuevo hook `useActiveTimersCount` (parecido a `usePendingAssignedCount`) que devuelve el número de timers activos en la organización.
+- Punto/contador ámbar sobre el icono de la nueva entrada del menú.
+
+## Detalles técnicos
+- Nueva ruta en `src/App.tsx`: `/en-curso` → `src/pages/ActiveWork.tsx`, protegida a roles `admin` y `oficina`.
+- Query base:
+  ```
+  time_logs (ended_at IS NULL)
+    join vehicles(plate, brand, model, status, priority)
+    join profiles(full_name) on user_id
+  ```
+- Realtime: `supabase.channel('active-timers').on('postgres_changes', { table: 'time_logs' }, ...)` con cleanup en unmount (según regla del proyecto).
+- RLS ya existente en `time_logs` limita a la organización; no hacen falta migraciones.
+- No se toca la lógica de timers ni de asignación; solo lectura.
+
+## Fuera del alcance
+- No se cambia el `ActiveTimerBanner` (banner personal del operario, se queda igual).
+- No se añaden acciones de "detener a distancia" (se puede añadir después si lo pides).
