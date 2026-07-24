@@ -48,6 +48,7 @@ const navigation = [
 ];
 
 const adminNavigation = [
+  { name: 'Trabajo en Curso', href: '/admin/active-work', icon: Timer, badgeKey: 'active' as const },
   { name: 'Usuarios', href: '/users', icon: Users },
   { name: 'Mi Taller', href: '/organization', icon: Building2 },
   { name: 'Carga Trabajo', href: '/admin/workload', icon: Users },
@@ -71,6 +72,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { organization } = useOrganization();
   const location = useLocation();
   const pendingCount = usePendingAssignedCount();
+  const activeTimersCount = useActiveTimersCount();
 
   const getInitials = (name: string) => {
     return name
