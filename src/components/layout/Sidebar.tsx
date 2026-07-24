@@ -27,7 +27,13 @@ import {
   Search,
   ClipboardList,
   ShieldCheck,
+  Timer,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
+import { usePendingAssignedCount } from '@/hooks/usePendingAssignedCount';
+import { useActiveTimersCount } from '@/hooks/useActiveTimersCount';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
