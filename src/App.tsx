@@ -45,6 +45,7 @@ import PortalView from "./pages/PortalView";
 import AppointmentConfirm from "./pages/AppointmentConfirm";
 import AdminAudit from "./pages/AdminAudit";
 import OAuthConsent from "./pages/OAuthConsent";
+import ActiveWork from "./pages/ActiveWork";
 
 const queryClient = new QueryClient();
 
@@ -97,6 +98,7 @@ const App = () => (
                 <Route path="/clients/:ownerId" element={<ClientHistory />} />
                 <Route path="/appointments" element={<Appointments />} />
                 <Route path="/admin/workload" element={<Workload />} />
+                <Route path="/admin/active-work" element={<ActiveWork />} />
                 <Route path="/settings/templates" element={<TaskTemplates />} />
                 <Route path="/c/:token" element={<PortalView />} />
                 <Route path="/cita/:token" element={<AppointmentConfirm />} />
