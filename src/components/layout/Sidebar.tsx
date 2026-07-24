@@ -27,11 +27,13 @@ import {
   Search,
   ClipboardList,
   ShieldCheck,
+  Timer,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { usePendingAssignedCount } from '@/hooks/usePendingAssignedCount';
+import { useActiveTimersCount } from '@/hooks/useActiveTimersCount';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -46,6 +48,7 @@ const navigation = [
 ];
 
 const adminNavigation = [
+  { name: 'Trabajo en Curso', href: '/admin/active-work', icon: Timer, badgeKey: 'active' as const },
   { name: 'Usuarios', href: '/users', icon: Users },
   { name: 'Mi Taller', href: '/organization', icon: Building2 },
   { name: 'Carga Trabajo', href: '/admin/workload', icon: Users },
@@ -69,6 +72,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { organization } = useOrganization();
   const location = useLocation();
   const pendingCount = usePendingAssignedCount();
+  const activeTimersCount = useActiveTimersCount();
 
   const getInitials = (name: string) => {
     return name
@@ -169,25 +173,47 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 </p>
               )}
               <div className="space-y-1">
-                {adminNavigation.map((item) => (
-                  <NavLink
-                    key={item.name}
-                    to={item.href}
-                    className={({ isActive }) =>
-                      cn(
-                        'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                        isActive
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                        collapsed && 'justify-center px-2'
-                      )
-                    }
-                    title={collapsed ? item.name : undefined}
-                  >
-                    <item.icon className="h-5 w-5 flex-shrink-0" />
-                    {!collapsed && <span>{item.name}</span>}
-                  </NavLink>
-                ))}
+                {adminNavigation.map((item) => {
+                  const badge =
+                    (item as any).badgeKey === 'active' && activeTimersCount > 0
+                      ? activeTimersCount
+                      : 0;
+                  return (
+                    <NavLink
+                      key={item.name}
+                      to={item.href}
+                      className={({ isActive }) =>
+                        cn(
+                          'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors relative',
+                          isActive
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                          collapsed && 'justify-center px-2'
+                        )
+                      }
+                      title={collapsed ? `${item.name}${badge ? ` (${badge} activos)` : ''}` : undefined}
+                    >
+                      <div className="relative flex-shrink-0">
+                        <item.icon className={cn('h-5 w-5', badge > 0 && 'text-primary animate-pulse')} />
+                        {badge > 0 && collapsed && (
+                          <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center leading-none">
+                            {badge > 9 ? '9+' : badge}
+                          </span>
+                        )}
+                      </div>
+                      {!collapsed && (
+                        <>
+                          <span className="flex-1">{item.name}</span>
+                          {badge > 0 && (
+                            <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center leading-none animate-pulse">
+                              {badge > 99 ? '99+' : badge}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </NavLink>
+                  );
+                })}
               </div>
             </div>
           )}
