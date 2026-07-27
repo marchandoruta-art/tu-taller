@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { VehicleWithOwner, Profile, ROLE_LABELS, UserRole, VehicleStatus, VehiclePriority } from '@/lib/types';
+import { VehicleWithOwner, Profile, UserRole, VehicleStatus, VehiclePriority } from '@/lib/types';
+import type { ActiveVehicleTimer } from '@/hooks/useActiveVehicleTimers';
 import { PriorityBadge } from './PrioritySelector';
 import { useWhatsAppMessage } from '@/hooks/useWhatsAppMessage';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -29,6 +30,7 @@ import { deleteVehiclePermanently } from '@/lib/deleteVehicle';
 interface VehicleCardProps {
   vehicle: VehicleWithOwner;
   totalTime?: number;
+  activeTimer?: ActiveVehicleTimer;
   messagesCount?: number;
   showNextAction?: boolean;
   onStatusChange?: () => void;
@@ -47,7 +49,7 @@ const nextStatusLabels: Record<VehicleStatus, string> = {
   entregado: '',
 };
 
-export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, onStatusChange }: VehicleCardProps) {
+export function VehicleCard({ vehicle, totalTime = 0, activeTimer, showNextAction = false, onStatusChange }: VehicleCardProps) {
   const navigate = useNavigate();
   const { role } = useAuth();
   const { openWhatsApp } = useWhatsAppMessage();
@@ -57,7 +59,15 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
   const [deleteStep, setDeleteStep] = useState<1 | 2>(1);
   const [confirmPlate, setConfirmPlate] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
   const isAdmin = role === 'admin';
+
+  useEffect(() => {
+    if (!activeTimer) return;
+    setNow(Date.now());
+    const interval = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(interval);
+  }, [activeTimer]);
 
   useEffect(() => {
     if (vehicle.assigned_to) {
@@ -119,6 +129,14 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
     return `${hours}h ${mins}m`;
   };
 
+  const formatRunningTime = (startedAt: string) => {
+    const seconds = Math.max(0, Math.floor((now - new Date(startedAt).getTime()) / 1000));
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
   const formatFinishedDate = (date?: string) => {
     if (!date) return null;
     const d = new Date(date);
@@ -164,6 +182,20 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
         <p className="text-xs md:text-sm text-muted-foreground truncate">
           {vehicle.brand} {vehicle.model}
         </p>
+        {activeTimer && (
+          <div className="flex items-center justify-between gap-2 rounded-md border border-primary/40 bg-primary/10 px-2 py-1.5">
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+              </span>
+              TRABAJANDO
+            </span>
+            <span className="font-mono text-sm font-bold tabular-nums text-primary">
+              {formatRunningTime(activeTimer.startedAt)}
+            </span>
+          </div>
+        )}
         {(vehicle.status === 'terminado' || vehicle.status === 'facturado' || vehicle.status === 'entregado') && vehicle.finished_at && (
           <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400 bg-green-500/10 border border-green-500/20 rounded-md px-2 py-1 -mx-1">
             <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
@@ -247,7 +279,7 @@ export function VehicleCard({ vehicle, totalTime = 0, showNextAction = false, on
         <div className="flex items-center justify-between pt-2 border-t border-border">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Clock className="w-3.5 h-3.5" />
-            <span className="font-mono">{formatTime(totalTime)}</span>
+            <span className="font-mono">{activeTimer ? `${formatTime(totalTime)} + en curso` : formatTime(totalTime)}</span>
           </div>
           {isAdmin && (
             <AlertDialog
