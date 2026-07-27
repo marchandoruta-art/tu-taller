@@ -21,6 +21,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import { downloadCsv, formatMinutes } from '@/lib/exportCsv';
+import { useActiveVehicleTimers } from '@/hooks/useActiveVehicleTimers';
 
 const statusOrder: VehicleStatus[] = ['recibido', 'en_reparacion', 'presupuestar', 'presupuestado', 'pendiente_piezas', 'terminado', 'facturado', 'entregado'];
 type ViewMode = 'kanban' | 'charts' | 'list';
@@ -31,6 +32,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { user, role } = useAuth();
   const { organizationId } = useOrganization();
+  const { timers: activeTimers } = useActiveVehicleTimers();
   const [vehicles, setVehicles] = useState<VehicleWithOwner[]>([]);
   const [profiles, setProfiles] = useState<Record<string, string>>({});
   const [vehicleTimes, setVehicleTimes] = useState<Record<string, number>>({});
@@ -403,7 +405,7 @@ export default function Dashboard() {
                                   <Draggable key={vehicle.id} draggableId={vehicle.id} index={index}>
                                     {(provided) => (
                                       <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="mb-2">
-                                        <VehicleCard vehicle={vehicle} totalTime={vehicleTimes[vehicle.id] || 0} showNextAction onStatusChange={fetchVehicles} />
+                                         <VehicleCard vehicle={vehicle} totalTime={vehicleTimes[vehicle.id] || 0} activeTimer={activeTimers[vehicle.id]} showNextAction onStatusChange={fetchVehicles} />
                                       </div>
                                     )}
                                   </Draggable>
@@ -447,7 +449,7 @@ export default function Dashboard() {
                                 <Draggable key={vehicle.id} draggableId={vehicle.id} index={index}>
                                   {(provided) => (
                                     <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="mb-2">
-                                      <VehicleCard vehicle={vehicle} totalTime={vehicleTimes[vehicle.id] || 0} showNextAction onStatusChange={fetchVehicles} />
+                                       <VehicleCard vehicle={vehicle} totalTime={vehicleTimes[vehicle.id] || 0} activeTimer={activeTimers[vehicle.id]} showNextAction onStatusChange={fetchVehicles} />
                                     </div>
                                   )}
                                 </Draggable>

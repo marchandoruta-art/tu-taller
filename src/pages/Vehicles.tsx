@@ -11,6 +11,7 @@ import { Loader2, Search, UserCheck, RefreshCw, Archive, History, Trash2 } from 
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { QuickPlateDialog } from '@/components/vehicles/QuickPlateDialog';
+import { useActiveVehicleTimers } from '@/hooks/useActiveVehicleTimers';
 
 export default function Vehicles() {
   const { user, role } = useAuth();
@@ -25,6 +26,7 @@ export default function Vehicles() {
   const [assignedFilter, setAssignedFilter] = useState<string>('all');
   const [operators, setOperators] = useState<{ user_id: string; full_name: string; count: number }[]>([]);
   const isAdmin = role === 'admin';
+  const { timers: activeTimers } = useActiveVehicleTimers();
 
 
   const shouldIncludeArchived = includeArchived || search.trim().length > 0;
@@ -236,7 +238,7 @@ export default function Vehicles() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {filteredVehicles.map((vehicle) => (
-              <VehicleCard key={vehicle.id} vehicle={vehicle} onStatusChange={fetchVehicles} />
+              <VehicleCard key={vehicle.id} vehicle={vehicle} activeTimer={activeTimers[vehicle.id]} onStatusChange={fetchVehicles} />
             ))}
           </div>
         )}

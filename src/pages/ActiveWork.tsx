@@ -62,12 +62,18 @@ export default function ActiveWork() {
     let cancelled = false;
 
     const load = async () => {
-      const { data: logs } = await supabase
+      const { data: logs, error: logsError } = await supabase
         .from('time_logs')
         .select('id, user_id, vehicle_id, started_at')
         .eq('organization_id', organizationId)
         .is('ended_at', null)
         .order('started_at', { ascending: true });
+
+      if (logsError) {
+        console.error('Error loading active work:', logsError);
+        if (!cancelled) setLoading(false);
+        return;
+      }
 
       if (!logs || logs.length === 0) {
         if (!cancelled) {
@@ -122,7 +128,12 @@ export default function ActiveWork() {
       .channel(`active-work-${organizationId}`)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'time_logs' },
+        {
+          event: '*',
+          schema: 'public',
+          table: 'time_logs',
+          filter: `organization_id=eq.${organizationId}`,
+        },
         () => load(),
       )
       .on(
@@ -132,9 +143,15 @@ export default function ActiveWork() {
       )
       .subscribe();
 
+    const refresh = () => void load();
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
+
     return () => {
       cancelled = true;
-      supabase.removeChannel(channel);
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+      void supabase.removeChannel(channel);
     };
   }, [organizationId]);
 

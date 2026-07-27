@@ -35,14 +35,25 @@ export function useActiveTimersCount() {
       .channel(`active-timers-count-${organizationId}`)
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'time_logs' },
+        {
+          event: '*',
+          schema: 'public',
+          table: 'time_logs',
+          filter: `organization_id=eq.${organizationId}`,
+        },
         () => load(),
       )
       .subscribe();
 
+    const refresh = () => void load();
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
+
     return () => {
       cancelled = true;
-      supabase.removeChannel(channel);
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+      void supabase.removeChannel(channel);
     };
   }, [user, organizationId]);
 
