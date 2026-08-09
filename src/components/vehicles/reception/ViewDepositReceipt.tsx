@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Printer, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import type { VehicleWithOwner } from '@/lib/types';
 import type { ExteriorDamage } from './VehicleDiagram';
 import type { InteriorCheckData } from './InteriorChecklist';
@@ -50,6 +51,7 @@ const INTERIOR_LABELS: Record<string, string> = {
 };
 
 export function ViewDepositReceipt({ vehicle }: ViewDepositReceiptProps) {
+  const { t } = useTranslation();
   const exteriorDamages = (vehicle.exterior_damages as ExteriorDamage[] | null) || [];
   const interiorCheck = (vehicle.interior_check as InteriorCheckData | null) || {
     spare_wheel: false,
@@ -243,22 +245,22 @@ export function ViewDepositReceipt({ vehicle }: ViewDepositReceiptProps) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <FileText className="h-5 w-5" />
-          Resguardo de Depósito
+          {t('depositReceipt.cardTitle')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Accede al resguardo de depósito generado en la recepción del vehículo con todos los datos del cliente, inspección y textos legales.
+          {t('depositReceipt.cardDescription')}
         </p>
 
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={handlePrint} className="flex-1 sm:flex-none">
             <Printer className="h-4 w-4 mr-2" />
-            Imprimir
+            {t('depositReceipt.print')}
           </Button>
           <Button variant="outline" onClick={handleDownload} className="flex-1 sm:flex-none">
             <Download className="h-4 w-4 mr-2" />
-            Descargar
+            {t('depositReceipt.download')}
           </Button>
         </div>
       </CardContent>

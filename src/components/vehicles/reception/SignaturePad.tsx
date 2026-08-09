@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Eraser, Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface SignaturePadProps {
   value: string;
@@ -9,6 +10,7 @@ interface SignaturePadProps {
 }
 
 export function SignaturePad({ value, onChange }: SignaturePadProps) {
+  const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasSignature, setHasSignature] = useState(!!value);
@@ -111,12 +113,12 @@ export function SignaturePad({ value, onChange }: SignaturePadProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <Label className="text-base font-medium">Firma del Cliente</Label>
+        <Label className="text-base font-medium">{t('signaturePad.label')}</Label>
         <div className="flex gap-2">
           {hasSignature && (
             <Button type="button" variant="outline" size="sm" onClick={clearSignature}>
               <Eraser className="h-4 w-4 mr-1" />
-              Borrar
+              {t('signaturePad.clear')}
             </Button>
           )}
         </div>
@@ -136,7 +138,7 @@ export function SignaturePad({ value, onChange }: SignaturePadProps) {
         />
         {!hasSignature && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <p className="text-muted-foreground text-sm">Firme aquí</p>
+            <p className="text-muted-foreground text-sm">{t('signaturePad.signHere')}</p>
           </div>
         )}
       </div>
@@ -144,7 +146,7 @@ export function SignaturePad({ value, onChange }: SignaturePadProps) {
       {hasSignature && (
         <div className="flex items-center gap-1 text-green-600 text-sm">
           <Check className="h-4 w-4" />
-          <span>Firma capturada</span>
+          <span>{t('signaturePad.captured')}</span>
         </div>
       )}
     </div>

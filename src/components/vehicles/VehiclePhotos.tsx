@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
 import { Camera, Upload, Trash2, Loader2, Image, X, ZoomIn } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface VehiclePhoto {
   id: string;
@@ -24,11 +25,11 @@ interface VehiclePhotosProps {
   vehicleId: string;
 }
 
-const PHOTO_TYPE_LABELS = {
-  before: 'Antes',
-  during: 'Durante',
-  after: 'Después',
-};
+const PHOTO_TYPE_LABEL_KEYS = {
+  before: 'vehiclePhotos.photoTypeBefore',
+  during: 'vehiclePhotos.photoTypeDuring',
+  after: 'vehiclePhotos.photoTypeAfter',
+} as const;
 
 // Extract storage path from a full public URL or return as-is if already a path
 function extractStoragePath(url: string, bucket: string): string {
@@ -41,6 +42,7 @@ function extractStoragePath(url: string, bucket: string): string {
 }
 
 export function VehiclePhotos({ vehicleId }: VehiclePhotosProps) {
+  const { t } = useTranslation();
   const { user, role } = useAuth();
   const { organizationId } = useOrganization();
   const [photos, setPhotos] = useState<VehiclePhoto[]>([]);
@@ -90,13 +92,13 @@ export function VehiclePhotos({ vehicleId }: VehiclePhotosProps) {
     
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      toast.error('Solo se permiten imágenes');
+      toast.error(t('vehiclePhotos.onlyImagesAllowed'));
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('La imagen no puede superar 5MB');
+      toast.error(t('vehiclePhotos.imageTooLarge'));
       return;
     }
 
@@ -123,11 +125,11 @@ export function VehiclePhotos({ vehicleId }: VehiclePhotosProps) {
 
       if (dbError) throw dbError;
 
-      toast.success('Foto subida correctamente');
+      toast.success(t('vehiclePhotos.uploadSuccess'));
       fetchPhotos();
     } catch (error) {
       console.error('Error uploading photo:', error);
-      toast.error('Error al subir la foto');
+      toast.error(t('vehiclePhotos.uploadError'));
     } finally {
       setUploading(false);
       e.target.value = '';
@@ -143,10 +145,10 @@ export function VehiclePhotos({ vehicleId }: VehiclePhotosProps) {
       if (error) throw error;
 
       setPhotos(photos.filter(p => p.id !== photo.id));
-      toast.success('Foto eliminada');
+      toast.success(t('vehiclePhotos.deleteSuccess'));
     } catch (error) {
       console.error('Error deleting photo:', error);
-      toast.error('Error al eliminar la foto');
+      toast.error(t('vehiclePhotos.deleteError'));
     }
   };
 
@@ -169,26 +171,26 @@ export function VehiclePhotos({ vehicleId }: VehiclePhotosProps) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Camera className="h-5 w-5" />
-          Documentación Fotográfica
+          {t('vehiclePhotos.title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs value={selectedType} onValueChange={(v) => setSelectedType(v as typeof selectedType)}>
           <TabsList className="grid w-full grid-cols-3 mb-4">
             <TabsTrigger value="before" className="gap-2">
-              Antes
+              {t('vehiclePhotos.photoTypeBefore')}
               <span className="bg-muted text-muted-foreground text-xs px-1.5 rounded">
                 {getPhotosByType('before').length}
               </span>
             </TabsTrigger>
             <TabsTrigger value="during" className="gap-2">
-              Durante
+              {t('vehiclePhotos.photoTypeDuring')}
               <span className="bg-muted text-muted-foreground text-xs px-1.5 rounded">
                 {getPhotosByType('during').length}
               </span>
             </TabsTrigger>
             <TabsTrigger value="after" className="gap-2">
-              Después
+              {t('vehiclePhotos.photoTypeAfter')}
               <span className="bg-muted text-muted-foreground text-xs px-1.5 rounded">
                 {getPhotosByType('after').length}
               </span>
@@ -214,7 +216,7 @@ export function VehiclePhotos({ vehicleId }: VehiclePhotosProps) {
                       ) : (
                         <Upload className="h-4 w-4" />
                       )}
-                      Subir foto "{PHOTO_TYPE_LABELS[type]}"
+                      {t('vehiclePhotos.uploadButton', { type: t(PHOTO_TYPE_LABEL_KEYS[type]) })}
                     </span>
                   </Button>
                 </label>
@@ -224,7 +226,7 @@ export function VehiclePhotos({ vehicleId }: VehiclePhotosProps) {
               {getPhotosByType(type).length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Image className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No hay fotos "{PHOTO_TYPE_LABELS[type]}" aún</p>
+                  <p className="text-sm">{t('vehiclePhotos.noPhotosOfType', { type: t(PHOTO_TYPE_LABEL_KEYS[type]) })}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -232,7 +234,7 @@ export function VehiclePhotos({ vehicleId }: VehiclePhotosProps) {
                     <div key={photo.id} className="relative group">
                       <img
                         src={photo.signed_url || photo.photo_url}
-                        alt={`Foto ${PHOTO_TYPE_LABELS[type]}`}
+                        alt={t('vehiclePhotos.photoAlt', { type: t(PHOTO_TYPE_LABEL_KEYS[type]) })}
                         className="w-full h-32 object-cover rounded-lg border cursor-pointer"
                         onClick={() => setSelectedPhoto(photo)}
                       />
@@ -279,7 +281,7 @@ export function VehiclePhotos({ vehicleId }: VehiclePhotosProps) {
                 </Button>
                 <img
                   src={selectedPhoto.signed_url || selectedPhoto.photo_url}
-                  alt="Foto ampliada"
+                  alt={t('vehiclePhotos.enlargedPhotoAlt')}
                   className="w-full max-h-[80vh] object-contain rounded-lg"
                 />
               </div>

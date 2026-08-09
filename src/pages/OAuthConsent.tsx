@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Wrench } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 // Beta API — narrow typed wrapper so we don't need to touch generated types.
 type OAuthNs = {
@@ -14,6 +15,7 @@ type OAuthNs = {
 const oauth = (supabase.auth as unknown as { oauth: OAuthNs }).oauth;
 
 export default function OAuthConsent() {
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const authorizationId = params.get("authorization_id") ?? "";
   const [details, setDetails] = useState<any>(null);
@@ -23,7 +25,7 @@ export default function OAuthConsent() {
   useEffect(() => {
     let active = true;
     (async () => {
-      if (!authorizationId) return setError("Falta el parámetro authorization_id");
+      if (!authorizationId) return setError(t('oauthConsent.missingAuthorizationParam'));
       const { data: sess } = await supabase.auth.getSession();
       if (!sess.session) {
         const next = window.location.pathname + window.location.search;
@@ -41,7 +43,7 @@ export default function OAuthConsent() {
         }
         setDetails(data);
       } catch (e: any) {
-        setError(e?.message ?? "Error al cargar la solicitud");
+        setError(e?.message ?? t('oauthConsent.errorLoadingRequest'));
       }
     })();
     return () => { active = false; };
@@ -55,11 +57,11 @@ export default function OAuthConsent() {
         : await oauth.denyAuthorization(authorizationId);
       if (error) { setBusy(false); return setError(error.message); }
       const target = data?.redirect_url ?? data?.redirect_to;
-      if (!target) { setBusy(false); return setError("No se devolvió redirección."); }
+      if (!target) { setBusy(false); return setError(t('oauthConsent.noRedirectReturned')); }
       window.location.href = target;
     } catch (e: any) {
       setBusy(false);
-      setError(e?.message ?? "Error");
+      setError(e?.message ?? t('oauthConsent.genericError'));
     }
   }
 
@@ -77,7 +79,7 @@ export default function OAuthConsent() {
       </main>
     );
   }
-  const clientName = details.client?.name ?? details.client?.client_name ?? "una aplicación externa";
+  const clientName = details.client?.name ?? details.client?.client_name ?? t('oauthConsent.externalApp');
   return (
     <main className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
@@ -85,16 +87,16 @@ export default function OAuthConsent() {
           <div className="mx-auto w-14 h-14 rounded-2xl bg-primary flex items-center justify-center">
             <Wrench className="w-7 h-7 text-primary-foreground" />
           </div>
-          <CardTitle>Conectar {clientName}</CardTitle>
+          <CardTitle>{t('oauthConsent.connectTo', { clientName })}</CardTitle>
           <CardDescription>
-            Vas a permitir que {clientName} acceda a los datos de Tu Taller como tu usuario. Podrá usar las herramientas MCP expuestas por la app.
+            {t('oauthConsent.description', { clientName })}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex gap-2">
-          <Button variant="outline" className="flex-1" disabled={busy} onClick={() => decide(false)}>Denegar</Button>
+          <Button variant="outline" className="flex-1" disabled={busy} onClick={() => decide(false)}>{t('oauthConsent.deny')}</Button>
           <Button className="flex-1" disabled={busy} onClick={() => decide(true)}>
             {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Aprobar
+            {t('oauthConsent.approve')}
           </Button>
         </CardContent>
       </Card>

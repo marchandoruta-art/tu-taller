@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Car, Loader2, Wrench, Clock, CheckCircle2, AlertCircle, Phone, MessageCircle, ShieldCheck, XCircle } from 'lucide-react';
 import { STATUS_LABELS, VehicleStatus } from '@/lib/types';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface Approval {
   id: string;
@@ -38,6 +39,7 @@ const STATUS_PROGRESS: Record<VehicleStatus, number> = {
 };
 
 export default function PortalView() {
+  const { t } = useTranslation();
   const { token } = useParams();
   const [data, setData] = useState<PortalData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -51,10 +53,10 @@ export default function PortalView() {
       const res = await fetch(url, { headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } });
       if (!res.ok) {
         const j = await res.json().catch(() => ({}));
-        throw new Error(j?.error || 'Enlace no válido o caducado');
+        throw new Error(j?.error || t('portalView.linkInvalidOrExpired'));
       }
       setData(await res.json());
-    } catch (e: any) { setError(e?.message || 'Error'); }
+    } catch (e: any) { setError(e?.message || t('portalView.genericError')); }
     finally { setLoading(false); }
   };
 
@@ -77,11 +79,11 @@ export default function PortalView() {
         }),
       });
       const j = await res.json();
-      if (!res.ok) throw new Error(j?.error || 'Error');
-      toast.success(response === 'aprobado' ? 'Trabajo aprobado' : 'Trabajo rechazado');
+      if (!res.ok) throw new Error(j?.error || t('portalView.genericError'));
+      toast.success(response === 'aprobado' ? t('portalView.workApproved') : t('portalView.workRejected'));
       await load();
     } catch (e: any) {
-      toast.error(e?.message || 'Error al responder');
+      toast.error(e?.message || t('portalView.errorResponding'));
     } finally { setResponding(null); }
   };
 
@@ -90,8 +92,8 @@ export default function PortalView() {
     <div className="min-h-screen flex items-center justify-center bg-background p-6">
       <Card className="max-w-md w-full"><CardContent className="py-10 text-center space-y-3">
         <AlertCircle className="h-10 w-10 mx-auto text-destructive" />
-        <h2 className="text-lg font-semibold">Enlace no disponible</h2>
-        <p className="text-sm text-muted-foreground">{error || 'El enlace ha caducado o ha sido revocado.'}</p>
+        <h2 className="text-lg font-semibold">{t('portalView.linkUnavailable')}</h2>
+        <p className="text-sm text-muted-foreground">{error || t('portalView.linkExpiredOrRevoked')}</p>
       </CardContent></Card>
     </div>
   );
@@ -106,7 +108,7 @@ export default function PortalView() {
       <div className="max-w-2xl mx-auto space-y-5">
         <header className="text-center space-y-1">
           <h1 className="text-xl font-bold">{workshop.name}</h1>
-          <p className="text-xs text-muted-foreground">Seguimiento de su vehículo</p>
+          <p className="text-xs text-muted-foreground">{t('portalView.subtitle')}</p>
         </header>
 
         <Card>
@@ -122,13 +124,13 @@ export default function PortalView() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Estado actual</span>
+                <span className="text-sm text-muted-foreground">{t('portalView.currentStatus')}</span>
                 <Badge>{STATUS_LABELS[vehicle.status]}</Badge>
               </div>
               <div className="w-full bg-muted rounded-full h-2.5">
                 <div className="bg-primary h-2.5 rounded-full transition-all" style={{ width: `${pct}%` }} />
               </div>
-              <p className="text-xs text-muted-foreground text-right">{pct}% completado</p>
+              <p className="text-xs text-muted-foreground text-right">{t('portalView.completed', { pct })}</p>
             </div>
           </CardContent>
         </Card>
@@ -138,10 +140,10 @@ export default function PortalView() {
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <ShieldCheck className="h-4 w-4 text-amber-600"/>
-                Necesitamos su aprobación
+                {t('portalView.needsApproval')}
               </CardTitle>
               <p className="text-xs text-muted-foreground">
-                El taller ha detectado trabajos adicionales. Revíselos y confirme si desea que se realicen.
+                {t('portalView.needsApprovalDescription')}
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -150,7 +152,7 @@ export default function PortalView() {
                   <p className="text-sm font-medium whitespace-pre-wrap">{a.description}</p>
                   {a.estimated_info && <p className="text-xs text-muted-foreground whitespace-pre-wrap">{a.estimated_info}</p>}
                   <Textarea
-                    placeholder="Comentario (opcional)"
+                    placeholder={t('portalView.commentPlaceholder')}
                     className="text-sm"
                     value={notes[a.id] || ''}
                     onChange={(e) => setNotes(prev => ({ ...prev, [a.id]: e.target.value }))}
@@ -161,13 +163,13 @@ export default function PortalView() {
                       disabled={responding === a.id}
                       onClick={() => respond(a.id, 'aprobado')}
                       className="bg-green-600 hover:bg-green-700 text-white h-11">
-                      {responding === a.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <><CheckCircle2 className="h-4 w-4 mr-1"/>Aprobar</>}
+                      {responding === a.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <><CheckCircle2 className="h-4 w-4 mr-1"/>{t('portalView.approve')}</>}
                     </Button>
                     <Button
                       disabled={responding === a.id}
                       variant="destructive"
                       onClick={() => respond(a.id, 'rechazado')} className="h-11">
-                      {responding === a.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <><XCircle className="h-4 w-4 mr-1"/>Rechazar</>}
+                      {responding === a.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <><XCircle className="h-4 w-4 mr-1"/>{t('portalView.reject')}</>}
                     </Button>
                   </div>
                 </div>
@@ -178,7 +180,7 @@ export default function PortalView() {
 
         {answered.length > 0 && (
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-base">Trabajos adicionales respondidos</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-base">{t('portalView.answeredExtraWork')}</CardTitle></CardHeader>
             <CardContent className="space-y-2">
               {answered.map(a => (
                 <div key={a.id} className="p-2 rounded border text-sm flex items-start gap-2">
@@ -195,7 +197,7 @@ export default function PortalView() {
         {vehicle.work_summary && (
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2"><Wrench className="h-4 w-4" /> Trabajos realizados</CardTitle>
+              <CardTitle className="text-base flex items-center gap-2"><Wrench className="h-4 w-4" /> {t('portalView.workPerformed')}</CardTitle>
             </CardHeader>
             <CardContent><p className="text-sm whitespace-pre-wrap text-muted-foreground">{vehicle.work_summary}</p></CardContent>
           </Card>
@@ -205,16 +207,16 @@ export default function PortalView() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center justify-between">
-                <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> Trabajos solicitados</span>
+                <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> {t('portalView.requestedWork')}</span>
                 <span className="text-sm font-normal text-muted-foreground">{progress.done}/{progress.total}</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
-                {vehicle.client_tasks.map((t, idx) => (
+                {vehicle.client_tasks.map((task, idx) => (
                   <li key={idx} className="text-sm flex items-start gap-2">
-                    {t.done ? <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-600 flex-shrink-0" /> : <Clock className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />}
-                    <span className={t.done ? 'line-through text-muted-foreground' : ''}>{t.text}</span>
+                    {task.done ? <CheckCircle2 className="h-4 w-4 mt-0.5 text-green-600 flex-shrink-0" /> : <Clock className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" />}
+                    <span className={task.done ? 'line-through text-muted-foreground' : ''}>{task.text}</span>
                   </li>
                 ))}
               </ul>
@@ -223,7 +225,7 @@ export default function PortalView() {
         )}
 
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-base">Contacto del taller</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-base">{t('portalView.workshopContact')}</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
             {workshop.horario && <p className="text-muted-foreground">🕐 {workshop.horario}</p>}
             {workshop.phone && (

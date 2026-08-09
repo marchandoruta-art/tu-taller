@@ -17,6 +17,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Pencil, Loader2, Car, ClipboardCheck, User } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { FuelGauge } from './reception/FuelGauge';
 import { VehicleDiagram, ExteriorDamage } from './reception/VehicleDiagram';
 import { InteriorChecklist, InteriorCheckData } from './reception/InteriorChecklist';
@@ -44,6 +45,7 @@ const DEFAULT_INTERIOR: InteriorCheckData = {
 };
 
 export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDataDialogProps) {
+  const { t } = useTranslation();
   const { role } = useAuth();
   const { organizationId } = useOrganization();
   const [open, setOpen] = useState(false);
@@ -109,7 +111,7 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
 
   const handleSave = async () => {
     if (!vehicleFields.plate.trim() || !vehicleFields.brand.trim() || !vehicleFields.model.trim()) {
-      toast.error('Matrícula, marca y modelo son obligatorios');
+      toast.error(t('editReceptionData.requiredFieldsError'));
       return;
     }
 
@@ -177,12 +179,12 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
         }
       }
 
-      toast.success('Datos actualizados correctamente');
+      toast.success(t('editReceptionData.updateSuccess'));
       setOpen(false);
       onSuccess();
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Error desconocido';
-      toast.error('Error al guardar', { description: msg });
+      const msg = error instanceof Error ? error.message : t('editReceptionData.unknownError');
+      toast.error(t('editReceptionData.saveErrorTitle'), { description: msg });
     } finally {
       setLoading(false);
     }
@@ -195,14 +197,14 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" data-edit-reception>
           <Pencil className="mr-2 h-4 w-4" />
-          Editar Datos Recepción
+          {t('editReceptionData.triggerButton')}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-2xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Pencil className="h-5 w-5" />
-            Editar Datos del Vehículo y Recepción
+            {t('editReceptionData.dialogTitle')}
           </DialogTitle>
         </DialogHeader>
 
@@ -212,63 +214,63 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
               {canEditOwner && (
                 <TabsTrigger value="owner" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
-                  Propietario
+                  {t('editReceptionData.tabOwner')}
                 </TabsTrigger>
               )}
               <TabsTrigger value="vehicle" className="flex items-center gap-2">
                 <Car className="h-4 w-4" />
-                Vehículo
+                {t('editReceptionData.tabVehicle')}
               </TabsTrigger>
               <TabsTrigger value="inspection" className="flex items-center gap-2">
                 <ClipboardCheck className="h-4 w-4" />
-                Inspección
+                {t('editReceptionData.tabInspection')}
               </TabsTrigger>
             </TabsList>
 
             {canEditOwner && (
               <TabsContent value="owner" className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Nombre *</Label>
+                  <Label>{t('editReceptionData.ownerName')}</Label>
                   <Input
                     value={ownerFields.name}
                     onChange={(e) => setOwnerFields({ ...ownerFields, name: e.target.value })}
-                    placeholder="Juan Pérez"
+                    placeholder={t('editReceptionData.ownerNamePlaceholder')}
                     required
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Teléfono</Label>
+                    <Label>{t('editReceptionData.ownerPhone')}</Label>
                     <Input
                       value={ownerFields.phone}
                       onChange={(e) => setOwnerFields({ ...ownerFields, phone: e.target.value })}
-                      placeholder="612 345 678"
+                      placeholder={t('editReceptionData.ownerPhonePlaceholder')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>DNI/NIF</Label>
+                    <Label>{t('editReceptionData.ownerDni')}</Label>
                     <Input
                       value={ownerFields.dni}
                       onChange={(e) => setOwnerFields({ ...ownerFields, dni: e.target.value })}
-                      placeholder="12345678A"
+                      placeholder={t('editReceptionData.ownerDniPlaceholder')}
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Email</Label>
+                  <Label>{t('editReceptionData.ownerEmail')}</Label>
                   <Input
                     type="email"
                     value={ownerFields.email}
                     onChange={(e) => setOwnerFields({ ...ownerFields, email: e.target.value })}
-                    placeholder="cliente@email.com"
+                    placeholder={t('editReceptionData.ownerEmailPlaceholder')}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Dirección</Label>
+                  <Label>{t('editReceptionData.ownerAddress')}</Label>
                   <Input
                     value={ownerFields.address}
                     onChange={(e) => setOwnerFields({ ...ownerFields, address: e.target.value })}
-                    placeholder="Calle Principal, 123"
+                    placeholder={t('editReceptionData.ownerAddressPlaceholder')}
                   />
                 </div>
               </TabsContent>
@@ -277,7 +279,7 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
             <TabsContent value="vehicle" className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Matrícula *</Label>
+                  <Label>{t('editReceptionData.plate')}</Label>
                   <Input
                     value={vehicleFields.plate}
                     onChange={(e) => setVehicleFields({ ...vehicleFields, plate: e.target.value.toUpperCase() })}
@@ -285,7 +287,7 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Año</Label>
+                  <Label>{t('editReceptionData.year')}</Label>
                   <Input
                     type="number"
                     value={vehicleFields.year}
@@ -295,7 +297,7 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Marca *</Label>
+                  <Label>{t('editReceptionData.brand')}</Label>
                   <Input
                     value={vehicleFields.brand}
                     onChange={(e) => setVehicleFields({ ...vehicleFields, brand: e.target.value })}
@@ -303,7 +305,7 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Modelo *</Label>
+                  <Label>{t('editReceptionData.model')}</Label>
                   <Input
                     value={vehicleFields.model}
                     onChange={(e) => setVehicleFields({ ...vehicleFields, model: e.target.value })}
@@ -313,14 +315,14 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Color</Label>
+                  <Label>{t('editReceptionData.color')}</Label>
                   <Input
                     value={vehicleFields.color}
                     onChange={(e) => setVehicleFields({ ...vehicleFields, color: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Nº Bastidor</Label>
+                  <Label>{t('editReceptionData.vin')}</Label>
                   <Input
                     value={vehicleFields.vin}
                     onChange={(e) => setVehicleFields({ ...vehicleFields, vin: e.target.value })}
@@ -328,7 +330,7 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Descripción del problema</Label>
+                <Label>{t('editReceptionData.problemDescription')}</Label>
                 <Textarea
                   value={vehicleFields.client_description}
                   onChange={(e) => setVehicleFields({ ...vehicleFields, client_description: e.target.value })}
@@ -344,14 +346,14 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
                   onChange={(value) => setInspectionFields({ ...inspectionFields, fuel_level: value })}
                 />
                 <div className="space-y-2">
-                  <Label>Kilometraje</Label>
+                  <Label>{t('editReceptionData.mileage')}</Label>
                   <Input
                     type="number"
                     value={inspectionFields.mileage}
                     onChange={(e) => setInspectionFields({ ...inspectionFields, mileage: e.target.value })}
-                    placeholder="125.000"
+                    placeholder={t('editReceptionData.mileagePlaceholder')}
                   />
-                  <p className="text-xs text-muted-foreground">km</p>
+                  <p className="text-xs text-muted-foreground">{t('editReceptionData.mileageUnit')}</p>
                 </div>
               </div>
 
@@ -366,7 +368,7 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
               />
 
               <div className="space-y-2">
-                <Label>Objetos personales del cliente</Label>
+                <Label>{t('editReceptionData.clientBelongings')}</Label>
                 <Textarea
                   value={inspectionFields.client_belongings}
                   onChange={(e) => setInspectionFields({ ...inspectionFields, client_belongings: e.target.value })}
@@ -375,7 +377,7 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
               </div>
 
               <div className="space-y-2">
-                <Label>Observaciones adicionales</Label>
+                <Label>{t('editReceptionData.additionalNotes')}</Label>
                 <Textarea
                   value={inspectionFields.reception_notes}
                   onChange={(e) => setInspectionFields({ ...inspectionFields, reception_notes: e.target.value })}
@@ -393,11 +395,11 @@ export function EditReceptionDataDialog({ vehicle, onSuccess }: EditReceptionDat
 
         <div className="flex gap-3 pt-4">
           <Button variant="outline" onClick={() => setOpen(false)} className="flex-1">
-            Cancelar
+            {t('editReceptionData.cancel')}
           </Button>
           <Button onClick={handleSave} disabled={loading} className="flex-1">
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Guardar Cambios
+            {t('editReceptionData.saveChanges')}
           </Button>
         </div>
       </DialogContent>

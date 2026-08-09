@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Stethoscope, Loader2, Wrench, AlertTriangle, ListChecks, Package, ShieldAlert, Cpu } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface ProbableCause {
   cause: string;
@@ -38,6 +39,7 @@ const probColor = {
 } as const;
 
 export function AIDiagnosticDialog({ vehicleId, initialSymptoms = '', triggerClassName }: Props) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [symptoms, setSymptoms] = useState(initialSymptoms);
   const [extra, setExtra] = useState('');
@@ -46,7 +48,7 @@ export function AIDiagnosticDialog({ vehicleId, initialSymptoms = '', triggerCla
 
   const run = async () => {
     if (!symptoms.trim()) {
-      toast.error('Describe primero los síntomas');
+      toast.error(t('aiDiagnostic.describeSymptomsFirst'));
       return;
     }
     setLoading(true);
@@ -60,7 +62,7 @@ export function AIDiagnosticDialog({ vehicleId, initialSymptoms = '', triggerCla
         },
       });
       if (error) {
-        toast.error((error as { message?: string }).message || 'Error al diagnosticar');
+        toast.error((error as { message?: string }).message || t('aiDiagnostic.errorDiagnosing'));
         return;
       }
       if (data?.error) {
@@ -69,7 +71,7 @@ export function AIDiagnosticDialog({ vehicleId, initialSymptoms = '', triggerCla
       }
       setResult(data.diagnostic as Diagnostic);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Error de red');
+      toast.error(e instanceof Error ? e.message : t('aiDiagnostic.networkError'));
     } finally {
       setLoading(false);
     }
@@ -80,27 +82,27 @@ export function AIDiagnosticDialog({ vehicleId, initialSymptoms = '', triggerCla
       <DialogTrigger asChild>
         <Button type="button" variant="outline" className={triggerClassName}>
           <Stethoscope className="h-4 w-4 mr-2 text-primary" />
-          Asistente de diagnóstico
+          {t('aiDiagnostic.triggerButton')}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Stethoscope className="h-5 w-5 text-primary" />
-            Asistente de diagnóstico IA
+            {t('aiDiagnostic.dialogTitle')}
           </DialogTitle>
           <DialogDescription className="text-xs">
-            Describe los síntomas y la IA propondrá causas probables, pasos de inspección y piezas candidatas. Orientativo, no sustituye al criterio del técnico.
+            {t('aiDiagnostic.dialogDescription')}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div>
             <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">
-              Síntomas
+              {t('aiDiagnostic.symptoms')}
             </label>
             <Textarea
-              placeholder="Ej: al frenar en frío hay chirrido metálico en el eje delantero derecho, desaparece tras 5 min conduciendo…"
+              placeholder={t('aiDiagnostic.symptomsPlaceholder')}
               value={symptoms}
               onChange={(e) => setSymptoms(e.target.value)}
               rows={4}
@@ -109,10 +111,10 @@ export function AIDiagnosticDialog({ vehicleId, initialSymptoms = '', triggerCla
           </div>
           <div>
             <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">
-              Contexto adicional (opcional)
+              {t('aiDiagnostic.additionalContext')}
             </label>
             <Textarea
-              placeholder="Últimas intervenciones, códigos DTC leídos, cuándo aparece, condiciones…"
+              placeholder={t('aiDiagnostic.additionalContextPlaceholder')}
               value={extra}
               onChange={(e) => setExtra(e.target.value)}
               rows={2}
@@ -121,9 +123,9 @@ export function AIDiagnosticDialog({ vehicleId, initialSymptoms = '', triggerCla
           </div>
           <Button onClick={run} disabled={loading || !symptoms.trim()} className="w-full">
             {loading ? (
-              <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Analizando…</>
+              <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t('aiDiagnostic.analyzing')}</>
             ) : (
-              <><Stethoscope className="h-4 w-4 mr-2" /> Diagnosticar</>
+              <><Stethoscope className="h-4 w-4 mr-2" /> {t('aiDiagnostic.diagnose')}</>
             )}
           </Button>
         </div>
@@ -132,8 +134,8 @@ export function AIDiagnosticDialog({ vehicleId, initialSymptoms = '', triggerCla
           <div className="space-y-4 pt-2 border-t">
             <div className="rounded-lg border bg-muted/30 p-3">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-semibold uppercase text-muted-foreground">Resumen</span>
-                <Badge variant="outline">Confianza: {result.confidence}</Badge>
+                <span className="text-xs font-semibold uppercase text-muted-foreground">{t('aiDiagnostic.summary')}</span>
+                <Badge variant="outline">{t('aiDiagnostic.confidence', { value: result.confidence })}</Badge>
               </div>
               <p className="text-sm">{result.summary}</p>
             </div>
@@ -141,7 +143,7 @@ export function AIDiagnosticDialog({ vehicleId, initialSymptoms = '', triggerCla
             {result.probable_causes?.length > 0 && (
               <div>
                 <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2 flex items-center gap-1">
-                  <AlertTriangle className="h-3 w-3" /> Causas probables
+                  <AlertTriangle className="h-3 w-3" /> {t('aiDiagnostic.probableCauses')}
                 </h4>
                 <div className="space-y-2">
                   {result.probable_causes.map((c, i) => (
@@ -160,7 +162,7 @@ export function AIDiagnosticDialog({ vehicleId, initialSymptoms = '', triggerCla
             {result.diagnostic_steps?.length > 0 && (
               <div>
                 <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2 flex items-center gap-1">
-                  <ListChecks className="h-3 w-3" /> Pasos de inspección
+                  <ListChecks className="h-3 w-3" /> {t('aiDiagnostic.inspectionSteps')}
                 </h4>
                 <ol className="space-y-1 text-sm list-decimal list-inside">
                   {result.diagnostic_steps.map((s, i) => <li key={i}>{s}</li>)}
@@ -172,7 +174,7 @@ export function AIDiagnosticDialog({ vehicleId, initialSymptoms = '', triggerCla
               {result.required_tools && result.required_tools.length > 0 && (
                 <div>
                   <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2 flex items-center gap-1">
-                    <Wrench className="h-3 w-3" /> Herramientas
+                    <Wrench className="h-3 w-3" /> {t('aiDiagnostic.tools')}
                   </h4>
                   <ul className="text-sm space-y-1">
                     {result.required_tools.map((t, i) => <li key={i}>• {t}</li>)}
@@ -182,7 +184,7 @@ export function AIDiagnosticDialog({ vehicleId, initialSymptoms = '', triggerCla
               {result.parts_likely_needed && result.parts_likely_needed.length > 0 && (
                 <div>
                   <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2 flex items-center gap-1">
-                    <Package className="h-3 w-3" /> Piezas candidatas
+                    <Package className="h-3 w-3" /> {t('aiDiagnostic.candidateParts')}
                   </h4>
                   <ul className="text-sm space-y-1">
                     {result.parts_likely_needed.map((p, i) => <li key={i}>• {p}</li>)}
@@ -194,7 +196,7 @@ export function AIDiagnosticDialog({ vehicleId, initialSymptoms = '', triggerCla
             {result.dtc_codes_to_check && result.dtc_codes_to_check.length > 0 && (
               <div>
                 <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2 flex items-center gap-1">
-                  <Cpu className="h-3 w-3" /> Códigos DTC a comprobar
+                  <Cpu className="h-3 w-3" /> {t('aiDiagnostic.dtcCodes')}
                 </h4>
                 <div className="flex flex-wrap gap-1">
                   {result.dtc_codes_to_check.map((d, i) => (
@@ -207,7 +209,7 @@ export function AIDiagnosticDialog({ vehicleId, initialSymptoms = '', triggerCla
             {result.safety_warnings && result.safety_warnings.length > 0 && (
               <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
                 <h4 className="text-xs font-semibold uppercase mb-2 flex items-center gap-1 text-amber-700 dark:text-amber-300">
-                  <ShieldAlert className="h-3 w-3" /> Seguridad
+                  <ShieldAlert className="h-3 w-3" /> {t('aiDiagnostic.safety')}
                 </h4>
                 <ul className="text-sm space-y-1">
                   {result.safety_warnings.map((w, i) => <li key={i}>⚠ {w}</li>)}

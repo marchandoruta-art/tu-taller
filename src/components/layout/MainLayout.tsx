@@ -7,12 +7,14 @@ import { cn } from '@/lib/utils';
 import { ActiveTimerBanner } from '@/components/timer/ActiveTimerBanner';
 import { CommandPalette } from '@/components/ui/CommandPalette';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { useTranslation } from 'react-i18next';
 
 interface MainLayoutProps {
   children: ReactNode;
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
+  const { t } = useTranslation();
   const { signOut } = useAuth();
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -89,7 +91,7 @@ export function MainLayout({ children }: MainLayoutProps) {
               >
                 <PanelLeft className="h-5 w-5" />
               </Button>
-              <span className="font-semibold">Autos Formentera</span>
+              <span className="font-semibold">{t('mainLayout.companyName')}</span>
             </div>
             <div className="flex items-center gap-1">
               <Button
@@ -99,7 +101,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                   const event = new KeyboardEvent('keydown', { key: 'k', metaKey: true });
                   window.dispatchEvent(event);
                 }}
-                title="Buscar (Cmd+K)"
+                title={t('mainLayout.searchTitle')}
               >
                 <Search className="h-5 w-5" />
               </Button>
@@ -109,7 +111,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                 size="icon"
                 onClick={signOut}
                 className="text-muted-foreground hover:text-destructive"
-                title="Cerrar sesión"
+                title={t('mainLayout.signOutTitle')}
               >
                 <LogOut className="h-5 w-5" />
               </Button>
