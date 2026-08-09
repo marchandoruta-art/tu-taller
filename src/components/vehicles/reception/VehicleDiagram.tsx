@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { X, Camera, Image, Loader2, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -23,36 +24,37 @@ interface VehicleDiagramProps {
 
 interface VehicleZone {
   id: string;
-  label: string;
   path: string;
 }
 
 // SVG paths for each zone of the vehicle (top-down view)
 const VEHICLE_ZONES: VehicleZone[] = [
-  { id: 'hood', label: 'Capó', path: 'M 80 40 L 170 40 L 180 80 L 70 80 Z' },
-  { id: 'windshield', label: 'Parabrisas', path: 'M 70 80 L 180 80 L 185 100 L 65 100 Z' },
-  { id: 'roof', label: 'Techo', path: 'M 65 100 L 185 100 L 185 180 L 65 180 Z' },
-  { id: 'rear_window', label: 'Luneta trasera', path: 'M 65 180 L 185 180 L 180 200 L 70 200 Z' },
-  { id: 'trunk', label: 'Maletero', path: 'M 70 200 L 180 200 L 170 240 L 80 240 Z' },
-  { id: 'front_bumper', label: 'Parachoques delantero', path: 'M 70 25 L 180 25 L 180 40 L 70 40 Z' },
-  { id: 'rear_bumper', label: 'Parachoques trasero', path: 'M 70 240 L 180 240 L 180 255 L 70 255 Z' },
-  { id: 'front_left_fender', label: 'Aleta delantera izquierda', path: 'M 40 40 L 70 40 L 70 90 L 40 85 Z' },
-  { id: 'front_right_fender', label: 'Aleta delantera derecha', path: 'M 180 40 L 210 40 L 210 85 L 180 90 Z' },
-  { id: 'left_door_front', label: 'Puerta delantera izquierda', path: 'M 40 90 L 65 90 L 65 145 L 40 145 Z' },
-  { id: 'left_door_rear', label: 'Puerta trasera izquierda', path: 'M 40 145 L 65 145 L 65 190 L 40 190 Z' },
-  { id: 'right_door_front', label: 'Puerta delantera derecha', path: 'M 185 90 L 210 90 L 210 145 L 185 145 Z' },
-  { id: 'right_door_rear', label: 'Puerta trasera derecha', path: 'M 185 145 L 210 145 L 210 190 L 185 190 Z' },
-  { id: 'rear_left_fender', label: 'Aleta trasera izquierda', path: 'M 40 190 L 65 190 L 70 240 L 40 235 Z' },
-  { id: 'rear_right_fender', label: 'Aleta trasera derecha', path: 'M 185 190 L 210 190 L 210 235 L 180 240 Z' },
-  { id: 'left_mirror', label: 'Retrovisor izquierdo', path: 'M 30 85 L 40 80 L 40 95 L 30 95 Z' },
-  { id: 'right_mirror', label: 'Retrovisor derecho', path: 'M 210 80 L 220 85 L 220 95 L 210 95 Z' },
-  { id: 'wheel_fl', label: 'Rueda delantera izquierda', path: 'M 25 55 A 12 18 0 1 1 25 55.01 Z' },
-  { id: 'wheel_fr', label: 'Rueda delantera derecha', path: 'M 225 55 A 12 18 0 1 1 225 55.01 Z' },
-  { id: 'wheel_rl', label: 'Rueda trasera izquierda', path: 'M 25 215 A 12 18 0 1 1 25 215.01 Z' },
-  { id: 'wheel_rr', label: 'Rueda trasera derecha', path: 'M 225 215 A 12 18 0 1 1 225 215.01 Z' },
+  { id: 'hood', path: 'M 80 40 L 170 40 L 180 80 L 70 80 Z' },
+  { id: 'windshield', path: 'M 70 80 L 180 80 L 185 100 L 65 100 Z' },
+  { id: 'roof', path: 'M 65 100 L 185 100 L 185 180 L 65 180 Z' },
+  { id: 'rear_window', path: 'M 65 180 L 185 180 L 180 200 L 70 200 Z' },
+  { id: 'trunk', path: 'M 70 200 L 180 200 L 170 240 L 80 240 Z' },
+  { id: 'front_bumper', path: 'M 70 25 L 180 25 L 180 40 L 70 40 Z' },
+  { id: 'rear_bumper', path: 'M 70 240 L 180 240 L 180 255 L 70 255 Z' },
+  { id: 'front_left_fender', path: 'M 40 40 L 70 40 L 70 90 L 40 85 Z' },
+  { id: 'front_right_fender', path: 'M 180 40 L 210 40 L 210 85 L 180 90 Z' },
+  { id: 'left_door_front', path: 'M 40 90 L 65 90 L 65 145 L 40 145 Z' },
+  { id: 'left_door_rear', path: 'M 40 145 L 65 145 L 65 190 L 40 190 Z' },
+  { id: 'right_door_front', path: 'M 185 90 L 210 90 L 210 145 L 185 145 Z' },
+  { id: 'right_door_rear', path: 'M 185 145 L 210 145 L 210 190 L 185 190 Z' },
+  { id: 'rear_left_fender', path: 'M 40 190 L 65 190 L 70 240 L 40 235 Z' },
+  { id: 'rear_right_fender', path: 'M 185 190 L 210 190 L 210 235 L 180 240 Z' },
+  { id: 'left_mirror', path: 'M 30 85 L 40 80 L 40 95 L 30 95 Z' },
+  { id: 'right_mirror', path: 'M 210 80 L 220 85 L 220 95 L 210 95 Z' },
+  { id: 'wheel_fl', path: 'M 25 55 A 12 18 0 1 1 25 55.01 Z' },
+  { id: 'wheel_fr', path: 'M 225 55 A 12 18 0 1 1 225 55.01 Z' },
+  { id: 'wheel_rl', path: 'M 25 215 A 12 18 0 1 1 25 215.01 Z' },
+  { id: 'wheel_rr', path: 'M 225 215 A 12 18 0 1 1 225 215.01 Z' },
 ];
 
 export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
+  const { t } = useTranslation();
+  const zoneLabel = (id: string) => t(`vehicleDiagram.zones.${id}`);
   const [selectedZone, setSelectedZone] = useState<VehicleZone | null>(null);
   const [newDamage, setNewDamage] = useState({ description: '', photos: [] as string[] });
   const [uploading, setUploading] = useState(false);
@@ -76,7 +78,7 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
       return filePath;
     } catch (error) {
       console.error('Error uploading photo:', error);
-      toast.error('Error al subir la foto');
+      toast.error(t('vehicleDiagram.uploadPhotoError'));
       return null;
     }
   };
@@ -193,8 +195,8 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Label className="text-base font-medium">Daños Exteriores</Label>
-        <span className="text-xs text-muted-foreground">Toca una zona para marcar daños</span>
+        <Label className="text-base font-medium">{t('vehicleDiagram.title')}</Label>
+        <span className="text-xs text-muted-foreground">{t('vehicleDiagram.tapZoneHint')}</span>
       </div>
 
       {/* Interactive Vehicle Diagram */}
@@ -271,19 +273,19 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
 
           {/* Front indicator */}
           <text x="125" y="18" textAnchor="middle" fontSize="8" fill="hsl(var(--muted-foreground))">
-            FRONTAL
+            {t('vehicleDiagram.front')}
           </text>
           
           {/* Rear indicator */}
           <text x="125" y="272" textAnchor="middle" fontSize="8" fill="hsl(var(--muted-foreground))">
-            TRASERO
+            {t('vehicleDiagram.rear')}
           </text>
         </svg>
 
         {/* Zone label on hover/select */}
         {(hoveredZone || selectedZone) && (
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-background/95 px-3 py-1 rounded-full text-xs font-medium border shadow-sm">
-            {VEHICLE_ZONES.find(z => z.id === (selectedZone?.id || hoveredZone))?.label}
+            {zoneLabel(VEHICLE_ZONES.find(z => z.id === (selectedZone?.id || hoveredZone))?.id || '')}
           </div>
         )}
       </div>
@@ -293,23 +295,23 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
         <div className="space-y-3 p-3 border rounded-lg bg-primary/5 animate-in fade-in slide-in-from-top-2">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-primary" />
-            <span className="font-medium text-sm">{selectedZone.label}</span>
+            <span className="font-medium text-sm">{zoneLabel(selectedZone.id)}</span>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="damage-description">Descripción del daño</Label>
+            <Label htmlFor="damage-description">{t('vehicleDiagram.damageDescription')}</Label>
             <Input
               id="damage-description"
               value={newDamage.description}
               onChange={(e) => setNewDamage({ ...newDamage, description: e.target.value })}
-              placeholder="Ej: Arañazo de 10cm, abolladura, pintura descascarillada..."
+              placeholder={t('vehicleDiagram.damageDescriptionPlaceholder')}
               autoFocus
             />
           </div>
 
           {/* Photo Upload Section */}
           <div className="space-y-2">
-            <Label>Fotos del daño (opcional)</Label>
+            <Label>{t('vehicleDiagram.damagePhotosLabel')}</Label>
             <div className="flex gap-2">
               <input
                 ref={cameraInputRef}
@@ -335,7 +337,7 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
                 disabled={uploading}
               >
                 {uploading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Camera className="h-4 w-4 mr-1" />}
-                Cámara
+                {t('vehicleDiagram.camera')}
               </Button>
               <Button
                 type="button"
@@ -345,7 +347,7 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
                 disabled={uploading}
               >
                 <Image className="h-4 w-4 mr-1" />
-                Galería
+                {t('vehicleDiagram.gallery')}
               </Button>
             </div>
 
@@ -356,7 +358,7 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
                   <div key={index} className="relative group">
                     <img
                       src={getDisplayUrl(photo)}
-                      alt={`Daño ${index + 1}`}
+                      alt={t('vehicleDiagram.damagePhotoAlt', { index: index + 1 })}
                       className="h-16 w-16 object-cover rounded-md border"
                     />
                     <button
@@ -374,10 +376,10 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
 
           <div className="flex gap-2">
             <Button type="button" size="sm" onClick={addDamage} disabled={!newDamage.description || uploading}>
-              Añadir daño
+              {t('vehicleDiagram.addDamage')}
             </Button>
             <Button type="button" variant="ghost" size="sm" onClick={() => { setSelectedZone(null); setNewDamage({ description: '', photos: [] }); }}>
-              Cancelar
+              {t('vehicleDiagram.cancel')}
             </Button>
           </div>
         </div>
@@ -386,7 +388,7 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
       {/* Damage List */}
       {damages.length > 0 && (
         <div className="space-y-2">
-          <Label className="text-sm text-muted-foreground">Daños registrados ({damages.length})</Label>
+          <Label className="text-sm text-muted-foreground">{t('vehicleDiagram.registeredDamages', { count: damages.length })}</Label>
           {damages.map((damage) => {
             const zone = VEHICLE_ZONES.find(z => z.id === damage.zone);
             return (
@@ -401,7 +403,7 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm flex items-center gap-1">
                       <AlertTriangle className="h-3 w-3 text-destructive" />
-                      {zone?.label || damage.zone}
+                      {zone ? zoneLabel(zone.id) : damage.zone}
                     </p>
                     <p className="text-sm text-muted-foreground">{damage.description}</p>
                   </div>
@@ -423,7 +425,7 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
                         <img
                           key={index}
                           src={displayUrl}
-                          alt={`Daño ${index + 1}`}
+                          alt={t('vehicleDiagram.damagePhotoAlt', { index: index + 1 })}
                           className="h-12 w-12 object-cover rounded-md border cursor-pointer hover:opacity-80"
                           onClick={() => displayUrl && window.open(displayUrl, '_blank')}
                         />
@@ -439,7 +441,7 @@ export function VehicleDiagram({ damages, onChange }: VehicleDiagramProps) {
 
       {damages.length === 0 && !selectedZone && (
         <p className="text-sm text-muted-foreground text-center py-2">
-          No se han registrado daños exteriores
+          {t('vehicleDiagram.noDamagesRegistered')}
         </p>
       )}
     </div>
