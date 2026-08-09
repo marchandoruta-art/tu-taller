@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AttendanceClock } from '@/components/attendance/AttendanceClock';
@@ -23,6 +24,7 @@ interface TimeLogWithVehicle {
 }
 
 export default function TimeLogs() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [timeLogs, setTimeLogs] = useState<TimeLogWithVehicle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,8 +86,8 @@ export default function TimeLogs() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold">Registro de Tiempo</h1>
-          <p className="text-muted-foreground">Control de jornada y reparaciones</p>
+          <h1 className="text-2xl font-bold">{t('planningUI.timeLogs.title')}</h1>
+          <p className="text-muted-foreground">{t('planningUI.timeLogs.subtitle')}</p>
         </div>
 
         {/* Grid layout */}
@@ -103,7 +105,7 @@ export default function TimeLogs() {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                     <Wrench className="h-4 w-4" />
-                    Reparaciones Hoy
+                    {t('planningUI.timeLogs.repairsToday')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -113,7 +115,7 @@ export default function TimeLogs() {
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Últimos 7 días
+                    {t('planningUI.timeLogs.last7Days')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -127,13 +129,13 @@ export default function TimeLogs() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="h-5 w-5" />
-                  Historial de Reparaciones
+                  {t('planningUI.timeLogs.history')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {timeLogs.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">
-                    No hay registros de tiempo
+                    {t('planningUI.timeLogs.noLogs')}
                   </p>
                 ) : (
                   <div className="space-y-3 max-h-96 overflow-y-auto">

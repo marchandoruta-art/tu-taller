@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,8 +11,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Wrench, Loader2, Building2, UserPlus, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import { LanguageSelector } from '@/components/settings/LanguageSelector';
 
 export default function Onboarding() {
+  const { t } = useTranslation();
   const { user, profile, signOut } = useAuth();
   const { refetch } = useOrganization();
   const navigate = useNavigate();
@@ -72,11 +75,11 @@ export default function Onboarding() {
       if (roleError) throw roleError;
 
       await refetch();
-      toast.success('¡Taller creado correctamente!');
+      toast.success(t('authUI.onboarding.createSuccess'));
       navigate('/');
     } catch (error: any) {
       console.error('Error creating organization:', error);
-      toast.error('Error al crear el taller', { description: error.message });
+      toast.error(t('authUI.onboarding.createErrorTitle'), { description: error.message });
     } finally {
       setLoading(false);
     }
@@ -97,14 +100,14 @@ export default function Onboarding() {
 
       if (findError) {
         console.error('Error looking up organization:', findError);
-        toast.error('Error al buscar el taller');
+        toast.error(t('authUI.onboarding.lookupError'));
         setLoading(false);
         return;
       }
 
       if (!orgs || orgs.length === 0) {
-        toast.error('Código de invitación no válido', {
-          description: 'Verifica que el código sea correcto e inténtalo de nuevo.',
+        toast.error(t('authUI.onboarding.invalidCodeTitle'), {
+          description: t('authUI.onboarding.invalidCodeDescription'),
         });
         setLoading(false);
         return;
@@ -135,11 +138,11 @@ export default function Onboarding() {
       }
 
       await refetch();
-      toast.success(`¡Te has unido a ${org.name}!`);
+      toast.success(t('authUI.onboarding.joinSuccess', { name: org.name }));
       navigate('/');
     } catch (error: any) {
       console.error('Error joining organization:', error);
-      toast.error('Error al unirse al taller', { description: error.message });
+      toast.error(t('authUI.onboarding.joinErrorTitle'), { description: error.message });
     } finally {
       setLoading(false);
     }
@@ -153,10 +156,13 @@ export default function Onboarding() {
             <Wrench className="w-8 h-8 text-primary-foreground" />
           </div>
           <div>
-            <CardTitle className="text-2xl">¡Bienvenido, {profile?.full_name}!</CardTitle>
+            <CardTitle className="text-2xl">{t('authUI.onboarding.welcome', { name: profile?.full_name })}</CardTitle>
             <CardDescription>
-              Configura tu espacio de trabajo para comenzar
+              {t('authUI.onboarding.subtitle')}
             </CardDescription>
+          </div>
+          <div className="flex justify-center">
+            <LanguageSelector compact className="w-auto" />
           </div>
         </CardHeader>
         <CardContent>
@@ -164,35 +170,35 @@ export default function Onboarding() {
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="create" className="flex items-center gap-2">
                 <Building2 className="h-4 w-4" />
-                Crear Taller
+                {t('authUI.onboarding.createTab')}
               </TabsTrigger>
               <TabsTrigger value="join" className="flex items-center gap-2">
                 <UserPlus className="h-4 w-4" />
-                Unirse
+                {t('authUI.onboarding.joinTab')}
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="create">
               <form onSubmit={handleCreateOrganization} className="space-y-4">
                 <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-                  <p className="text-sm font-medium">Crea tu propio taller</p>
+                  <p className="text-sm font-medium">{t('authUI.onboarding.createInfoTitle')}</p>
                   <p className="text-xs text-muted-foreground">
-                    Serás el administrador y podrás invitar a tu equipo después.
+                    {t('authUI.onboarding.createInfoDescription')}
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="org-name">Nombre del Taller</Label>
+                  <Label htmlFor="org-name">{t('authUI.onboarding.orgNameLabel')}</Label>
                   <Input
                     id="org-name"
                     value={orgName}
                     onChange={(e) => setOrgName(e.target.value)}
-                    placeholder="Ej: Taller García"
+                    placeholder={t('authUI.onboarding.orgNamePlaceholder')}
                     required
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Crear Taller
+                  {t('authUI.onboarding.createButton')}
                 </Button>
               </form>
             </TabsContent>
@@ -200,18 +206,18 @@ export default function Onboarding() {
             <TabsContent value="join">
               <form onSubmit={handleJoinOrganization} className="space-y-4">
                 <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-                  <p className="text-sm font-medium">Únete a un taller existente</p>
+                  <p className="text-sm font-medium">{t('authUI.onboarding.joinInfoTitle')}</p>
                   <p className="text-xs text-muted-foreground">
-                    Pide el código de invitación al administrador del taller.
+                    {t('authUI.onboarding.joinInfoDescription')}
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="invite-code">Código de Invitación</Label>
+                  <Label htmlFor="invite-code">{t('authUI.onboarding.inviteCodeLabel')}</Label>
                   <Input
                     id="invite-code"
                     value={inviteCode}
                     onChange={(e) => setInviteCode(e.target.value)}
-                    placeholder="taller-garcia-abc123"
+                    placeholder={t('authUI.onboarding.inviteCodePlaceholder')}
                     autoComplete="off"
                     autoCorrect="off"
                     autoCapitalize="off"
@@ -221,7 +227,7 @@ export default function Onboarding() {
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Unirse al Taller
+                  {t('authUI.onboarding.joinButton')}
                 </Button>
               </form>
             </TabsContent>
@@ -233,13 +239,13 @@ export default function Onboarding() {
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
-              Cerrar sesión y volver
+              {t('authUI.onboarding.signOutAndBack')}
             </button>
             <Link
               to="/forgot-password"
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
-              ¿Olvidaste tu contraseña?
+              {t('authUI.onboarding.forgotPassword')}
             </Link>
           </div>
         </CardContent>

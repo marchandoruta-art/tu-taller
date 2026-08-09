@@ -1,5 +1,6 @@
-import { VehicleStatus, STATUS_LABELS } from '@/lib/types';
+import { VehicleStatus } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useLabels } from '@/hooks/useLabels';
 
 interface VehicleStatusBadgeProps {
   status: VehicleStatus;
@@ -7,6 +8,8 @@ interface VehicleStatusBadgeProps {
 }
 
 export function VehicleStatusBadge({ status, className }: VehicleStatusBadgeProps) {
+  const labels = useLabels();
+
   const statusStyles: Record<VehicleStatus, string> = {
     recibido: 'status-received',
     presupuestar: 'status-to-quote',
@@ -20,7 +23,7 @@ export function VehicleStatusBadge({ status, className }: VehicleStatusBadgeProp
 
   return (
     <span className={cn('status-badge', statusStyles[status], className)}>
-      {STATUS_LABELS[status]}
+      {labels.status(status)}
     </span>
   );
 }

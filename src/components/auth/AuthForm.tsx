@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,8 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Wrench, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { LanguageSelector } from '@/components/settings/LanguageSelector';
 
 export function AuthForm() {
+  const { t } = useTranslation();
   const { signIn, signUp } = useAuth();
   const [loading, setLoading] = useState(false);
 
@@ -21,9 +24,9 @@ export function AuthForm() {
 
     const { error } = await signIn(email, password);
     if (error) {
-      toast.error('Error al iniciar sesión', { description: error.message });
+      toast.error(t('authUI.auth.signInErrorTitle'), { description: error.message });
     } else {
-      toast.success('¡Bienvenido!');
+      toast.success(t('authUI.auth.signInSuccess'));
     }
     setLoading(false);
   };
@@ -38,9 +41,9 @@ export function AuthForm() {
 
     const { error } = await signUp(email, password, fullName);
     if (error) {
-      toast.error('Error al registrarse', { description: error.message });
+      toast.error(t('authUI.auth.signUpErrorTitle'), { description: error.message });
     } else {
-      toast.success('¡Cuenta creada!', { description: 'Ya puedes acceder al sistema.' });
+      toast.success(t('authUI.auth.signUpSuccessTitle'), { description: t('authUI.auth.signUpSuccessDescription') });
     }
     setLoading(false);
   };
@@ -53,31 +56,34 @@ export function AuthForm() {
             <Wrench className="w-8 h-8 text-primary-foreground" />
           </div>
           <div>
-            <CardTitle className="text-2xl">TallerPro</CardTitle>
-            <CardDescription>Sistema de Gestión de Taller</CardDescription>
+            <CardTitle className="text-2xl">{t('authUI.brand')}</CardTitle>
+            <CardDescription>{t('authUI.tagline')}</CardDescription>
+          </div>
+          <div className="flex justify-center">
+            <LanguageSelector compact className="w-auto" />
           </div>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="signin">Iniciar Sesión</TabsTrigger>
-              <TabsTrigger value="signup">Registrarse</TabsTrigger>
+              <TabsTrigger value="signin">{t('authUI.auth.signInTab')}</TabsTrigger>
+              <TabsTrigger value="signup">{t('authUI.auth.signUpTab')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
+                  <Label htmlFor="signin-email">{t('authUI.auth.email')}</Label>
                   <Input
                     id="signin-email"
                     name="email"
                     type="email"
-                    placeholder="tu@email.com"
+                    placeholder={t('authUI.auth.emailPlaceholder')}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">Contraseña</Label>
+                  <Label htmlFor="signin-password">{t('authUI.auth.password')}</Label>
                   <Input
                     id="signin-password"
                     name="password"
@@ -88,11 +94,11 @@ export function AuthForm() {
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Entrar
+                  {t('authUI.auth.signInButton')}
                 </Button>
                 <div className="text-center">
                   <a href="/forgot-password" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                    ¿Olvidaste tu contraseña?
+                    {t('authUI.auth.forgotPassword')}
                   </a>
                 </div>
               </form>
@@ -101,27 +107,27 @@ export function AuthForm() {
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-name">Nombre completo</Label>
+                  <Label htmlFor="signup-name">{t('authUI.auth.fullName')}</Label>
                   <Input
                     id="signup-name"
                     name="fullName"
                     type="text"
-                    placeholder="Juan Pérez"
+                    placeholder={t('authUI.auth.fullNamePlaceholder')}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="signup-email">{t('authUI.auth.email')}</Label>
                   <Input
                     id="signup-email"
                     name="email"
                     type="email"
-                    placeholder="tu@email.com"
+                    placeholder={t('authUI.auth.emailPlaceholder')}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Contraseña</Label>
+                  <Label htmlFor="signup-password">{t('authUI.auth.password')}</Label>
                   <Input
                     id="signup-password"
                     name="password"
@@ -133,7 +139,7 @@ export function AuthForm() {
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Crear cuenta
+                  {t('authUI.auth.signUpButton')}
                 </Button>
               </form>
             </TabsContent>

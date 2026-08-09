@@ -1,3 +1,5 @@
+import i18n from '@/i18n';
+
 export type UserRole = 'mecanico' | 'chapista' | 'oficina' | 'admin';
 
 // Owner can be null for non-admin users due to RLS
@@ -7,12 +9,21 @@ export type VehicleStatus = 'recibido' | 'presupuestar' | 'presupuestado' | 'en_
 
 export type VehiclePriority = 'baja' | 'normal' | 'alta' | 'urgente';
 
-export const PRIORITY_LABELS: Record<VehiclePriority, string> = {
-  baja: 'Baja',
-  normal: 'Normal',
-  alta: 'Alta',
-  urgente: 'Urgente',
-};
+// Labels are resolved through i18n at read time so every screen follows the
+// selected language without changing the Spanish values stored in the database.
+const translatedLabels = <T extends string>(namespace: string, keys: readonly T[]) =>
+  new Proxy({} as Record<T, string>, {
+    get: (_target, prop: string) => i18n.t(`${namespace}.${prop}`),
+    ownKeys: () => [...keys],
+    getOwnPropertyDescriptor: () => ({ enumerable: true, configurable: true }),
+  });
+
+export const PRIORITY_LABELS = translatedLabels<VehiclePriority>('priority', [
+  'baja',
+  'normal',
+  'alta',
+  'urgente',
+]);
 
 export const PRIORITY_ORDER: Record<VehiclePriority, number> = {
   urgente: 0,
@@ -150,20 +161,20 @@ export interface Notification {
   created_at: string;
 }
 
-export const STATUS_LABELS: Record<VehicleStatus, string> = {
-  recibido: 'Recibido',
-  presupuestar: 'Presupuestar',
-  presupuestado: 'Presupuestado',
-  en_reparacion: 'En Reparación',
-  pendiente_piezas: 'Pendiente Piezas',
-  terminado: 'Terminado',
-  facturado: 'Facturado',
-  entregado: 'Entregado',
-};
+export const STATUS_LABELS = translatedLabels<VehicleStatus>('status', [
+  'recibido',
+  'presupuestar',
+  'presupuestado',
+  'en_reparacion',
+  'pendiente_piezas',
+  'terminado',
+  'facturado',
+  'entregado',
+]);
 
-export const ROLE_LABELS: Record<UserRole, string> = {
-  mecanico: 'Mecánico',
-  chapista: 'Chapista',
-  oficina: 'Oficina',
-  admin: 'Administrador',
-};
+export const ROLE_LABELS = translatedLabels<UserRole>('role', [
+  'mecanico',
+  'chapista',
+  'oficina',
+  'admin',
+]);

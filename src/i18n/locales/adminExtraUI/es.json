@@ -1,0 +1,169 @@
+{
+  "adminExtraUI": {
+    "attendance": {
+      "title": "Control Horario",
+      "subtitle": "Gestión de asistencia de empleados",
+      "searchPlaceholder": "Buscar empleado...",
+      "periodWeek": "Esta semana",
+      "periodMonth": "Este mes",
+      "periodAll": "Todo el historial",
+      "exportCsv": "Exportar CSV",
+      "totalHours": "Horas totales",
+      "sessions": "Sesiones",
+      "detailedRecords": "Registros Detallados",
+      "noRecordsThisWeek": "No hay registros para esta semana",
+      "inProgress": "En curso",
+      "user": "Usuario",
+      "noRole": "Sin rol",
+      "exitTypes": {
+        "normal": "Normal",
+        "medico": "Médico",
+        "descanso": "Descanso",
+        "desayuno": "Desayuno",
+        "auto_8h": "Auto 8h",
+        "auto_16h": "Auto 16:00h"
+      },
+      "csvHeaders": {
+        "employee": "Empleado",
+        "role": "Rol",
+        "date": "Fecha",
+        "clockIn": "Entrada",
+        "clockOut": "Salida",
+        "exitType": "Tipo Salida",
+        "totalMinutes": "Minutos Totales",
+        "totalHours": "Horas Totales"
+      },
+      "csvFileNamePrefix": {
+        "week": "semana",
+        "month": "mes",
+        "all": "historico"
+      },
+      "toast": {
+        "noRecordsToExport": "No hay registros para exportar",
+        "csvDownloaded": "Archivo CSV descargado correctamente",
+        "exportError": "Error al exportar los datos"
+      }
+    },
+    "productivity": {
+      "title": "Productividad",
+      "subtitle": "Análisis de rendimiento del equipo",
+      "weekly": "Semanal",
+      "monthly": "Mensual",
+      "export": "Exportar",
+      "employees": "Empleados",
+      "attendanceHours": "Horas Asistencia",
+      "workedHours": "Horas Trabajadas",
+      "averageProductivity": "Productividad Media",
+      "noDataTitle": "Sin datos de productividad",
+      "noDataDescription": "No hay registros de asistencia o trabajo para este período",
+      "user": "Usuario",
+      "attendance": "Asistencia",
+      "worked": "Trabajado",
+      "sessionsCount": "{{count}} sesiones",
+      "tasksCount": "{{count}} tareas",
+      "csv": {
+        "employee": "Empleado",
+        "role": "Rol",
+        "attendance": "Tiempo en taller",
+        "work": "Tiempo en tareas",
+        "productivity": "Productividad %",
+        "attendanceSessions": "Fichajes",
+        "workSessions": "Sesiones trabajo"
+      },
+      "toast": {
+        "nothingToExport": "Nada que exportar"
+      }
+    },
+    "workload": {
+      "title": "Carga de Trabajo",
+      "subtitle": "Distribución de vehículos y horas por operario",
+      "filterPlaceholder": "Filtrar por operario",
+      "allOperators": "Todos los operarios",
+      "export": "Exportar",
+      "operators": "Operarios",
+      "assignedVehicles": "Vehículos asignados",
+      "totalHours": "Horas totales",
+      "averagePerOperator": "Media/operario",
+      "vehicles": "vehículos",
+      "load": "Carga",
+      "assignedVehiclesTitle": "Vehículos asignados",
+      "noVehiclesAssigned": "Sin vehículos asignados",
+      "noOperators": "No hay operarios con vehículos asignados",
+      "csv": {
+        "operator": "Operario",
+        "role": "Rol",
+        "vehicles": "Vehículos asignados",
+        "time": "Horas totales",
+        "plates": "Matrículas"
+      },
+      "toast": {
+        "nothingToExport": "Nada que exportar"
+      }
+    },
+    "data": {
+      "title": "Gestión de Datos",
+      "subtitle": "Administrar vehículos y propietarios",
+      "restrictedTitle": "Acceso Restringido",
+      "restrictedDescription": "Solo los administradores pueden acceder a esta sección.",
+      "vehiclesTab": "Vehículos ({{count}})",
+      "ownersTab": "Propietarios ({{count}})",
+      "vehiclesListTitle": "Listado de Vehículos",
+      "searchVehiclePlaceholder": "Buscar vehículo...",
+      "ownersListTitle": "Listado de Propietarios",
+      "searchOwnerPlaceholder": "Buscar propietario...",
+      "table": {
+        "plate": "Matrícula",
+        "brand": "Marca",
+        "model": "Modelo",
+        "year": "Año",
+        "color": "Color",
+        "vin": "VIN",
+        "status": "Estado",
+        "actions": "Acciones",
+        "name": "Nombre",
+        "phone": "Teléfono",
+        "email": "Email",
+        "dni": "DNI",
+        "address": "Dirección"
+      },
+      "viewHistory": "Ver histórico",
+      "editVehicleTitle": "Editar Vehículo",
+      "editOwnerTitle": "Editar Propietario",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "saving": "Guardando...",
+      "toast": {
+        "vehicleSaveError": "Error al guardar vehículo",
+        "vehicleUpdated": "Vehículo actualizado",
+        "ownerSaveError": "Error al guardar propietario",
+        "ownerUpdated": "Propietario actualizado"
+      }
+    },
+    "audit": {
+      "title": "Log de auditoría",
+      "subtitle": "Registro de acciones importantes en el taller",
+      "export": "Exportar",
+      "filtersTitle": "Filtros",
+      "allActions": "Todas las acciones",
+      "allUsers": "Todos los usuarios",
+      "fromPlaceholder": "Desde",
+      "toPlaceholder": "Hasta",
+      "eventsTitle": "Eventos ({{count}})",
+      "noEvents": "No hay eventos que coincidan.",
+      "system": "Sistema",
+      "user": "Usuario",
+      "actions": {
+        "vehicle_deleted": "🗑️ Vehículo borrado",
+        "vehicle_reassigned": "🔄 Reasignación",
+        "client_approval_response": "📬 Respuesta cliente"
+      },
+      "csv": {
+        "date": "Fecha",
+        "user": "Usuario",
+        "action": "Acción",
+        "entity": "Entidad",
+        "details": "Detalles"
+      }
+    }
+  }
+}

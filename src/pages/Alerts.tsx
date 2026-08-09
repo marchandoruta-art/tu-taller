@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 import { VehicleWithOwner, STATUS_LABELS } from '@/lib/types';
 import { 
   AlertTriangle, 
@@ -33,6 +34,7 @@ interface LowProductivityUser {
 }
 
 export default function Alerts() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { role } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -169,13 +171,13 @@ export default function Alerts() {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <AlertTriangle className="h-6 w-6 text-status-pending-parts" />
-              Sistema de Alertas
+              {t('planningUI.alerts.title')}
             </h1>
-            <p className="text-muted-foreground">Monitoreo de vehículos estancados y productividad</p>
+            <p className="text-muted-foreground">{t('planningUI.alerts.subtitle')}</p>
           </div>
           {totalAlerts > 0 && (
             <Badge variant="destructive" className="text-lg px-3 py-1">
-              {totalAlerts} alertas
+              {t('planningUI.alerts.alertsCount', { count: totalAlerts })}
             </Badge>
           )}
         </div>
@@ -186,8 +188,8 @@ export default function Alerts() {
               <div className="w-16 h-16 mx-auto bg-status-completed/20 rounded-full flex items-center justify-center mb-4">
                 <Clock className="h-8 w-8 text-status-completed" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">¡Todo en orden!</h3>
-              <p className="text-muted-foreground">No hay alertas activas en este momento.</p>
+              <h3 className="text-lg font-semibold mb-2">{t('planningUI.alerts.allGood')}</h3>
+              <p className="text-muted-foreground">{t('planningUI.alerts.noActiveAlerts')}</p>
             </CardContent>
           </Card>
         ) : (
@@ -195,15 +197,15 @@ export default function Alerts() {
             <TabsList>
               <TabsTrigger value="stalled" className="gap-2">
                 <Clock className="h-4 w-4" />
-                Estancados ({stalledVehicles.length})
+                {t('planningUI.alerts.tabs.stalled', { count: stalledVehicles.length })}
               </TabsTrigger>
               <TabsTrigger value="pending" className="gap-2">
                 <Car className="h-4 w-4" />
-                Pend. Piezas ({pendingPartsVehicles.length})
+                {t('planningUI.alerts.tabs.pendingParts', { count: pendingPartsVehicles.length })}
               </TabsTrigger>
               <TabsTrigger value="productivity" className="gap-2">
                 <TrendingDown className="h-4 w-4" />
-                Baja Productividad ({lowProductivityUsers.length})
+                {t('planningUI.alerts.tabs.lowProductivity', { count: lowProductivityUsers.length })}
               </TabsTrigger>
             </TabsList>
 
@@ -211,7 +213,7 @@ export default function Alerts() {
               {stalledVehicles.length === 0 ? (
                 <Card>
                   <CardContent className="py-8 text-center text-muted-foreground">
-                    No hay vehículos estancados
+                    {t('planningUI.alerts.noStalledVehicles')}
                   </CardContent>
                 </Card>
               ) : (
@@ -236,9 +238,9 @@ export default function Alerts() {
                         <div className="text-right">
                           <div className="flex items-center gap-2 text-status-pending-parts">
                             <Calendar className="h-4 w-4" />
-                            <span className="font-semibold">{vehicle.daysStalled} días</span>
+                            <span className="font-semibold">{t('planningUI.alerts.daysStalled', { count: vehicle.daysStalled })}</span>
                           </div>
-                          <p className="text-xs text-muted-foreground">sin actualización</p>
+                          <p className="text-xs text-muted-foreground">{t('planningUI.alerts.sinceUpdate')}</p>
                           <Button
                             size="sm"
                             variant="outline"
@@ -246,7 +248,7 @@ export default function Alerts() {
                             onClick={() => navigate(`/vehicles/${vehicle.id}`)}
                           >
                             <ExternalLink className="h-4 w-4 mr-1" />
-                            Ver
+                            {t('planningUI.alerts.view')}
                           </Button>
                         </div>
                       </div>
@@ -260,7 +262,7 @@ export default function Alerts() {
               {pendingPartsVehicles.length === 0 ? (
                 <Card>
                   <CardContent className="py-8 text-center text-muted-foreground">
-                    No hay vehículos pendientes de piezas
+                    {t('planningUI.alerts.noPendingParts')}
                   </CardContent>
                 </Card>
               ) : (
@@ -285,9 +287,9 @@ export default function Alerts() {
                         <div className="text-right">
                           <div className="flex items-center gap-2 text-status-in-progress">
                             <Clock className="h-4 w-4" />
-                            <span className="font-semibold">{vehicle.daysStalled} días</span>
+                            <span className="font-semibold">{t('planningUI.alerts.daysStalled', { count: vehicle.daysStalled })}</span>
                           </div>
-                          <p className="text-xs text-muted-foreground">esperando piezas</p>
+                          <p className="text-xs text-muted-foreground">{t('planningUI.alerts.waitingParts')}</p>
                           <Button
                             size="sm"
                             variant="outline"
@@ -295,7 +297,7 @@ export default function Alerts() {
                             onClick={() => navigate(`/vehicles/${vehicle.id}`)}
                           >
                             <ExternalLink className="h-4 w-4 mr-1" />
-                            Ver
+                            {t('planningUI.alerts.view')}
                           </Button>
                         </div>
                       </div>
@@ -310,13 +312,13 @@ export default function Alerts() {
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
                     <TrendingDown className="h-5 w-5 text-status-pending-parts" />
-                    Usuarios con productividad inferior al 50% (última semana)
+                    {t('planningUI.alerts.lowProductivityTitle')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {lowProductivityUsers.length === 0 ? (
                     <p className="text-center text-muted-foreground py-4">
-                      Todos los usuarios tienen buena productividad
+                      {t('planningUI.alerts.allGoodProductivity')}
                     </p>
                   ) : (
                     <div className="space-y-4">
@@ -329,7 +331,7 @@ export default function Alerts() {
                             <div>
                               <p className="font-medium">{user.full_name}</p>
                               <p className="text-xs text-muted-foreground">
-                                Asistencia: {formatTime(user.attendanceMinutes)} | Trabajo: {formatTime(user.workMinutes)}
+                                {t('planningUI.alerts.attendanceWorkSummary', { attendance: formatTime(user.attendanceMinutes), work: formatTime(user.workMinutes) })}
                               </p>
                             </div>
                           </div>
@@ -337,7 +339,7 @@ export default function Alerts() {
                             <span className={`text-2xl font-bold ${user.productivity < 30 ? 'text-status-pending-parts' : 'text-status-in-progress'}`}>
                               {user.productivity.toFixed(0)}%
                             </span>
-                            <p className="text-xs text-muted-foreground">productividad</p>
+                            <p className="text-xs text-muted-foreground">{t('planningUI.alerts.productivityLabel')}</p>
                           </div>
                         </div>
                       ))}

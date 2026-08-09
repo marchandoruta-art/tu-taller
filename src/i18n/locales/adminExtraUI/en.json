@@ -1,0 +1,169 @@
+{
+  "adminExtraUI": {
+    "attendance": {
+      "title": "Time Tracking",
+      "subtitle": "Employee attendance management",
+      "searchPlaceholder": "Search employee...",
+      "periodWeek": "This week",
+      "periodMonth": "This month",
+      "periodAll": "Entire history",
+      "exportCsv": "Export CSV",
+      "totalHours": "Total hours",
+      "sessions": "Sessions",
+      "detailedRecords": "Detailed Records",
+      "noRecordsThisWeek": "No records for this week",
+      "inProgress": "In progress",
+      "user": "User",
+      "noRole": "No role",
+      "exitTypes": {
+        "normal": "Normal",
+        "medico": "Medical",
+        "descanso": "Break",
+        "desayuno": "Breakfast",
+        "auto_8h": "Auto 8h",
+        "auto_16h": "Auto 4:00pm"
+      },
+      "csvHeaders": {
+        "employee": "Employee",
+        "role": "Role",
+        "date": "Date",
+        "clockIn": "Clock in",
+        "clockOut": "Clock out",
+        "exitType": "Exit type",
+        "totalMinutes": "Total minutes",
+        "totalHours": "Total hours"
+      },
+      "csvFileNamePrefix": {
+        "week": "week",
+        "month": "month",
+        "all": "history"
+      },
+      "toast": {
+        "noRecordsToExport": "No records to export",
+        "csvDownloaded": "CSV file downloaded successfully",
+        "exportError": "Error exporting data"
+      }
+    },
+    "productivity": {
+      "title": "Productivity",
+      "subtitle": "Team performance analysis",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "export": "Export",
+      "employees": "Employees",
+      "attendanceHours": "Attendance Hours",
+      "workedHours": "Worked Hours",
+      "averageProductivity": "Average Productivity",
+      "noDataTitle": "No productivity data",
+      "noDataDescription": "There are no attendance or work records for this period",
+      "user": "User",
+      "attendance": "Attendance",
+      "worked": "Worked",
+      "sessionsCount": "{{count}} sessions",
+      "tasksCount": "{{count}} tasks",
+      "csv": {
+        "employee": "Employee",
+        "role": "Role",
+        "attendance": "Time at workshop",
+        "work": "Time on tasks",
+        "productivity": "Productivity %",
+        "attendanceSessions": "Clock-ins",
+        "workSessions": "Work sessions"
+      },
+      "toast": {
+        "nothingToExport": "Nothing to export"
+      }
+    },
+    "workload": {
+      "title": "Workload",
+      "subtitle": "Distribution of vehicles and hours per operator",
+      "filterPlaceholder": "Filter by operator",
+      "allOperators": "All operators",
+      "export": "Export",
+      "operators": "Operators",
+      "assignedVehicles": "Assigned vehicles",
+      "totalHours": "Total hours",
+      "averagePerOperator": "Average/operator",
+      "vehicles": "vehicles",
+      "load": "Load",
+      "assignedVehiclesTitle": "Assigned vehicles",
+      "noVehiclesAssigned": "No vehicles assigned",
+      "noOperators": "No operators with assigned vehicles",
+      "csv": {
+        "operator": "Operator",
+        "role": "Role",
+        "vehicles": "Assigned vehicles",
+        "time": "Total hours",
+        "plates": "Plates"
+      },
+      "toast": {
+        "nothingToExport": "Nothing to export"
+      }
+    },
+    "data": {
+      "title": "Data Management",
+      "subtitle": "Manage vehicles and owners",
+      "restrictedTitle": "Restricted Access",
+      "restrictedDescription": "Only administrators can access this section.",
+      "vehiclesTab": "Vehicles ({{count}})",
+      "ownersTab": "Owners ({{count}})",
+      "vehiclesListTitle": "Vehicle List",
+      "searchVehiclePlaceholder": "Search vehicle...",
+      "ownersListTitle": "Owner List",
+      "searchOwnerPlaceholder": "Search owner...",
+      "table": {
+        "plate": "Plate",
+        "brand": "Brand",
+        "model": "Model",
+        "year": "Year",
+        "color": "Color",
+        "vin": "VIN",
+        "status": "Status",
+        "actions": "Actions",
+        "name": "Name",
+        "phone": "Phone",
+        "email": "Email",
+        "dni": "ID",
+        "address": "Address"
+      },
+      "viewHistory": "View history",
+      "editVehicleTitle": "Edit Vehicle",
+      "editOwnerTitle": "Edit Owner",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving...",
+      "toast": {
+        "vehicleSaveError": "Error saving vehicle",
+        "vehicleUpdated": "Vehicle updated",
+        "ownerSaveError": "Error saving owner",
+        "ownerUpdated": "Owner updated"
+      }
+    },
+    "audit": {
+      "title": "Audit log",
+      "subtitle": "Record of important actions in the workshop",
+      "export": "Export",
+      "filtersTitle": "Filters",
+      "allActions": "All actions",
+      "allUsers": "All users",
+      "fromPlaceholder": "From",
+      "toPlaceholder": "To",
+      "eventsTitle": "Events ({{count}})",
+      "noEvents": "No matching events.",
+      "system": "System",
+      "user": "User",
+      "actions": {
+        "vehicle_deleted": "🗑️ Vehicle deleted",
+        "vehicle_reassigned": "🔄 Reassignment",
+        "client_approval_response": "📬 Client response"
+      },
+      "csv": {
+        "date": "Date",
+        "user": "User",
+        "action": "Action",
+        "entity": "Entity",
+        "details": "Details"
+      }
+    }
+  }
+}

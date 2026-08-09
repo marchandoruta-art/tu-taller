@@ -9,6 +9,7 @@ import { Loader2, Bell, Check, MessageCircle, ChevronDown, ChevronRight } from '
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Notification } from '@/lib/types';
+import { useTranslation } from 'react-i18next';
 
 function extractWhatsAppLink(message: string): { text: string; url: string } | null {
   const match = message.match(/(https:\/\/wa\.me\/[^\s]+)/);
@@ -17,17 +18,6 @@ function extractWhatsAppLink(message: string): { text: string; url: string } | n
   return { text, url: match[1] };
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  vehicle_finished: 'Vehículo terminado',
-  pickup_overdue: 'Recogida pendiente',
-  new_message: 'Nuevo mensaje',
-  appointment_reminder: 'Recordatorio de cita',
-  appointment_confirmed: 'Cita confirmada',
-  appointment_cancelled: 'Cita cancelada',
-  client_approval: 'Aprobación cliente',
-  attendance_alert: 'Fichaje',
-  stuck_vehicle: 'Vehículo estancado',
-};
 
 interface Group {
   key: string;
@@ -55,6 +45,7 @@ function groupNotifications(list: Notification[]): Group[] {
 }
 
 export default function Notifications() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -128,15 +119,15 @@ export default function Notifications() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Notificaciones</h1>
+            <h1 className="text-2xl font-bold">{t('planningUI.notifications.title')}</h1>
             <p className="text-muted-foreground">
-              {unreadCount > 0 ? `${unreadCount} sin leer` : 'Todas leídas'}
+              {unreadCount > 0 ? t('planningUI.notifications.unread', { count: unreadCount }) : t('planningUI.notifications.allRead')}
             </p>
           </div>
           {unreadCount > 0 && (
             <Button variant="outline" onClick={markAllAsRead}>
               <Check className="mr-2 h-4 w-4" />
-              Marcar todas
+              {t('planningUI.notifications.markAll')}
             </Button>
           )}
         </div>
@@ -145,17 +136,17 @@ export default function Notifications() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Bell className="h-5 w-5" />
-              Agrupadas por tipo y vehículo
+              {t('planningUI.notifications.groupedTitle')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             {groups.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No tienes notificaciones</p>
+              <p className="text-center text-muted-foreground py-8">{t('planningUI.notifications.empty')}</p>
             ) : (
               <div className="space-y-2">
                 {groups.map((g) => {
                   const isOpen = !!openKeys[g.key];
-                  const label = TYPE_LABELS[g.type] || g.type;
+                  const label = t(`planningUI.notifications.types.${g.type}`, { defaultValue: g.type });
                   const latest = g.items[0];
                   return (
                     <Collapsible key={g.key} open={isOpen} onOpenChange={() => toggle(g.key)}>
@@ -174,11 +165,11 @@ export default function Notifications() {
                             <div className="flex flex-wrap items-center gap-2">
                               <span className="font-medium text-sm">{label}</span>
                               <span className="text-xs text-muted-foreground">
-                                {g.items.length} {g.items.length === 1 ? 'mensaje' : 'mensajes'}
+                                {t('planningUI.notifications.messageCount', { count: g.items.length })}
                               </span>
                               {g.unread > 0 && (
                                 <span className="text-xs bg-primary text-primary-foreground rounded-full px-2 py-0.5">
-                                  {g.unread} nuevas
+                                  {t('planningUI.notifications.newCount', { count: g.unread })}
                                 </span>
                               )}
                             </div>
@@ -224,7 +215,7 @@ export default function Notifications() {
                                           onClick={() => window.open(wa.url, '_blank')}
                                         >
                                           <MessageCircle className="mr-2 h-4 w-4" />
-                                          WhatsApp
+                                          {t('planningUI.notifications.whatsapp')}
                                         </Button>
                                       )}
                                       <p className="text-xs text-muted-foreground mt-1">

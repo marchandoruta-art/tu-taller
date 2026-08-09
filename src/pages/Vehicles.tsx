@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { VehicleWithOwner, STATUS_LABELS } from '@/lib/types';
@@ -14,6 +15,7 @@ import { QuickPlateDialog } from '@/components/vehicles/QuickPlateDialog';
 import { useActiveVehicleTimers } from '@/hooks/useActiveVehicleTimers';
 
 export default function Vehicles() {
+  const { t } = useTranslation();
   const { user, role } = useAuth();
   const navigate = useNavigate();
   const [vehicles, setVehicles] = useState<VehicleWithOwner[]>([]);
@@ -110,7 +112,7 @@ export default function Vehicles() {
         .in('user_id', ids);
       const list = (profs || []).map((p: any) => ({
         user_id: p.user_id,
-        full_name: p.full_name || 'Sin nombre',
+        full_name: p.full_name || t('vehiclesUI:vehicles.unassigned'),
         count: vehicles.filter((v) => v.assigned_to === p.user_id).length,
       }));
       list.sort((a, b) => b.count - a.count);
@@ -154,17 +156,17 @@ export default function Vehicles() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Vehículos</h1>
+            <h1 className="text-2xl font-bold">{t('vehiclesUI:vehicles.title')}</h1>
             <p className="text-muted-foreground">
-              {vehicles.length} vehículos registrados
+              {t('vehiclesUI:vehicles.registeredCount', { count: vehicles.length })}
             </p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={fetchVehicles} className="gap-2">
               <RefreshCw className="h-4 w-4" />
-              Refrescar
+              {t('vehiclesUI:vehicles.refresh')}
             </Button>
-            <QuickPlateDialog onSuccess={fetchVehicles} triggerLabel="Matrícula rápida" triggerVariant="outline" />
+            <QuickPlateDialog onSuccess={fetchVehicles} triggerLabel={t('vehiclesUI:vehicles.quickPlate')} triggerVariant="outline" />
             <NewVehicleDialog onSuccess={fetchVehicles} />
           </div>
         </div>
@@ -174,7 +176,7 @@ export default function Vehicles() {
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar por matrícula, marca, modelo o propietario..."
+              placeholder={t('vehiclesUI:vehicles.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -182,10 +184,10 @@ export default function Vehicles() {
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-48">
-              <SelectValue placeholder="Filtrar por estado" />
+              <SelectValue placeholder={t('vehiclesUI:vehicles.filterByStatus')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos los estados</SelectItem>
+              <SelectItem value="all">{t('vehiclesUI:vehicles.allStatuses')}</SelectItem>
               {Object.entries(STATUS_LABELS).map(([key, label]) => (
                 <SelectItem key={key} value={key}>
                   {label}
@@ -196,11 +198,11 @@ export default function Vehicles() {
           {isAdmin && (
             <Select value={assignedFilter} onValueChange={setAssignedFilter}>
               <SelectTrigger className="w-56">
-                <SelectValue placeholder="Filtrar por operario" />
+                <SelectValue placeholder={t('vehiclesUI:vehicles.filterByOperator')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos los operarios</SelectItem>
-                <SelectItem value="unassigned">Sin asignar</SelectItem>
+                <SelectItem value="all">{t('vehiclesUI:vehicles.allOperators')}</SelectItem>
+                <SelectItem value="unassigned">{t('vehiclesUI:vehicles.unassigned')}</SelectItem>
                 {operators.map((o) => (
                   <SelectItem key={o.user_id} value={o.user_id}>
                     {o.full_name} ({o.count})
@@ -216,24 +218,24 @@ export default function Vehicles() {
             className="gap-2 h-10"
           >
             <UserCheck className="h-4 w-4" />
-            Mis vehículos {myVehiclesCount > 0 && `(${myVehiclesCount})`}
+            {t('vehiclesUI:vehicles.myVehicles')} {myVehiclesCount > 0 && `(${myVehiclesCount})`}
           </Button>
           <Button
             variant={includeArchived ? "default" : "outline"}
             size="sm"
             onClick={() => setIncludeArchived(!includeArchived)}
             className="gap-2 h-10"
-            title="Incluye vehículos entregados hace más de 24h"
+            title={t('vehiclesUI:vehicles.archivedTooltip')}
           >
             <Archive className="h-4 w-4" />
-            Archivados
+            {t('vehiclesUI:vehicles.archived')}
           </Button>
         </div>
 
         {/* Grid */}
         {filteredVehicles.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">No se encontraron vehículos activos ni archivados</p>
+            <p className="text-muted-foreground">{t('vehiclesUI:vehicles.noVehiclesFound')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -248,7 +250,7 @@ export default function Vehicles() {
           <div className="space-y-2 pt-4 border-t border-border">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <History className="h-4 w-4" />
-              <span>Encontrados en histórico eliminado ({deletedMatches.length})</span>
+              <span>{t('vehiclesUI:vehicles.foundInDeletedHistory', { count: deletedMatches.length })}</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
               {deletedMatches.map((a) => (
@@ -261,14 +263,14 @@ export default function Vehicles() {
                     <Trash2 className="h-4 w-4 text-destructive shrink-0" />
                     <span className="font-mono font-bold">{a.plate}</span>
                     <span className="text-xs uppercase tracking-wide px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">
-                      Eliminado
+                      {t('vehiclesUI:vehicles.deleted')}
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {a.brand} {a.model}
                     {a.owner_snapshot?.name && ` · ${a.owner_snapshot.name}`}
                   </p>
-                  <p className="text-xs text-muted-foreground">Ver histórico completo →</p>
+                  <p className="text-xs text-muted-foreground">{t('vehiclesUI:vehicles.viewFullHistory')}</p>
                 </button>
               ))}
             </div>

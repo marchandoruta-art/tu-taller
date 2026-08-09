@@ -9,12 +9,14 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Send, Loader2, Gauge } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 interface VehicleChatProps {
   vehicleId: string;
 }
 
 export function VehicleChat({ vehicleId }: VehicleChatProps) {
+  const { t } = useTranslation();
   const { user, profile } = useAuth();
   const { organizationId } = useOrganization();
   const [messages, setMessages] = useState<VehicleMessage[]>([]);
@@ -187,13 +189,13 @@ export function VehicleChat({ vehicleId }: VehicleChatProps) {
   return (
     <div className="flex flex-col h-[400px] bg-card rounded-xl border border-border overflow-hidden">
       <div className="p-3 border-b border-border">
-        <h3 className="font-medium">Chat del Vehículo</h3>
+        <h3 className="font-medium">{t('planningUI.vehicleChat.title')}</h3>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 ? (
           <p className="text-center text-muted-foreground text-sm py-8">
-            No hay mensajes aún. ¡Inicia la conversación!
+            {t('planningUI.vehicleChat.empty')}
           </p>
         ) : (
           messages.map((msg) => {
@@ -213,7 +215,7 @@ export function VehicleChat({ vehicleId }: VehicleChatProps) {
                 <div className={`max-w-[70%] ${isOwn ? 'text-right' : ''}`}>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-xs font-medium">
-                      {profileData?.full_name || 'Usuario'}
+                      {profileData?.full_name || t('planningUI.vehicleChat.userFallback')}
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {format(new Date(msg.created_at), 'HH:mm', { locale: es })}
@@ -241,7 +243,7 @@ export function VehicleChat({ vehicleId }: VehicleChatProps) {
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Escribe un mensaje..."
+            placeholder={t('planningUI.vehicleChat.messagePlaceholder')}
             disabled={sending}
           />
           <Button
@@ -267,14 +269,14 @@ export function VehicleChat({ vehicleId }: VehicleChatProps) {
               onChange={(e) => setKm(e.target.value)}
               placeholder={
                 currentKm != null
-                  ? `KM actuales: ${currentKm.toLocaleString('es-ES')}`
-                  : 'Añadir KM (opcional)'
+                  ? t('planningUI.vehicleChat.kmPlaceholderCurrent', { km: currentKm.toLocaleString('es-ES') })
+                  : t('planningUI.vehicleChat.kmPlaceholder')
               }
               disabled={sending}
               className="pl-8 h-9 text-sm"
             />
           </div>
-          <span className="text-xs text-muted-foreground whitespace-nowrap">km</span>
+          <span className="text-xs text-muted-foreground whitespace-nowrap">{t('planningUI.vehicleChat.kmUnit')}</span>
         </div>
       </form>
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -33,6 +34,7 @@ interface VehicleHistory {
 }
 
 export default function ClientHistory() {
+  const { t } = useTranslation();
   const { ownerId } = useParams<{ ownerId: string }>();
   const navigate = useNavigate();
   const { role } = useAuth();
@@ -154,24 +156,24 @@ export default function ClientHistory() {
           </div>
           <div className="flex-1">
             <h1 className="text-2xl font-bold">{owner?.name}</h1>
-            <p className="text-sm text-muted-foreground">Historial completo del cliente</p>
+            <p className="text-sm text-muted-foreground">{t('authUI.clientHistory.subtitle')}</p>
           </div>
           <Button variant="outline" className="gap-2" onClick={() => {
             if (!owner) return;
             downloadCsv(`historial-${owner.name.replace(/\s+/g, '-')}`, vehicles, [
-              { key: 'plate', label: 'Matrícula', value: (v) => v.plate },
-              { key: 'brand', label: 'Marca', value: (v) => v.brand },
-              { key: 'model', label: 'Modelo', value: (v) => v.model },
-              { key: 'status', label: 'Estado', value: (v) => v.status },
-              { key: 'created_at', label: 'Ingreso', value: (v) => new Date(v.created_at).toLocaleDateString('es-ES') },
-              { key: 'delivered_at', label: 'Entrega', value: (v) => v.delivered_at ? new Date(v.delivered_at).toLocaleDateString('es-ES') : '' },
-              { key: 'minutes', label: 'Minutos', value: (v) => v.totalMinutes },
-              { key: 'parts', label: 'Nº piezas', value: (v) => v.partsCount },
-              { key: 'cost', label: 'Coste piezas (€)', value: (v) => v.partsCost.toFixed(2) },
-              { key: 'summary', label: 'Trabajo', value: (v) => v.work_summary || '' },
+              { key: 'plate', label: t('authUI.clientHistory.csv.plate'), value: (v) => v.plate },
+              { key: 'brand', label: t('authUI.clientHistory.csv.brand'), value: (v) => v.brand },
+              { key: 'model', label: t('authUI.clientHistory.csv.model'), value: (v) => v.model },
+              { key: 'status', label: t('authUI.clientHistory.csv.status'), value: (v) => v.status },
+              { key: 'created_at', label: t('authUI.clientHistory.csv.created'), value: (v) => new Date(v.created_at).toLocaleDateString('es-ES') },
+              { key: 'delivered_at', label: t('authUI.clientHistory.csv.delivered'), value: (v) => v.delivered_at ? new Date(v.delivered_at).toLocaleDateString('es-ES') : '' },
+              { key: 'minutes', label: t('authUI.clientHistory.csv.minutes'), value: (v) => v.totalMinutes },
+              { key: 'parts', label: t('authUI.clientHistory.csv.parts'), value: (v) => v.partsCount },
+              { key: 'cost', label: t('authUI.clientHistory.csv.cost'), value: (v) => v.partsCost.toFixed(2) },
+              { key: 'summary', label: t('authUI.clientHistory.csv.work'), value: (v) => v.work_summary || '' },
             ]);
           }}>
-            <Download className="h-4 w-4"/> Exportar
+            <Download className="h-4 w-4"/> {t('authUI.clientHistory.export')}
           </Button>
         </div>
 
@@ -194,7 +196,7 @@ export default function ClientHistory() {
               {owner.dni && (
                 <div className="flex items-center gap-2 text-sm">
                   <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span>DNI: {owner.dni}</span>
+                  <span>{t('authUI.clientHistory.dni', { dni: owner.dni })}</span>
                 </div>
               )}
               {owner.address && (
@@ -211,19 +213,19 @@ export default function ClientHistory() {
           <Card>
             <CardContent className="pt-4 text-center">
               <div className="text-2xl font-bold text-primary">{totalVehicles}</div>
-              <div className="text-xs text-muted-foreground">Vehículos</div>
+              <div className="text-xs text-muted-foreground">{t('authUI.clientHistory.vehicles')}</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4 text-center">
               <div className="text-2xl font-bold text-primary">{completedVehicles}</div>
-              <div className="text-xs text-muted-foreground">Completados</div>
+              <div className="text-xs text-muted-foreground">{t('authUI.clientHistory.completed')}</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4 text-center">
               <div className="text-2xl font-bold text-primary">{formatTime(totalTime)}</div>
-              <div className="text-xs text-muted-foreground">Tiempo Total</div>
+              <div className="text-xs text-muted-foreground">{t('authUI.clientHistory.totalTime')}</div>
             </CardContent>
           </Card>
           <Card>
@@ -231,7 +233,7 @@ export default function ClientHistory() {
               <div className="text-2xl font-bold text-primary">
                 {totalSpent > 0 ? `${totalSpent.toFixed(0)}€` : '-'}
               </div>
-              <div className="text-xs text-muted-foreground">Gasto Estimado</div>
+              <div className="text-xs text-muted-foreground">{t('authUI.clientHistory.estimatedSpend')}</div>
             </CardContent>
           </Card>
         </div>
@@ -240,13 +242,13 @@ export default function ClientHistory() {
         <div className="space-y-3">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <Car className="h-5 w-5" />
-            Vehículos ({vehicles.length})
+            {t('authUI.clientHistory.vehiclesCount', { count: vehicles.length })}
           </h2>
 
           {vehicles.length === 0 ? (
             <Card>
               <CardContent className="py-8 text-center text-muted-foreground">
-                No hay vehículos registrados para este cliente
+                {t('authUI.clientHistory.empty')}
               </CardContent>
             </Card>
           ) : (
@@ -263,7 +265,7 @@ export default function ClientHistory() {
                         <span className="font-bold text-lg">{v.plate}</span>
                         <VehicleStatusBadge status={v.status} />
                         {v.archived && (
-                          <Badge variant="outline" className="text-xs">Archivado</Badge>
+                          <Badge variant="outline" className="text-xs">{t('authUI.clientHistory.archivedBadge')}</Badge>
                         )}
                       </div>
                       <div className="text-sm text-muted-foreground">
@@ -283,7 +285,7 @@ export default function ClientHistory() {
                         {v.partsCount > 0 && (
                           <span className="flex items-center gap-1">
                             <Wrench className="h-3 w-3" />
-                            {v.partsCount} piezas
+                            {t('authUI.clientHistory.parts', { count: v.partsCount })}
                           </span>
                         )}
                         {v.partsCost > 0 && (

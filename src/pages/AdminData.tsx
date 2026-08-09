@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import {
   Table,
   TableBody,
@@ -27,6 +28,7 @@ import {
 } from '@/components/ui/dialog';
 
 export default function AdminData() {
+  const { t } = useTranslation();
   const { role } = useAuth();
   const [loading, setLoading] = useState(true);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -81,9 +83,9 @@ export default function AdminData() {
       .eq('id', editingVehicle.id);
 
     if (error) {
-      toast.error('Error al guardar vehículo');
+      toast.error(t('adminExtraUI.data.toast.vehicleSaveError'));
     } else {
-      toast.success('Vehículo actualizado');
+      toast.success(t('adminExtraUI.data.toast.vehicleUpdated'));
       setEditingVehicle(null);
       fetchData();
     }
@@ -106,9 +108,9 @@ export default function AdminData() {
       .eq('id', editingOwner.id);
 
     if (error) {
-      toast.error('Error al guardar propietario');
+      toast.error(t('adminExtraUI.data.toast.ownerSaveError'));
     } else {
-      toast.success('Propietario actualizado');
+      toast.success(t('adminExtraUI.data.toast.ownerUpdated'));
       setEditingOwner(null);
       fetchData();
     }
@@ -133,8 +135,8 @@ export default function AdminData() {
       <MainLayout>
         <div className="flex flex-col items-center justify-center h-[60vh] text-center">
           <Database className="h-12 w-12 text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Acceso Restringido</h2>
-          <p className="text-muted-foreground">Solo los administradores pueden acceder a esta sección.</p>
+          <h2 className="text-xl font-semibold mb-2">{t('adminExtraUI.data.restrictedTitle')}</h2>
+          <p className="text-muted-foreground">{t('adminExtraUI.data.restrictedDescription')}</p>
         </div>
       </MainLayout>
     );
@@ -156,20 +158,20 @@ export default function AdminData() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Database className="h-6 w-6" />
-            Gestión de Datos
+            {t('adminExtraUI.data.title')}
           </h1>
-          <p className="text-muted-foreground">Administrar vehículos y propietarios</p>
+          <p className="text-muted-foreground">{t('adminExtraUI.data.subtitle')}</p>
         </div>
 
         <Tabs defaultValue="vehicles" className="w-full">
           <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="vehicles" className="flex items-center gap-2">
               <Car className="h-4 w-4" />
-              Vehículos ({vehicles.length})
+              {t('adminExtraUI.data.vehiclesTab', { count: vehicles.length })}
             </TabsTrigger>
             <TabsTrigger value="owners" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
-              Propietarios ({owners.length})
+              {t('adminExtraUI.data.ownersTab', { count: owners.length })}
             </TabsTrigger>
           </TabsList>
 
@@ -177,11 +179,11 @@ export default function AdminData() {
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between gap-4">
-                  <CardTitle className="text-lg">Listado de Vehículos</CardTitle>
+                  <CardTitle className="text-lg">{t('adminExtraUI.data.vehiclesListTitle')}</CardTitle>
                   <div className="relative w-64">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Buscar vehículo..."
+                      placeholder={t('adminExtraUI.data.searchVehiclePlaceholder')}
                       value={searchVehicles}
                       onChange={(e) => setSearchVehicles(e.target.value)}
                       className="pl-9"
@@ -194,14 +196,14 @@ export default function AdminData() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Matrícula</TableHead>
-                        <TableHead>Marca</TableHead>
-                        <TableHead>Modelo</TableHead>
-                        <TableHead>Año</TableHead>
-                        <TableHead>Color</TableHead>
-                        <TableHead>VIN</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead className="text-right">Acciones</TableHead>
+                        <TableHead>{t('adminExtraUI.data.table.plate')}</TableHead>
+                        <TableHead>{t('adminExtraUI.data.table.brand')}</TableHead>
+                        <TableHead>{t('adminExtraUI.data.table.model')}</TableHead>
+                        <TableHead>{t('adminExtraUI.data.table.year')}</TableHead>
+                        <TableHead>{t('adminExtraUI.data.table.color')}</TableHead>
+                        <TableHead>{t('adminExtraUI.data.table.vin')}</TableHead>
+                        <TableHead>{t('adminExtraUI.data.table.status')}</TableHead>
+                        <TableHead className="text-right">{t('adminExtraUI.data.table.actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -220,7 +222,7 @@ export default function AdminData() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => { setHistoryVehicleId(vehicle.id); setHistoryVehiclePlate(vehicle.plate); }}
-                                title="Ver histórico"
+                                title={t('adminExtraUI.data.viewHistory')}
                               >
                                 <History className="h-4 w-4" />
                               </Button>
@@ -246,11 +248,11 @@ export default function AdminData() {
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between gap-4">
-                  <CardTitle className="text-lg">Listado de Propietarios</CardTitle>
+                  <CardTitle className="text-lg">{t('adminExtraUI.data.ownersListTitle')}</CardTitle>
                   <div className="relative w-64">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Buscar propietario..."
+                      placeholder={t('adminExtraUI.data.searchOwnerPlaceholder')}
                       value={searchOwners}
                       onChange={(e) => setSearchOwners(e.target.value)}
                       className="pl-9"
@@ -263,12 +265,12 @@ export default function AdminData() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Nombre</TableHead>
-                        <TableHead>Teléfono</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>DNI</TableHead>
-                        <TableHead>Dirección</TableHead>
-                        <TableHead className="text-right">Acciones</TableHead>
+                        <TableHead>{t('adminExtraUI.data.table.name')}</TableHead>
+                        <TableHead>{t('adminExtraUI.data.table.phone')}</TableHead>
+                        <TableHead>{t('adminExtraUI.data.table.email')}</TableHead>
+                        <TableHead>{t('adminExtraUI.data.table.dni')}</TableHead>
+                        <TableHead>{t('adminExtraUI.data.table.address')}</TableHead>
+                        <TableHead className="text-right">{t('adminExtraUI.data.table.actions')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -302,20 +304,20 @@ export default function AdminData() {
         <Dialog open={!!editingVehicle} onOpenChange={() => setEditingVehicle(null)}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Editar Vehículo</DialogTitle>
+              <DialogTitle>{t('adminExtraUI.data.editVehicleTitle')}</DialogTitle>
             </DialogHeader>
             {editingVehicle && (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Matrícula</Label>
+                    <Label>{t('adminExtraUI.data.table.plate')}</Label>
                     <Input
                       value={editingVehicle.plate}
                       onChange={(e) => setEditingVehicle({ ...editingVehicle, plate: e.target.value })}
                     />
                   </div>
                   <div>
-                    <Label>Marca</Label>
+                    <Label>{t('adminExtraUI.data.table.brand')}</Label>
                     <Input
                       value={editingVehicle.brand}
                       onChange={(e) => setEditingVehicle({ ...editingVehicle, brand: e.target.value })}
@@ -324,14 +326,14 @@ export default function AdminData() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Modelo</Label>
+                    <Label>{t('adminExtraUI.data.table.model')}</Label>
                     <Input
                       value={editingVehicle.model}
                       onChange={(e) => setEditingVehicle({ ...editingVehicle, model: e.target.value })}
                     />
                   </div>
                   <div>
-                    <Label>Año</Label>
+                    <Label>{t('adminExtraUI.data.table.year')}</Label>
                     <Input
                       type="number"
                       value={editingVehicle.year || ''}
@@ -341,14 +343,14 @@ export default function AdminData() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Color</Label>
+                    <Label>{t('adminExtraUI.data.table.color')}</Label>
                     <Input
                       value={editingVehicle.color || ''}
                       onChange={(e) => setEditingVehicle({ ...editingVehicle, color: e.target.value })}
                     />
                   </div>
                   <div>
-                    <Label>VIN</Label>
+                    <Label>{t('adminExtraUI.data.table.vin')}</Label>
                     <Input
                       value={editingVehicle.vin || ''}
                       onChange={(e) => setEditingVehicle({ ...editingVehicle, vin: e.target.value })}
@@ -358,11 +360,11 @@ export default function AdminData() {
                 <div className="flex justify-end gap-2 pt-4">
                   <Button variant="outline" onClick={() => setEditingVehicle(null)}>
                     <X className="h-4 w-4 mr-2" />
-                    Cancelar
+                    {t('adminExtraUI.data.cancel')}
                   </Button>
                   <Button onClick={handleSaveVehicle} disabled={saving}>
                     <Save className="h-4 w-4 mr-2" />
-                    {saving ? 'Guardando...' : 'Guardar'}
+                    {saving ? t('adminExtraUI.data.saving') : t('adminExtraUI.data.save')}
                   </Button>
                 </div>
               </div>
@@ -374,12 +376,12 @@ export default function AdminData() {
         <Dialog open={!!editingOwner} onOpenChange={() => setEditingOwner(null)}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Editar Propietario</DialogTitle>
+              <DialogTitle>{t('adminExtraUI.data.editOwnerTitle')}</DialogTitle>
             </DialogHeader>
             {editingOwner && (
               <div className="space-y-4">
                 <div>
-                  <Label>Nombre</Label>
+                  <Label>{t('adminExtraUI.data.table.name')}</Label>
                   <Input
                     value={editingOwner.name}
                     onChange={(e) => setEditingOwner({ ...editingOwner, name: e.target.value })}
@@ -387,14 +389,14 @@ export default function AdminData() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Teléfono</Label>
+                    <Label>{t('adminExtraUI.data.table.phone')}</Label>
                     <Input
                       value={editingOwner.phone || ''}
                       onChange={(e) => setEditingOwner({ ...editingOwner, phone: e.target.value })}
                     />
                   </div>
                   <div>
-                    <Label>DNI</Label>
+                    <Label>{t('adminExtraUI.data.table.dni')}</Label>
                     <Input
                       value={editingOwner.dni || ''}
                       onChange={(e) => setEditingOwner({ ...editingOwner, dni: e.target.value })}
@@ -402,7 +404,7 @@ export default function AdminData() {
                   </div>
                 </div>
                 <div>
-                  <Label>Email</Label>
+                  <Label>{t('adminExtraUI.data.table.email')}</Label>
                   <Input
                     type="email"
                     value={editingOwner.email || ''}
@@ -410,7 +412,7 @@ export default function AdminData() {
                   />
                 </div>
                 <div>
-                  <Label>Dirección</Label>
+                  <Label>{t('adminExtraUI.data.table.address')}</Label>
                   <Input
                     value={editingOwner.address || ''}
                     onChange={(e) => setEditingOwner({ ...editingOwner, address: e.target.value })}
@@ -419,11 +421,11 @@ export default function AdminData() {
                 <div className="flex justify-end gap-2 pt-4">
                   <Button variant="outline" onClick={() => setEditingOwner(null)}>
                     <X className="h-4 w-4 mr-2" />
-                    Cancelar
+                    {t('adminExtraUI.data.cancel')}
                   </Button>
                   <Button onClick={handleSaveOwner} disabled={saving}>
                     <Save className="h-4 w-4 mr-2" />
-                    {saving ? 'Guardando...' : 'Guardar'}
+                    {saving ? t('adminExtraUI.data.saving') : t('adminExtraUI.data.save')}
                   </Button>
                 </div>
               </div>

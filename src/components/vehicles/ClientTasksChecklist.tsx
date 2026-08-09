@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Plus, Trash2, Loader2, ClipboardList, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 export interface ClientTask {
   text: string;
@@ -23,6 +24,7 @@ interface ClientTasksChecklistProps {
 }
 
 export function ClientTasksChecklist({ vehicleId, tasks, clientDescription, onUpdate }: ClientTasksChecklistProps) {
+  const { t } = useTranslation();
   const [newTask, setNewTask] = useState('');
   const [saving, setSaving] = useState(false);
   const [templates, setTemplates] = useState<{ id: string; name: string; tasks: { text: string }[] }[]>([]);
@@ -43,12 +45,12 @@ export function ClientTasksChecklist({ vehicleId, tasks, clientDescription, onUp
       .filter((t: any) => t?.text && !existingTexts.has(String(t.text).toLowerCase().trim()))
       .map((t: any) => ({ text: t.text, done: false }));
     if (newOnes.length === 0) {
-      toast.info('La plantilla ya está aplicada');
+      toast.info(t('vehiclesUI.clientTasks.templateAlreadyApplied'));
       return;
     }
     const updated = [...tasks, ...newOnes];
     const ok = await saveTasks(updated);
-    if (ok) toast.success(`${newOnes.length} tarea(s) añadidas desde "${tpl.name}"`);
+    if (ok) toast.success(t('vehiclesUI.clientTasks.tasksAddedFromTemplate', { count: newOnes.length, name: tpl.name }));
   };
 
 
@@ -60,7 +62,7 @@ export function ClientTasksChecklist({ vehicleId, tasks, clientDescription, onUp
       .eq('id', vehicleId);
     setSaving(false);
     if (error) {
-      toast.error('Error al guardar tareas');
+      toast.error(t('vehiclesUI.clientTasks.errorSaving'));
       return false;
     }
     onUpdate(updated);
@@ -102,18 +104,18 @@ export function ClientTasksChecklist({ vehicleId, tasks, clientDescription, onUp
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <CardTitle className="text-lg flex items-center gap-2">
             <ClipboardList className="h-5 w-5" />
-            Trabajos Solicitados
+            {t('vehiclesUI.clientTasks.title')}
           </CardTitle>
           <div className="flex items-center gap-2">
             {templates.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-1 h-8 text-xs">
-                    <ClipboardList className="h-3.5 w-3.5" /> Plantilla <ChevronDown className="h-3 w-3" />
+                    <ClipboardList className="h-3.5 w-3.5" /> {t('vehiclesUI.clientTasks.template')} <ChevronDown className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="max-h-72 overflow-y-auto">
-                  <DropdownMenuLabel>Aplicar plantilla</DropdownMenuLabel>
+                  <DropdownMenuLabel>{t('vehiclesUI.clientTasks.applyTemplate')}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {templates.map((t) => (
                     <DropdownMenuItem key={t.id} onClick={() => applyTemplate(t.id)}>
@@ -181,7 +183,7 @@ export function ClientTasksChecklist({ vehicleId, tasks, clientDescription, onUp
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Añadir trabajo... (Enter)"
+            placeholder={t('vehiclesUI.clientTasks.addTaskPlaceholder')}
             className="flex-1"
             disabled={saving}
           />

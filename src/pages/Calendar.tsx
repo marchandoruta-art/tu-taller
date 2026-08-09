@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 import { useOrganization } from '@/hooks/useOrganization';
 import { VehicleWithOwner, STATUS_LABELS } from '@/lib/types';
 import { 
@@ -39,6 +40,7 @@ interface ScheduledDelivery {
 }
 
 export default function CalendarPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, role } = useAuth();
   const { organizationId } = useOrganization();
@@ -98,7 +100,7 @@ export default function CalendarPage() {
 
   const handleAddDelivery = async () => {
     if (!selectedDate || !selectedVehicle || !user) {
-      toast.error('Selecciona un vehículo y fecha');
+      toast.error(t('planningUI.calendar.toast.selectVehicleAndDate'));
       return;
     }
 
@@ -114,9 +116,9 @@ export default function CalendarPage() {
     });
 
     if (error) {
-      toast.error('Error al programar entrega');
+      toast.error(t('planningUI.calendar.toast.scheduleError'));
     } else {
-      toast.success('Entrega programada');
+      toast.success(t('planningUI.calendar.toast.scheduled'));
       setDialogOpen(false);
       setSelectedVehicle('');
       setSelectedTime('');
@@ -130,9 +132,9 @@ export default function CalendarPage() {
   const handleDeleteDelivery = async (id: string) => {
     const { error } = await supabase.from('scheduled_deliveries').delete().eq('id', id);
     if (error) {
-      toast.error('Error al eliminar');
+      toast.error(t('planningUI.calendar.toast.deleteError'));
     } else {
-      toast.success('Entrega eliminada');
+      toast.success(t('planningUI.calendar.toast.deleted'));
       fetchData();
     }
   };
@@ -165,24 +167,24 @@ export default function CalendarPage() {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <CalendarIcon className="h-6 w-6 text-primary" />
-              Calendario de Entregas
+              {t('planningUI.calendar.title')}
             </h1>
-            <p className="text-muted-foreground">Planifica y gestiona las entregas de vehículos</p>
+            <p className="text-muted-foreground">{t('planningUI.calendar.subtitle')}</p>
           </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
-                Programar Entrega
+                {t('planningUI.calendar.scheduleDelivery')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Programar Entrega</DialogTitle>
+                <DialogTitle>{t('planningUI.calendar.scheduleDelivery')}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Fecha</label>
+                  <label className="text-sm font-medium mb-2 block">{t('planningUI.calendar.dateLabel')}</label>
                   <CalendarComponent
                     mode="single"
                     selected={selectedDate}
@@ -192,10 +194,10 @@ export default function CalendarPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Vehículo</label>
+                  <label className="text-sm font-medium mb-2 block">{t('planningUI.calendar.vehicleLabel')}</label>
                   <Select value={selectedVehicle} onValueChange={setSelectedVehicle}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecciona un vehículo" />
+                      <SelectValue placeholder={t('planningUI.calendar.vehiclePlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
                       {vehicles.map(v => (
@@ -207,7 +209,7 @@ export default function CalendarPage() {
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Hora (opcional)</label>
+                  <label className="text-sm font-medium mb-2 block">{t('planningUI.calendar.timeLabel')}</label>
                   <Input
                     type="time"
                     value={selectedTime}
@@ -215,17 +217,17 @@ export default function CalendarPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Notas (opcional)</label>
+                  <label className="text-sm font-medium mb-2 block">{t('planningUI.calendar.notesLabel')}</label>
                   <Textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Notas adicionales..."
+                    placeholder={t('planningUI.calendar.notesPlaceholder')}
                     rows={3}
                   />
                 </div>
                 <Button onClick={handleAddDelivery} disabled={saving} className="w-full">
                   {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                  Programar Entrega
+                  {t('planningUI.calendar.scheduleDelivery')}
                 </Button>
               </div>
             </DialogContent>
@@ -285,13 +287,13 @@ export default function CalendarPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">
-                {selectedDate ? format(selectedDate, "d 'de' MMMM", { locale: es }) : 'Selecciona una fecha'}
+                {selectedDate ? format(selectedDate, "d 'de' MMMM", { locale: es }) : t('planningUI.calendar.selectDate')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {selectedDateDeliveries.length === 0 ? (
                 <p className="text-muted-foreground text-sm text-center py-8">
-                  No hay entregas programadas para este día
+                  {t('planningUI.calendar.noDeliveriesForDay')}
                 </p>
               ) : (
                 <div className="space-y-3">
@@ -304,7 +306,7 @@ export default function CalendarPage() {
                         <div className="flex items-center gap-2">
                           <Car className="h-4 w-4 text-primary" />
                           <span className="font-medium">
-                            {delivery.vehicle?.plate || 'Vehículo'}
+                            {delivery.vehicle?.plate || t('planningUI.calendar.vehicleFallback')}
                           </span>
                         </div>
                         <Button
@@ -338,7 +340,7 @@ export default function CalendarPage() {
                         className="w-full mt-2"
                         onClick={() => navigate(`/vehicles/${delivery.vehicle_id}`)}
                       >
-                        Ver vehículo
+                        {t('planningUI.calendar.viewVehicle')}
                       </Button>
                     </div>
                   ))}
@@ -351,12 +353,12 @@ export default function CalendarPage() {
         {/* Upcoming Deliveries Summary */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Próximas Entregas</CardTitle>
+            <CardTitle className="text-lg">{t('planningUI.calendar.upcomingDeliveries')}</CardTitle>
           </CardHeader>
           <CardContent>
             {deliveries.length === 0 ? (
               <p className="text-muted-foreground text-center py-4">
-                No hay entregas programadas este mes
+                {t('planningUI.calendar.noDeliveriesThisMonth')}
               </p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -378,7 +380,7 @@ export default function CalendarPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">
-                        {delivery.vehicle?.plate || 'Vehículo'}
+                        {delivery.vehicle?.plate || t('planningUI.calendar.vehicleFallback')}
                       </p>
                       <p className="text-sm text-muted-foreground truncate">
                         {delivery.vehicle?.brand} {delivery.vehicle?.model}

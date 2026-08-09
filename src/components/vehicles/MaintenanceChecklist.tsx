@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Trash2, Loader2, Wrench, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 export interface MaintenanceItem {
   text: string;
@@ -20,20 +21,22 @@ interface Props {
   onUpdate: (items: MaintenanceItem[]) => void;
 }
 
-const DEFAULT_ITEMS = [
-  'Neumáticos (presión y desgaste)',
-  'Frenos (pastillas y discos)',
-  'Luces (cortas, largas, freno, intermitentes)',
-  'Niveles (aceite, refrigerante, frenos, dirección)',
-  'Rótulas y bieletas',
-  'Amortiguadores',
-  'Correas y mangueras',
-  'Batería',
-  'Filtros (aire, habitáculo)',
-  'Limpiaparabrisas y escobillas',
-];
+const DEFAULT_ITEM_KEYS = [
+  'tires',
+  'brakes',
+  'lights',
+  'fluids',
+  'joints',
+  'shocks',
+  'belts',
+  'battery',
+  'filters',
+  'wipers',
+] as const;
 
 export function MaintenanceChecklist({ vehicleId, items, onUpdate }: Props) {
+  const { t } = useTranslation();
+  const DEFAULT_ITEMS = DEFAULT_ITEM_KEYS.map((key) => t(`vehiclesUI.maintenance.defaultItems.${key}`));
   const [newItem, setNewItem] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -50,7 +53,7 @@ export function MaintenanceChecklist({ vehicleId, items, onUpdate }: Props) {
       .eq('id', vehicleId);
     setSaving(false);
     if (error) {
-      toast.error('Error al guardar el checklist');
+      toast.error(t('vehiclesUI.maintenance.errorSaving'));
       return false;
     }
     onUpdate(updated);
@@ -63,11 +66,11 @@ export function MaintenanceChecklist({ vehicleId, items, onUpdate }: Props) {
       .filter((t) => !existing.has(t.toLowerCase().trim()))
       .map((text) => ({ text, done: false }));
     if (additions.length === 0) {
-      toast.info('Ya están todos los ítems por defecto');
+      toast.info(t('vehiclesUI.maintenance.alreadyLoaded'));
       return;
     }
     const ok = await save([...list, ...additions]);
-    if (ok) toast.success(`${additions.length} ítem(s) añadidos`);
+    if (ok) toast.success(t('vehiclesUI.maintenance.itemsAdded', { count: additions.length }));
   };
 
   const toggle = async (i: number) => {
@@ -99,11 +102,11 @@ export function MaintenanceChecklist({ vehicleId, items, onUpdate }: Props) {
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <CardTitle className="text-lg flex items-center gap-2">
             <Wrench className="h-5 w-5" />
-            Checklist de Mantenimiento
+            {t('vehiclesUI.maintenance.title')}
           </CardTitle>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" className="gap-1 h-8 text-xs" onClick={loadDefaults} disabled={saving}>
-              <RotateCcw className="h-3.5 w-3.5" /> Cargar por defecto
+              <RotateCcw className="h-3.5 w-3.5" /> {t('vehiclesUI.maintenance.loadDefaults')}
             </Button>
             {total > 0 && (
               <span className="text-sm text-muted-foreground font-medium">
@@ -121,7 +124,7 @@ export function MaintenanceChecklist({ vehicleId, items, onUpdate }: Props) {
       <CardContent className="space-y-2">
         {total === 0 && (
           <p className="text-sm text-muted-foreground italic">
-            Sin ítems. Pulsa "Cargar por defecto" para añadir la lista habitual o crea los tuyos.
+            {t('vehiclesUI.maintenance.noItems')}
           </p>
         )}
 
@@ -153,7 +156,7 @@ export function MaintenanceChecklist({ vehicleId, items, onUpdate }: Props) {
               onBlur={(e) => {
                 if ((e.target.value || '') !== (item.note || '')) updateNote(index, e.target.value);
               }}
-              placeholder="Notas u observaciones (opcional)"
+              placeholder={t('vehiclesUI.maintenance.notesPlaceholder')}
               className="h-8 text-xs ml-7"
               disabled={saving}
             />
@@ -170,7 +173,7 @@ export function MaintenanceChecklist({ vehicleId, items, onUpdate }: Props) {
                 add();
               }
             }}
-            placeholder="Añadir ítem... (Enter)"
+            placeholder={t('vehiclesUI.maintenance.addItemPlaceholder')}
             className="flex-1"
             disabled={saving}
           />

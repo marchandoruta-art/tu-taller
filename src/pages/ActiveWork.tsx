@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 import { useOrganization } from '@/hooks/useOrganization';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -48,6 +49,7 @@ function formatElapsed(startedAt: string) {
 }
 
 export default function ActiveWork() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { role } = useAuth();
   const { organizationId } = useOrganization();
@@ -106,7 +108,7 @@ export default function ActiveWork() {
             user_id: l.user_id,
             vehicle_id: l.vehicle_id,
             started_at: l.started_at,
-            user_name: profMap.get(l.user_id) || 'Operario',
+            user_name: profMap.get(l.user_id) || t('planningUI.activeWork.operatorFallback'),
             plate: v.plate,
             brand: v.brand,
             model: v.model,
@@ -174,7 +176,7 @@ export default function ActiveWork() {
         <div className="p-6">
           <Card>
             <CardContent className="p-6 text-center text-muted-foreground">
-              No tienes permisos para ver esta página.
+              {t('planningUI.activeWork.noPermission')}
             </CardContent>
           </Card>
         </div>
@@ -189,23 +191,23 @@ export default function ActiveWork() {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <Timer className="h-6 w-6 text-primary" />
-              Trabajo en curso
+              {t('planningUI.activeWork.title')}
             </h1>
             <p className="text-sm text-muted-foreground">
-              Vehículos con cronómetro activo ahora mismo · actualización en tiempo real
+              {t('planningUI.activeWork.subtitle')}
             </p>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="text-sm">
-              {rows.length} activo{rows.length === 1 ? '' : 's'}
+              {t('planningUI.activeWork.activeCount', { count: rows.length })}
             </Badge>
             {operators.length > 1 && (
               <Select value={userFilter} onValueChange={setUserFilter}>
                 <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Todos los operarios" />
+                  <SelectValue placeholder={t('planningUI.activeWork.allOperators')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos los operarios</SelectItem>
+                  <SelectItem value="all">{t('planningUI.activeWork.allOperators')}</SelectItem>
                   {operators.map((op) => (
                     <SelectItem key={op.id} value={op.id}>
                       {op.name}
@@ -225,9 +227,9 @@ export default function ActiveWork() {
           <Card>
             <CardContent className="p-10 text-center space-y-2">
               <Car className="h-10 w-10 mx-auto text-muted-foreground" />
-              <p className="font-medium">Ahora mismo no hay ningún cronómetro activo</p>
+              <p className="font-medium">{t('planningUI.activeWork.noActiveTimers')}</p>
               <p className="text-sm text-muted-foreground">
-                Cuando un operario inicie un vehículo aparecerá aquí automáticamente.
+                {t('planningUI.activeWork.noActiveTimersHint')}
               </p>
             </CardContent>
           </Card>
@@ -263,7 +265,7 @@ export default function ActiveWork() {
                     </div>
                     <div className="text-sm text-muted-foreground mt-1">
                       <span className="font-medium text-foreground">{r.user_name}</span>
-                      {' · desde '}
+                      {t('planningUI.activeWork.since')}
                       {new Date(r.started_at).toLocaleTimeString('es-ES', {
                         hour: '2-digit',
                         minute: '2-digit',
@@ -276,7 +278,7 @@ export default function ActiveWork() {
                       {formatElapsed(r.started_at)}
                     </div>
                     <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                      en curso
+                      {t('planningUI.activeWork.inProgress')}
                     </div>
                   </div>
 

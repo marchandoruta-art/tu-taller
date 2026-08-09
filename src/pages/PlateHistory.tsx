@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Input } from '@/components/ui/input';
@@ -36,6 +37,7 @@ interface Match {
 }
 
 export default function PlateHistory() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [plate, setPlate] = useState(searchParams.get('plate') || '');
@@ -121,9 +123,9 @@ export default function PlateHistory() {
       }
 
       setMatches(results);
-      if (results.length === 0) toast.info(`No se encontraron vehículos con matrícula "${q}"`);
+      if (results.length === 0) toast.info(t('authUI.plateHistory.notFoundToast', { plate: q }));
     } catch (e: any) {
-      toast.error('Error buscando: ' + e.message);
+      toast.error(t('authUI.plateHistory.searchErrorToast', { message: e.message }));
     } finally {
       setLoading(false);
     }
@@ -149,16 +151,16 @@ export default function PlateHistory() {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Search className="h-6 w-6" /> Buscar por matrícula
+            <Search className="h-6 w-6" /> {t('authUI.plateHistory.title')}
           </h1>
           <p className="text-muted-foreground text-sm">
-            Histórico completo de un vehículo (activos, archivados o eliminados).
+            {t('authUI.plateHistory.subtitle')}
           </p>
         </div>
 
         <div className="flex gap-2 max-w-xl">
           <Input
-            placeholder="Introduce la matrícula (ej. 1234ABC)"
+            placeholder={t('authUI.plateHistory.placeholder')}
             value={plate}
             onChange={(e) => setPlate(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && search()}
@@ -167,7 +169,7 @@ export default function PlateHistory() {
           />
           <Button onClick={() => search()} disabled={loading || !plate.trim()}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-            <span className="ml-2 hidden sm:inline">Buscar</span>
+            <span className="ml-2 hidden sm:inline">{t('authUI.plateHistory.searchButton')}</span>
           </Button>
         </div>
 
@@ -179,13 +181,13 @@ export default function PlateHistory() {
 
         {!loading && searched && matches.length === 0 && (
           <Card className="p-8 text-center text-muted-foreground">
-            No se encontró ningún vehículo con esa matrícula.
+            {t('authUI.plateHistory.noResults')}
           </Card>
         )}
 
         {!loading && matches.length > 0 && (
           <p className="text-sm text-muted-foreground">
-            {matches.length} resultado{matches.length !== 1 ? 's' : ''} encontrado{matches.length !== 1 ? 's' : ''}
+            {t('authUI.plateHistory.resultsCount', { count: matches.length })}
           </p>
         )}
 
@@ -205,32 +207,32 @@ export default function PlateHistory() {
                       <span className="text-muted-foreground">— {m.brand} {m.model}</span>
                     </div>
                     {m.owner_name && (
-                      <p className="text-sm text-muted-foreground mt-1">Propietario: {m.owner_name}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{t('authUI.plateHistory.owner', { name: m.owner_name })}</p>
                     )}
                     <div className="flex flex-wrap gap-2 mt-2">
                       {m.source === 'deleted' ? (
-                        <Badge variant="destructive" className="gap-1"><Trash2 className="h-3 w-3" /> Eliminado</Badge>
+                        <Badge variant="destructive" className="gap-1"><Trash2 className="h-3 w-3" /> {t('authUI.plateHistory.deletedBadge')}</Badge>
                       ) : m.archived ? (
-                        <Badge variant="secondary" className="gap-1"><Archive className="h-3 w-3" /> Archivado</Badge>
+                        <Badge variant="secondary" className="gap-1"><Archive className="h-3 w-3" /> {t('authUI.plateHistory.archivedBadge')}</Badge>
                       ) : (
-                        <Badge>Activo</Badge>
+                        <Badge>{t('authUI.plateHistory.activeBadge')}</Badge>
                       )}
                       {m.status && <Badge variant="outline">{STATUS_LABELS[m.status] || m.status}</Badge>}
                       {m.archived_at && (
                         <span className="text-xs text-muted-foreground self-center">
-                          Eliminado: {format(new Date(m.archived_at), 'dd/MM/yy HH:mm', { locale: es })}
+                          {t('authUI.plateHistory.deletedAt', { date: format(new Date(m.archived_at), 'dd/MM/yy HH:mm', { locale: es }) })}
                         </span>
                       )}
                       {m.delivered_at && (
                         <span className="text-xs text-muted-foreground self-center">
-                          Entregado: {format(new Date(m.delivered_at), 'dd/MM/yy', { locale: es })}
+                          {t('authUI.plateHistory.deliveredAt', { date: format(new Date(m.delivered_at), 'dd/MM/yy', { locale: es }) })}
                         </span>
                       )}
                     </div>
                   </div>
                   {m.source === 'live' && (
                     <Button size="sm" variant="outline" onClick={() => navigate(`/vehicles/${m.vehicle_id}`)}>
-                      Abrir ficha
+                      {t('authUI.plateHistory.openRecord')}
                     </Button>
                   )}
                 </div>
@@ -238,15 +240,15 @@ export default function PlateHistory() {
                 {/* KPIs */}
                 <div className="grid grid-cols-3 gap-3">
                   <div className="rounded-lg border p-3 text-center">
-                    <p className="text-xs text-muted-foreground">Tiempo total</p>
+                    <p className="text-xs text-muted-foreground">{t('authUI.plateHistory.totalTime')}</p>
                     <p className="text-lg font-bold">{formatTime(totalMin)}</p>
                   </div>
                   <div className="rounded-lg border p-3 text-center">
-                    <p className="text-xs text-muted-foreground">Piezas</p>
+                    <p className="text-xs text-muted-foreground">{t('authUI.plateHistory.parts')}</p>
                     <p className="text-lg font-bold">{m.parts?.length || 0}</p>
                   </div>
                   <div className="rounded-lg border p-3 text-center">
-                    <p className="text-xs text-muted-foreground">Coste piezas</p>
+                    <p className="text-xs text-muted-foreground">{t('authUI.plateHistory.partsCost')}</p>
                     <p className="text-lg font-bold">{totalParts > 0 ? `${totalParts.toFixed(2)}€` : '-'}</p>
                   </div>
                 </div>
@@ -255,7 +257,7 @@ export default function PlateHistory() {
                 {m.work_summary && (
                   <div>
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-1 flex items-center gap-1">
-                      <FileText className="h-3 w-3" /> Resumen de trabajo
+                      <FileText className="h-3 w-3" /> {t('authUI.plateHistory.workSummary')}
                     </h4>
                     <p className="text-sm bg-muted/50 rounded-md p-3 whitespace-pre-wrap">{m.work_summary}</p>
                   </div>
@@ -265,7 +267,7 @@ export default function PlateHistory() {
                 {m.status_history && m.status_history.length > 0 && (
                   <div>
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2 flex items-center gap-1">
-                      <Calendar className="h-3 w-3" /> Historial de estados ({m.status_history.length})
+                      <Calendar className="h-3 w-3" /> {t('authUI.plateHistory.statusHistory', { count: m.status_history.length })}
                     </h4>
                     <div className="space-y-1.5">
                       {m.status_history.map((s: any) => (
@@ -288,23 +290,23 @@ export default function PlateHistory() {
                 {m.time_logs && m.time_logs.length > 0 && (
                   <div>
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2 flex items-center gap-1">
-                      <Clock className="h-3 w-3" /> Registros de tiempo ({m.time_logs.length} — {formatTime(totalMin)})
+                      <Clock className="h-3 w-3" /> {t('authUI.plateHistory.timeLogs', { count: m.time_logs.length, time: formatTime(totalMin) })}
                     </h4>
                     <ScrollArea className="max-h-64">
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="text-xs">Inicio</TableHead>
-                            <TableHead className="text-xs">Duración</TableHead>
-                            <TableHead className="text-xs">Notas</TableHead>
+                            <TableHead className="text-xs">{t('authUI.plateHistory.start')}</TableHead>
+                            <TableHead className="text-xs">{t('authUI.plateHistory.duration')}</TableHead>
+                            <TableHead className="text-xs">{t('authUI.plateHistory.notes')}</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {m.time_logs.map((t: any) => (
-                            <TableRow key={t.id}>
-                              <TableCell className="text-xs">{format(new Date(t.started_at), 'dd/MM/yy HH:mm', { locale: es })}</TableCell>
-                              <TableCell className="text-sm">{t.total_minutes ? formatTime(t.total_minutes) : 'En curso'}</TableCell>
-                              <TableCell className="text-xs text-muted-foreground">{t.notes || '-'}</TableCell>
+                          {m.time_logs.map((tl: any) => (
+                            <TableRow key={tl.id}>
+                              <TableCell className="text-xs">{format(new Date(tl.started_at), 'dd/MM/yy HH:mm', { locale: es })}</TableCell>
+                              <TableCell className="text-sm">{tl.total_minutes ? formatTime(tl.total_minutes) : t('authUI.plateHistory.inProgress')}</TableCell>
+                              <TableCell className="text-xs text-muted-foreground">{tl.notes || '-'}</TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
@@ -317,16 +319,16 @@ export default function PlateHistory() {
                 {m.parts && m.parts.length > 0 && (
                   <div>
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2 flex items-center gap-1">
-                      <Wrench className="h-3 w-3" /> Piezas y materiales ({m.parts.length})
+                      <Wrench className="h-3 w-3" /> {t('authUI.plateHistory.partsAndMaterials', { count: m.parts.length })}
                     </h4>
                     <ScrollArea className="max-h-64">
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="text-xs">Pieza</TableHead>
-                            <TableHead className="text-xs">Cant.</TableHead>
-                            <TableHead className="text-xs">Precio</TableHead>
-                            <TableHead className="text-xs">Ref.</TableHead>
+                            <TableHead className="text-xs">{t('authUI.plateHistory.part')}</TableHead>
+                            <TableHead className="text-xs">{t('authUI.plateHistory.quantity')}</TableHead>
+                            <TableHead className="text-xs">{t('authUI.plateHistory.price')}</TableHead>
+                            <TableHead className="text-xs">{t('authUI.plateHistory.reference')}</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -348,7 +350,7 @@ export default function PlateHistory() {
                 {m.anomalies && m.anomalies.length > 0 && (
                   <div>
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2 flex items-center gap-1">
-                      <AlertTriangle className="h-3 w-3" /> Anomalías ({m.anomalies.length})
+                      <AlertTriangle className="h-3 w-3" /> {t('authUI.plateHistory.anomalies', { count: m.anomalies.length })}
                     </h4>
                     <ul className="space-y-1.5">
                       {m.anomalies.map((a: any) => (
@@ -370,7 +372,7 @@ export default function PlateHistory() {
                 {m.messages && m.messages.length > 0 && (
                   <div>
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2 flex items-center gap-1">
-                      <MessageSquare className="h-3 w-3" /> Comentarios internos ({m.messages.length})
+                      <MessageSquare className="h-3 w-3" /> {t('authUI.plateHistory.internalMessages', { count: m.messages.length })}
                     </h4>
                     <ScrollArea className="max-h-48">
                       <ul className="space-y-2">
@@ -395,7 +397,7 @@ export default function PlateHistory() {
                   (!m.anomalies || m.anomalies.length === 0) &&
                   (!m.messages || m.messages.length === 0) && (
                     <p className="text-sm text-muted-foreground text-center py-4">
-                      Sin actividad registrada para este vehículo.
+                      {t('authUI.plateHistory.noActivity')}
                     </p>
                   )}
               </Card>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { VehicleWithOwner, Profile, UserRole, VehicleStatus, VehiclePriority } from '@/lib/types';
 import type { ActiveVehicleTimer } from '@/hooks/useActiveVehicleTimers';
 import { PriorityBadge } from './PrioritySelector';
@@ -38,18 +39,8 @@ interface VehicleCardProps {
 
 const statusOrder: VehicleStatus[] = ['recibido', 'presupuestar', 'presupuestado', 'en_reparacion', 'pendiente_piezas', 'terminado', 'facturado', 'entregado'];
 
-const nextStatusLabels: Record<VehicleStatus, string> = {
-  recibido: 'A Presupuestar',
-  presupuestar: 'Marcar Presupuestado',
-  presupuestado: 'Iniciar Reparación',
-  en_reparacion: 'Pend. Piezas',
-  pendiente_piezas: 'Terminado',
-  terminado: 'Facturar',
-  facturado: 'Entregar',
-  entregado: '',
-};
-
 export function VehicleCard({ vehicle, totalTime = 0, activeTimer, showNextAction = false, onStatusChange }: VehicleCardProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { role } = useAuth();
   const { openWhatsApp } = useWhatsAppMessage();
@@ -115,9 +106,9 @@ export function VehicleCard({ vehicle, totalTime = 0, activeTimer, showNextActio
       .eq('id', vehicle.id);
 
     if (error) {
-      toast.error('Error al actualizar estado');
+      toast.error(t('vehiclesUI:card.errorUpdatingStatus'));
     } else {
-      toast.success(`Vehículo movido a "${nextStatusLabels[vehicle.status] || nextStatus}"`);
+      toast.success(t('vehiclesUI:card.vehicleMoved', { status: t(`vehiclesUI:card.nextStatusLabels.${vehicle.status}`) || nextStatus }));
       onStatusChange?.();
     }
     setUpdating(false);
@@ -141,7 +132,7 @@ export function VehicleCard({ vehicle, totalTime = 0, activeTimer, showNextActio
     if (!date) return null;
     const d = new Date(date);
     if (isNaN(d.getTime())) return null;
-    return d.toLocaleDateString('es-ES', {
+    return d.toLocaleDateString(undefined, {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -189,7 +180,7 @@ export function VehicleCard({ vehicle, totalTime = 0, activeTimer, showNextActio
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
               </span>
-              TRABAJANDO
+              {t('vehiclesUI:card.working')}
             </span>
             <span className="font-mono text-sm font-bold tabular-nums text-primary">
               {formatRunningTime(activeTimer.startedAt)}
@@ -199,7 +190,7 @@ export function VehicleCard({ vehicle, totalTime = 0, activeTimer, showNextActio
         {(vehicle.status === 'terminado' || vehicle.status === 'facturado' || vehicle.status === 'entregado') && vehicle.finished_at && (
           <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400 bg-green-500/10 border border-green-500/20 rounded-md px-2 py-1 -mx-1">
             <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
-            <span className="font-medium">Terminado el {formatFinishedDate(vehicle.finished_at)}</span>
+            <span className="font-medium">{t('vehiclesUI:card.finishedOn', { date: formatFinishedDate(vehicle.finished_at) })}</span>
           </div>
         )}
       </CardHeader>
@@ -214,7 +205,7 @@ export function VehicleCard({ vehicle, totalTime = 0, activeTimer, showNextActio
           ) : (
             <>
               <Lock className="w-4 h-4 flex-shrink-0" />
-              <span className="italic text-xs">Datos restringidos</span>
+              <span className="italic text-xs">{t('vehiclesUI:card.restrictedData')}</span>
             </>
           )}
         </div>
@@ -229,7 +220,7 @@ export function VehicleCard({ vehicle, totalTime = 0, activeTimer, showNextActio
           {vehicle.mileage ? (
             <span className="text-xs font-medium">{vehicle.mileage.toLocaleString('es-ES')} km</span>
           ) : (
-            <span className="text-xs font-medium">⚠️ Falta indicar km</span>
+            <span className="text-xs font-medium">{t('vehiclesUI:card.missingMileage')}</span>
           )}
         </div>
 
@@ -247,7 +238,7 @@ export function VehicleCard({ vehicle, totalTime = 0, activeTimer, showNextActio
               <span className="truncate text-xs font-medium text-primary">{assignedUser.full_name}</span>
             </div>
           ) : (
-            <span className="text-xs text-muted-foreground">Sin asignar</span>
+            <span className="text-xs text-muted-foreground">{t('vehiclesUI:card.unassigned')}</span>
           )}
         </div>
 
@@ -271,7 +262,7 @@ export function VehicleCard({ vehicle, totalTime = 0, activeTimer, showNextActio
             }}
           >
             <MessageCircle className="w-3.5 h-3.5" />
-            Avisar por WhatsApp
+            {t('vehiclesUI:card.notifyWhatsapp')}
           </Button>
         )}
 
@@ -279,7 +270,7 @@ export function VehicleCard({ vehicle, totalTime = 0, activeTimer, showNextActio
         <div className="flex items-center justify-between pt-2 border-t border-border">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Clock className="w-3.5 h-3.5" />
-            <span className="font-mono">{activeTimer ? `${formatTime(totalTime)} + en curso` : formatTime(totalTime)}</span>
+            <span className="font-mono">{activeTimer ? t('vehiclesUI:card.plusInProgress', { time: formatTime(totalTime) }) : formatTime(totalTime)}</span>
           </div>
           {isAdmin && (
             <AlertDialog
@@ -311,16 +302,14 @@ export function VehicleCard({ vehicle, totalTime = 0, activeTimer, showNextActio
                     <AlertDialogHeader>
                       <AlertDialogTitle className="flex items-center gap-2">
                         <AlertTriangle className="h-5 w-5 text-destructive" />
-                        Paso 1 de 2 · ¿Eliminar vehículo?
+                        {t('vehiclesUI:card.deleteStep1Title')}
                       </AlertDialogTitle>
                       <AlertDialogDescription>
-                        Vas a eliminar permanentemente el vehículo <strong>{vehicle.plate}</strong> ({vehicle.brand} {vehicle.model}) y toda su información asociada (recambios, tiempos, fotos, mensajes...).
-                        <br /><br />
-                        Esta acción no se puede deshacer. En el siguiente paso tendrás que escribir la matrícula para confirmar.
+                        <span dangerouslySetInnerHTML={{ __html: t('vehiclesUI:card.deleteStep1Description', { plate: vehicle.plate, brand: vehicle.brand, model: vehicle.model }) }} />
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancelar</AlertDialogCancel>
+                      <AlertDialogCancel onClick={(e) => e.stopPropagation()}>{t('vehiclesUI:card.cancel')}</AlertDialogCancel>
                       <Button
                         variant="destructive"
                         onClick={(e) => {
@@ -328,7 +317,7 @@ export function VehicleCard({ vehicle, totalTime = 0, activeTimer, showNextActio
                           setDeleteStep(2);
                         }}
                       >
-                        Continuar
+                        {t('vehiclesUI:card.continue')}
                       </Button>
                     </AlertDialogFooter>
                   </>
@@ -337,14 +326,14 @@ export function VehicleCard({ vehicle, totalTime = 0, activeTimer, showNextActio
                     <AlertDialogHeader>
                       <AlertDialogTitle className="flex items-center gap-2">
                         <AlertTriangle className="h-5 w-5 text-destructive" />
-                        Paso 2 de 2 · Confirmación final
+                        {t('vehiclesUI:card.deleteStep2Title')}
                       </AlertDialogTitle>
                       <AlertDialogDescription>
-                        Escribe la matrícula <strong>{vehicle.plate}</strong> para confirmar el borrado definitivo.
+                        <span dangerouslySetInnerHTML={{ __html: t('vehiclesUI:card.deleteStep2Description', { plate: vehicle.plate }) }} />
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <div className="space-y-2 py-2">
-                      <Label htmlFor={`confirm-plate-${vehicle.id}`}>Matrícula</Label>
+                      <Label htmlFor={`confirm-plate-${vehicle.id}`}>{t('vehiclesUI:card.plateLabel')}</Label>
                       <Input
                         id={`confirm-plate-${vehicle.id}`}
                         value={confirmPlate}
@@ -355,7 +344,7 @@ export function VehicleCard({ vehicle, totalTime = 0, activeTimer, showNextActio
                       />
                     </div>
                     <AlertDialogFooter>
-                      <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancelar</AlertDialogCancel>
+                      <AlertDialogCancel onClick={(e) => e.stopPropagation()}>{t('vehiclesUI:card.cancel')}</AlertDialogCancel>
                       <Button
                         variant="destructive"
                         disabled={confirmPlate.trim().toUpperCase() !== vehicle.plate.toUpperCase() || deleting}
@@ -365,9 +354,9 @@ export function VehicleCard({ vehicle, totalTime = 0, activeTimer, showNextActio
                           const { error } = await deleteVehiclePermanently(vehicle.id);
                           setDeleting(false);
                           if (error) {
-                            toast.error('Error al eliminar el vehículo');
+                            toast.error(t('vehiclesUI:card.errorDeletingVehicle'));
                           } else {
-                            toast.success(`Vehículo ${vehicle.plate} eliminado`);
+                            toast.success(t('vehiclesUI:card.vehicleDeleted', { plate: vehicle.plate }));
                             setDeleteOpen(false);
                             setDeleteStep(1);
                             setConfirmPlate('');
@@ -375,7 +364,7 @@ export function VehicleCard({ vehicle, totalTime = 0, activeTimer, showNextActio
                           }
                         }}
                       >
-                        {deleting ? 'Eliminando...' : 'Eliminar definitivamente'}
+                        {deleting ? t('vehiclesUI:card.deleting') : t('vehiclesUI:card.deletePermanently')}
                       </Button>
                     </AlertDialogFooter>
                   </>
@@ -395,10 +384,10 @@ export function VehicleCard({ vehicle, totalTime = 0, activeTimer, showNextActio
             disabled={updating}
           >
             {updating ? (
-              'Actualizando...'
+              t('vehiclesUI:card.updating')
             ) : (
               <>
-                {nextStatusLabels[vehicle.status]}
+                {t(`vehiclesUI:card.nextStatusLabels.${vehicle.status}`)}
                 <ChevronRight className="w-3 h-3 ml-1" />
               </>
             )}

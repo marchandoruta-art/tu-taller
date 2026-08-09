@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { VehicleWithOwner, VehicleStatus, Profile, VehiclePriority, PRIORITY_ORDER, PRIORITY_LABELS } from '@/lib/types';
@@ -29,6 +30,7 @@ type StatusFilter = 'all' | 'en_taller' | VehicleStatus;
 type PriorityFilter = 'all' | 'urgent_high' | VehiclePriority;
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, role } = useAuth();
   const { organizationId } = useOrganization();
@@ -53,7 +55,7 @@ export default function Dashboard() {
       return;
     }
     if (created && created > 0) {
-      toast.success(`${created} vehículo${created > 1 ? 's' : ''} creado${created > 1 ? 's' : ''} desde citas de hoy`);
+      toast.success(t('vehiclesUI:dashboard.vehicleCreatedFromAppointments', { count: created }));
     }
   };
 
@@ -121,7 +123,7 @@ export default function Dashboard() {
 
     const { error } = await supabase.from('vehicles').update({ status: newStatus }).eq('id', vehicleId);
     if (error) {
-      toast.error('Error al mover vehículo');
+      toast.error(t('vehiclesUI:dashboard.errorMovingVehicle'));
       fetchVehicles();
     } else {
       toast.success(`${vehicle.plate} → ${STATUS_LABELS[newStatus]}`);
@@ -134,56 +136,56 @@ export default function Dashboard() {
 
   const stats: { label: string; value: number; icon: any; color: string; filter: StatusFilter }[] = [
     {
-      label: 'En Taller',
+      label: t('vehiclesUI:dashboard.stats.inWorkshop'),
       value: vehicles.filter((v) => v.status !== 'terminado' && v.status !== 'entregado').length,
       icon: Car,
       color: 'text-primary',
       filter: 'en_taller',
     },
     {
-      label: 'En Reparación',
+      label: t('vehiclesUI:dashboard.stats.inRepair'),
       value: vehicles.filter((v) => v.status === 'en_reparacion').length,
       icon: Wrench,
       color: 'text-status-in-progress',
       filter: 'en_reparacion' as VehicleStatus,
     },
     {
-      label: 'Presupuestar',
+      label: t('vehiclesUI:dashboard.stats.toQuote'),
       value: vehicles.filter((v) => v.status === 'presupuestar').length,
       icon: Clock,
       color: 'text-status-pending-parts',
       filter: 'presupuestar' as VehicleStatus,
     },
     {
-      label: 'Presupuestado',
+      label: t('vehiclesUI:dashboard.stats.quoted'),
       value: vehicles.filter((v) => v.status === 'presupuestado').length,
       icon: CheckCircle,
       color: 'text-status-completed',
       filter: 'presupuestado' as VehicleStatus,
     },
     {
-      label: 'Pendiente Piezas',
+      label: t('vehiclesUI:dashboard.stats.pendingParts'),
       value: vehicles.filter((v) => v.status === 'pendiente_piezas').length,
       icon: Clock,
       color: 'text-status-pending-parts',
       filter: 'pendiente_piezas' as VehicleStatus,
     },
     {
-      label: 'Terminados',
+      label: t('vehiclesUI:dashboard.stats.finished'),
       value: vehicles.filter((v) => v.status === 'terminado').length,
       icon: CheckCircle,
       color: 'text-status-completed',
       filter: 'terminado' as VehicleStatus,
     },
     {
-      label: 'Facturados',
+      label: t('vehiclesUI:dashboard.stats.invoiced'),
       value: vehicles.filter((v) => v.status === 'facturado').length,
       icon: CheckCircle,
       color: 'text-status-invoiced',
       filter: 'facturado' as VehicleStatus,
     },
     {
-      label: 'Entregados',
+      label: t('vehiclesUI:dashboard.stats.delivered'),
       value: vehicles.filter((v) => v.status === 'entregado').length,
       icon: PackageCheck,
       color: 'text-status-delivered',
@@ -224,21 +226,21 @@ export default function Dashboard() {
 
   const handleExport = () => {
     if (filteredVehicles.length === 0) {
-      toast.info('Nada que exportar');
+      toast.info(t('vehiclesUI:dashboard.nothingToExport'));
       return;
     }
-    downloadCsv('vehiculos', filteredVehicles, [
-      { key: 'plate', label: 'Matrícula', value: (v) => v.plate },
-      { key: 'brand', label: 'Marca', value: (v) => v.brand },
-      { key: 'model', label: 'Modelo', value: (v) => v.model },
-      { key: 'status', label: 'Estado', value: (v) => STATUS_LABELS[v.status] },
-      { key: 'priority', label: 'Prioridad', value: (v) => PRIORITY_LABELS[(v.priority as VehiclePriority) || 'normal'] },
-      { key: 'owner', label: 'Cliente', value: (v) => v.owner?.name || '' },
-      { key: 'phone', label: 'Teléfono', value: (v) => v.owner?.phone || '' },
-      { key: 'assigned', label: 'Asignado a', value: (v) => v.assigned_to ? profiles[v.assigned_to] || '' : '' },
-      { key: 'description', label: 'Descripción', value: (v) => v.client_description || '' },
-      { key: 'time', label: 'Tiempo trabajado', value: (v) => formatMinutes(vehicleTimes[v.id] || 0) },
-      { key: 'created', label: 'Creado', value: (v) => format(new Date(v.created_at), 'dd/MM/yyyy HH:mm') },
+    downloadCsv(t('vehiclesUI:dashboard.csv.filename'), filteredVehicles, [
+      { key: 'plate', label: t('vehiclesUI:dashboard.csv.plate'), value: (v) => v.plate },
+      { key: 'brand', label: t('vehiclesUI:dashboard.csv.brand'), value: (v) => v.brand },
+      { key: 'model', label: t('vehiclesUI:dashboard.csv.model'), value: (v) => v.model },
+      { key: 'status', label: t('vehiclesUI:dashboard.csv.status'), value: (v) => STATUS_LABELS[v.status] },
+      { key: 'priority', label: t('vehiclesUI:dashboard.csv.priority'), value: (v) => PRIORITY_LABELS[(v.priority as VehiclePriority) || 'normal'] },
+      { key: 'owner', label: t('vehiclesUI:dashboard.csv.owner'), value: (v) => v.owner?.name || '' },
+      { key: 'phone', label: t('vehiclesUI:dashboard.csv.phone'), value: (v) => v.owner?.phone || '' },
+      { key: 'assigned', label: t('vehiclesUI:dashboard.csv.assigned'), value: (v) => v.assigned_to ? profiles[v.assigned_to] || '' : '' },
+      { key: 'description', label: t('vehiclesUI:dashboard.csv.description'), value: (v) => v.client_description || '' },
+      { key: 'time', label: t('vehiclesUI:dashboard.csv.time'), value: (v) => formatMinutes(vehicleTimes[v.id] || 0) },
+      { key: 'created', label: t('vehiclesUI:dashboard.csv.created'), value: (v) => format(new Date(v.created_at), 'dd/MM/yyyy HH:mm') },
     ]);
   };
 
@@ -261,8 +263,8 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl md:text-2xl font-bold">Dashboard</h1>
-            <p className="text-sm text-muted-foreground">Vista general del taller</p>
+            <h1 className="text-xl md:text-2xl font-bold">{t('vehiclesUI:dashboard.title')}</h1>
+            <p className="text-sm text-muted-foreground">{t('vehiclesUI:dashboard.subtitle')}</p>
           </div>
           <div className="flex gap-2 flex-wrap">
             {isAdmin && (
@@ -273,7 +275,7 @@ export default function Dashboard() {
                 className="gap-2"
               >
                 <BarChart2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Gráficos</span>
+                <span className="hidden sm:inline">{t('vehiclesUI:dashboard.charts')}</span>
               </Button>
             )}
             <Button 
@@ -283,23 +285,23 @@ export default function Dashboard() {
               className="gap-2"
             >
               {viewMode === 'list' ? <LayoutGrid className="h-4 w-4" /> : <List className="h-4 w-4" />}
-              <span className="hidden sm:inline">{viewMode === 'list' ? 'Kanban' : 'Lista'}</span>
+              <span className="hidden sm:inline">{viewMode === 'list' ? t('vehiclesUI:dashboard.kanban') : t('vehiclesUI:dashboard.list')}</span>
             </Button>
             <Button
               variant={priorityFilter === 'urgent_high' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setPriorityFilter(priorityFilter === 'urgent_high' ? 'all' : 'urgent_high')}
               className={cn('gap-2', priorityFilter === 'urgent_high' && 'bg-red-600 hover:bg-red-700 text-white')}
-              title="Solo urgentes y altas"
+              title={t('vehiclesUI:dashboard.urgentTooltip')}
             >
               <Flame className="h-4 w-4" />
-              <span className="hidden sm:inline">Urgentes</span>
+              <span className="hidden sm:inline">{t('vehiclesUI:dashboard.urgent')}</span>
             </Button>
-            <Button variant="outline" size="sm" onClick={handleExport} className="gap-2" title="Exportar CSV">
+            <Button variant="outline" size="sm" onClick={handleExport} className="gap-2" title={t('vehiclesUI:dashboard.exportTooltip')}>
               <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">Exportar</span>
+              <span className="hidden sm:inline">{t('vehiclesUI:dashboard.export')}</span>
             </Button>
-            <QuickPlateDialog onSuccess={fetchVehicles} triggerLabel="Matrícula rápida" />
+            <QuickPlateDialog onSuccess={fetchVehicles} triggerLabel={t('vehiclesUI:dashboard.quickPlate')} />
             <NewVehicleDialog onSuccess={fetchVehicles} />
           </div>
         </div>
@@ -335,10 +337,10 @@ export default function Dashboard() {
         {statusFilter !== 'all' && (
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">
-              Filtrando por: <strong>{stats.find(s => s.filter === statusFilter)?.label}</strong>
+              {t('vehiclesUI:dashboard.filteringBy')} <strong>{stats.find(s => s.filter === statusFilter)?.label}</strong>
             </span>
             <Button variant="ghost" size="sm" onClick={() => setStatusFilter('all')} className="text-xs h-7">
-              Mostrar todos
+              {t('vehiclesUI:dashboard.showAll')}
             </Button>
           </div>
         )}
@@ -354,12 +356,12 @@ export default function Dashboard() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Matrícula</TableHead>
-                  <TableHead>Vehículo</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Prioridad</TableHead>
-                  <TableHead>Asignado a</TableHead>
-                  <TableHead className="hidden md:table-cell">Descripción</TableHead>
+                  <TableHead>{t('vehiclesUI:dashboard.table.plate')}</TableHead>
+                  <TableHead>{t('vehiclesUI:dashboard.table.vehicle')}</TableHead>
+                  <TableHead>{t('vehiclesUI:dashboard.table.status')}</TableHead>
+                  <TableHead>{t('vehiclesUI:dashboard.table.priority')}</TableHead>
+                  <TableHead>{t('vehiclesUI:dashboard.table.assignedTo')}</TableHead>
+                  <TableHead className="hidden md:table-cell">{t('vehiclesUI:dashboard.table.description')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -373,7 +375,7 @@ export default function Dashboard() {
                     <TableCell className="text-muted-foreground">{vehicle.brand} {vehicle.model}</TableCell>
                     <TableCell><VehicleStatusBadge status={vehicle.status} /></TableCell>
                     <TableCell><PriorityBadge value={(vehicle.priority as VehiclePriority) || 'normal'} /></TableCell>
-                    <TableCell>{vehicle.assigned_to ? profiles[vehicle.assigned_to] || '—' : <span className="text-muted-foreground italic">Sin asignar</span>}</TableCell>
+                    <TableCell>{vehicle.assigned_to ? profiles[vehicle.assigned_to] || '—' : <span className="text-muted-foreground italic">{t('vehiclesUI:dashboard.table.unassigned')}</span>}</TableCell>
                     <TableCell className="hidden md:table-cell text-muted-foreground text-xs max-w-[200px] truncate">
                       {vehicle.client_description || '—'}
                     </TableCell>
@@ -399,7 +401,7 @@ export default function Dashboard() {
                           <StatusColumn status={status} count={statusVehicles.length}>
                             <div className={cn("min-h-[60px] transition-colors rounded-lg", snapshot.isDraggingOver && "bg-primary/10")}>
                               {statusVehicles.length === 0 ? (
-                                <p className="text-center text-sm text-muted-foreground py-8">Sin vehículos</p>
+                                <p className="text-center text-sm text-muted-foreground py-8">{t('vehiclesUI:dashboard.noVehicles')}</p>
                               ) : (
                                 statusVehicles.map((vehicle, index) => (
                                   <Draggable key={vehicle.id} draggableId={vehicle.id} index={index}>
@@ -443,7 +445,7 @@ export default function Dashboard() {
                         <StatusColumn status={status} count={statusVehicles.length}>
                           <div className={cn("min-h-[60px] transition-colors rounded-lg", snapshot.isDraggingOver && "bg-primary/10")}>
                             {statusVehicles.length === 0 ? (
-                              <p className="text-center text-sm text-muted-foreground py-8">Sin vehículos</p>
+                              <p className="text-center text-sm text-muted-foreground py-8">{t('vehiclesUI:dashboard.noVehicles')}</p>
                             ) : (
                               statusVehicles.map((vehicle, index) => (
                                 <Draggable key={vehicle.id} draggableId={vehicle.id} index={index}>

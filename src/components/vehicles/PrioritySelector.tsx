@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { VehiclePriority, PRIORITY_LABELS } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -37,6 +38,7 @@ export function PriorityBadge({ value, className }: { value: VehiclePriority; cl
 }
 
 export function PrioritySelector({ vehicleId, value, canEdit = true, size = 'sm', onChanged }: PrioritySelectorProps) {
+  const { t } = useTranslation();
   const [updating, setUpdating] = useState(false);
 
   if (!canEdit) {
@@ -51,10 +53,10 @@ export function PrioritySelector({ vehicleId, value, canEdit = true, size = 'sm'
       .eq('id', vehicleId);
     setUpdating(false);
     if (error) {
-      toast.error('Error al cambiar prioridad');
+      toast.error(t('vehiclesUI:priority.errorChanging'));
     } else {
       onChanged?.(next);
-      toast.success(`Prioridad: ${PRIORITY_LABELS[next]}`);
+      toast.success(t('vehiclesUI:priority.priorityLabel', { priority: PRIORITY_LABELS[next] }));
     }
   };
 
@@ -73,7 +75,7 @@ export function PrioritySelector({ vehicleId, value, canEdit = true, size = 'sm'
         )}
       >
         <Icon className="h-3 w-3" />
-        <SelectValue placeholder="Prioridad" />
+        <SelectValue placeholder={t('vehiclesUI:priority.placeholder')} />
       </SelectTrigger>
       <SelectContent>
         {(['urgente', 'alta', 'normal', 'baja'] as VehiclePriority[]).map((p) => {

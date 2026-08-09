@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Profile, UserRole, ROLE_LABELS } from '@/lib/types';
 import {
@@ -25,6 +26,7 @@ interface AssignUserDialogProps {
 }
 
 export function AssignUserDialog({ vehicleId, currentAssignedTo, onAssigned }: AssignUserDialogProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,9 +72,9 @@ export function AssignUserDialog({ vehicleId, currentAssignedTo, onAssigned }: A
       .eq('id', vehicleId);
 
     if (error) {
-      toast.error('Error al asignar usuario');
+      toast.error(t('vehiclesUI:assignUser.errorAssigning'));
     } else {
-      toast.success(userId ? 'Usuario asignado correctamente' : 'Asignación eliminada');
+      toast.success(userId ? t('vehiclesUI:assignUser.userAssigned') : t('vehiclesUI:assignUser.assignmentRemoved'));
       onAssigned();
       setOpen(false);
     }
@@ -94,12 +96,12 @@ export function AssignUserDialog({ vehicleId, currentAssignedTo, onAssigned }: A
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <UserPlus className="h-4 w-4" />
-          <span className="hidden sm:inline">Asignar</span>
+          <span className="hidden sm:inline">{t('vehiclesUI:assignUser.trigger')}</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Asignar Técnico</DialogTitle>
+          <DialogTitle>{t('vehiclesUI:assignUser.title')}</DialogTitle>
         </DialogHeader>
         
         {loading ? (
@@ -123,8 +125,8 @@ export function AssignUserDialog({ vehicleId, currentAssignedTo, onAssigned }: A
                 <UserPlus className="h-5 w-5 text-muted-foreground" />
               </div>
               <div className="flex-1">
-                <p className="font-medium">Sin asignar</p>
-                <p className="text-xs text-muted-foreground">Dejar sin técnico asignado</p>
+                <p className="font-medium">{t('vehiclesUI:assignUser.unassignedOption')}</p>
+                <p className="text-xs text-muted-foreground">{t('vehiclesUI:assignUser.unassignedHint')}</p>
               </div>
               {!currentAssignedTo && (
                 <Check className="h-5 w-5 text-primary" />
@@ -152,7 +154,7 @@ export function AssignUserDialog({ vehicleId, currentAssignedTo, onAssigned }: A
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{user.full_name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {user.role ? ROLE_LABELS[user.role] : 'Usuario'}
+                    {user.role ? ROLE_LABELS[user.role] : t('vehiclesUI:assignUser.user')}
                   </p>
                 </div>
                 {currentAssignedTo === user.user_id && (

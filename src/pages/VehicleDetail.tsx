@@ -54,6 +54,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useWhatsAppMessage } from '@/hooks/useWhatsAppMessage';
+import { useTranslation } from 'react-i18next';
 
 export default function VehicleDetail() {
   const { id } = useParams();
@@ -61,6 +62,7 @@ export default function VehicleDetail() {
   const { user, role } = useAuth();
   const { organizationId } = useOrganization();
   const { openWhatsApp } = useWhatsAppMessage();
+  const { t } = useTranslation();
   const [vehicle, setVehicle] = useState<VehicleWithOwner | null>(null);
   const [parts, setParts] = useState<Part[]>([]);
   const [timeLogs, setTimeLogs] = useState<TimeLog[]>([]);
@@ -187,10 +189,10 @@ export default function VehicleDetail() {
       .eq('id', vehicle.id);
 
     if (error) {
-      toast.error('Error al actualizar el estado');
+      toast.error(t('vehiclesUI.detail.errorUpdatingStatus'));
     } else {
       setVehicle({ ...vehicle, status: newStatus });
-      toast.success(`Estado actualizado a: ${STATUS_LABELS[newStatus]}`);
+      toast.success(t('vehiclesUI.detail.statusUpdated', { status: STATUS_LABELS[newStatus] }));
       
       // Notify admin when vehicle is finished
       if (newStatus === 'terminado') {
@@ -214,13 +216,13 @@ export default function VehicleDetail() {
           user_id: admin.user_id,
           vehicle_id: vehicle.id,
           type: 'vehicle_finished',
-          message: `Vehículo ${vehicle.plate} (${vehicle.brand} ${vehicle.model}) ha sido marcado como TERMINADO`,
+          message: t('vehiclesUI.detail.notificationMessage', { plate: vehicle.plate, brand: vehicle.brand, model: vehicle.model }),
           read: false,
           organization_id: organizationId,
         }));
 
         await supabase.from('notifications').insert(notifications);
-        toast.info('Administradores notificados');
+        toast.info(t('vehiclesUI.detail.adminsNotified'));
       }
     } catch (error) {
       console.error('Error notifying admins:', error);
@@ -231,7 +233,7 @@ export default function VehicleDetail() {
     if (!vehicle) return;
     const parsed = kmInput.trim() ? parseInt(kmInput.replace(/[^\d]/g, ''), 10) : null;
     if (parsed !== null && (!Number.isFinite(parsed) || parsed < 0)) {
-      toast.error('Introduce un kilometraje válido');
+      toast.error(t('vehiclesUI.detail.invalidMileage'));
       return;
     }
     setKmSaving(true);
@@ -241,11 +243,11 @@ export default function VehicleDetail() {
       .eq('id', vehicle.id);
     setKmSaving(false);
     if (error) {
-      toast.error('Error al guardar el kilometraje');
+      toast.error(t('vehiclesUI.detail.errorSavingMileage'));
     } else {
       setVehicle({ ...vehicle, mileage: parsed ?? undefined });
       setKmEditing(false);
-      toast.success('Kilometraje actualizado');
+      toast.success(t('vehiclesUI.detail.mileageUpdated'));
     }
   };
 
@@ -255,7 +257,7 @@ export default function VehicleDetail() {
 
     const quantity = parseDecimalQuantity(newPart.quantity);
     if (quantity === null) {
-      toast.error('Introduce una cantidad válida, por ejemplo 1,5');
+      toast.error(t('vehiclesUI.detail.invalidQuantity'));
       return;
     }
 
@@ -271,9 +273,9 @@ export default function VehicleDetail() {
     ]);
 
     if (error) {
-      toast.error('Error al añadir la pieza');
+      toast.error(t('vehiclesUI.detail.errorAddingPart'));
     } else {
-      toast.success('Pieza añadida');
+      toast.success(t('vehiclesUI.detail.partAdded'));
       setNewPart({ name: '', quantity: '1', reference: '' });
       fetchVehicleData();
     }
@@ -293,9 +295,9 @@ export default function VehicleDetail() {
     ]);
 
     if (error) {
-      toast.error('Error al añadir la anomalía');
+      toast.error(t('vehiclesUI.detail.errorAddingAnomaly'));
     } else {
-      toast.success('Anomalía registrada');
+      toast.success(t('vehiclesUI.detail.anomalyAdded'));
       setNewAnomaly('');
       fetchVehicleData();
     }
@@ -304,10 +306,10 @@ export default function VehicleDetail() {
   const deleteAnomaly = async (anomalyId: string) => {
     const { error } = await supabase.from('vehicle_anomalies').delete().eq('id', anomalyId);
     if (error) {
-      toast.error('Error al eliminar la anomalía');
+      toast.error(t('vehiclesUI.detail.errorDeletingAnomaly'));
     } else {
       setAnomalies(anomalies.filter((a) => a.id !== anomalyId));
-      toast.success('Anomalía eliminada');
+      toast.success(t('vehiclesUI.detail.anomalyDeleted'));
     }
   };
 
@@ -341,11 +343,11 @@ export default function VehicleDetail() {
 
       if (dbError) throw dbError;
 
-      toast.success('Archivo subido correctamente');
+      toast.success(t('vehiclesUI.detail.fileUploaded'));
       fetchVehicleData();
     } catch (error) {
       console.error('Error uploading file:', error);
-      toast.error('Error al subir el archivo');
+      toast.error(t('vehiclesUI.detail.errorUploadingFile'));
     } finally {
       setUploadingFile(false);
       e.target.value = '';
@@ -367,20 +369,20 @@ export default function VehicleDetail() {
       if (error) throw error;
 
       setVehicleFiles(vehicleFiles.filter((f) => f.id !== fileId));
-      toast.success('Archivo eliminado');
+      toast.success(t('vehiclesUI.detail.fileDeleted'));
     } catch (error) {
       console.error('Error deleting file:', error);
-      toast.error('Error al eliminar el archivo');
+      toast.error(t('vehiclesUI.detail.errorDeletingFile'));
     }
   };
 
   const deletePart = async (partId: string) => {
     const { error } = await supabase.from('parts').delete().eq('id', partId);
     if (error) {
-      toast.error('Error al eliminar la pieza');
+      toast.error(t('vehiclesUI.detail.errorDeletingPart'));
     } else {
       setParts(parts.filter((p) => p.id !== partId));
-      toast.success('Pieza eliminada');
+      toast.success(t('vehiclesUI.detail.partDeleted'));
     }
   };
 
@@ -394,9 +396,9 @@ export default function VehicleDetail() {
       .eq('id', vehicle.id);
 
     if (error) {
-      toast.error('Error al guardar el resumen');
+      toast.error(t('vehiclesUI.detail.errorSavingSummary'));
     } else {
-      toast.success('Resumen guardado');
+      toast.success(t('vehiclesUI.detail.summarySaved'));
       setVehicle({ ...vehicle, work_summary: workSummary });
     }
     setSavingSummary(false);
@@ -422,21 +424,21 @@ export default function VehicleDetail() {
 
       // Show results
       if (data.email === 'sent') {
-        toast.success('Email enviado al cliente');
+        toast.success(t('vehiclesUI.detail.emailSent'));
       }
 
       // Open WhatsApp if available
       if (data.whatsapp) {
         window.open(data.whatsapp, '_blank');
-        toast.success('Abriendo WhatsApp...');
+        toast.success(t('vehiclesUI.detail.openingWhatsapp'));
       }
 
       if (!data.whatsapp && data.email !== 'sent') {
-        toast.warning('El cliente no tiene email ni teléfono registrado');
+        toast.warning(t('vehiclesUI.detail.noEmailOrPhone'));
       }
     } catch (error) {
       console.error('Error notifying client:', error);
-      toast.error('Error al notificar al cliente');
+      toast.error(t('vehiclesUI.detail.errorNotifyingClient'));
     } finally {
       setNotifyingClient(false);
     }
@@ -470,9 +472,9 @@ export default function VehicleDetail() {
     return (
       <MainLayout>
         <div className="text-center py-12">
-          <p className="text-muted-foreground">Vehículo no encontrado</p>
+          <p className="text-muted-foreground">{t('vehiclesUI.detail.vehicleNotFound')}</p>
           <Button variant="link" onClick={() => navigate('/')}>
-            Volver al dashboard
+            {t('vehiclesUI.detail.backToDashboard')}
           </Button>
         </div>
       </MainLayout>
@@ -533,7 +535,7 @@ export default function VehicleDetail() {
                   )}
                 </div>
               ) : (
-                <span className="text-sm text-muted-foreground">Sin asignar</span>
+                <span className="text-sm text-muted-foreground">{t('vehiclesUI.detail.assigned')}</span>
               )}
             </div>
           </div>
@@ -556,8 +558,8 @@ export default function VehicleDetail() {
                 className="gap-2 bg-green-600 hover:bg-green-700 text-white"
               >
                 <CheckCircle2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Marcar Terminado</span>
-                <span className="sm:hidden">Terminado</span>
+                <span className="hidden sm:inline">{t('vehiclesUI.detail.markFinished')}</span>
+                <span className="sm:hidden">{t('vehiclesUI.detail.finished')}</span>
               </Button>
             )}
             <Select value={vehicle.status} onValueChange={(v) => updateStatus(v as VehicleStatus)}>
@@ -581,7 +583,7 @@ export default function VehicleDetail() {
                     onClick={() => openWhatsApp(vehicle.owner!.phone!, vehicle)}
                   >
                     <MessageSquare className="h-4 w-4" />
-                    <span className="hidden sm:inline">WhatsApp</span>
+                    <span className="hidden sm:inline">{t('vehiclesUI.detail.whatsapp')}</span>
                   </Button>
                 )}
                 <Button onClick={notifyClient} className="gap-2" disabled={notifyingClient}>
@@ -590,7 +592,7 @@ export default function VehicleDetail() {
                   ) : (
                     <Bell className="h-4 w-4" />
                   )}
-                  <span className="hidden sm:inline">Avisar Cliente</span>
+                  <span className="hidden sm:inline">{t('vehiclesUI.detail.notifyClient')}</span>
                 </Button>
               </div>
             )}
@@ -605,7 +607,7 @@ export default function VehicleDetail() {
           return (
             <div className="flex items-center gap-2 p-3 rounded-lg border border-amber-500/40 bg-amber-500/10 text-sm">
               <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0"/>
-              <span>⏰ Cliente sin recoger hace <strong>{days} día{days !== 1 ? 's' : ''}</strong>. Recuérdele la recogida.</span>
+              <span dangerouslySetInnerHTML={{ __html: t('vehiclesUI.detail.overdueBadge', { count: days, days }) }} />
             </div>
           );
         })()}
@@ -618,13 +620,13 @@ export default function VehicleDetail() {
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Clock className="h-5 w-5" />
-                  Control de Tiempo
+                  {t('vehiclesUI.detail.timeControl')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <WorkTimer vehicleId={vehicle.id} vehicleStatus={vehicle.status} onUpdate={fetchVehicleData} />
                 <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                  <span className="text-sm text-muted-foreground">Tiempo total acumulado</span>
+                  <span className="text-sm text-muted-foreground">{t('vehiclesUI.detail.totalAccumulatedTime')}</span>
                   <span className="font-mono font-medium text-lg">{formatTime(getTotalTime())}</span>
                 </div>
               </CardContent>
@@ -656,10 +658,10 @@ export default function VehicleDetail() {
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">Descripción del Cliente</CardTitle>
+                  <CardTitle className="text-lg">{t('vehiclesUI.detail.clientDescription')}</CardTitle>
                   {!editingDescription && (
                     <Button variant="ghost" size="sm" onClick={() => setEditingDescription(true)}>
-                      Editar
+                      {t('vehiclesUI.detail.edit')}
                     </Button>
                   )}
                 </div>
@@ -670,7 +672,7 @@ export default function VehicleDetail() {
                     <Textarea
                       value={clientDescription}
                       onChange={(e) => setClientDescription(e.target.value)}
-                      placeholder="Descripción del cliente sobre el problema o trabajo a realizar..."
+                      placeholder={t('vehiclesUI.detail.descriptionPlaceholder')}
                       rows={4}
                     />
                     <div className="flex gap-2 justify-end">
@@ -678,24 +680,24 @@ export default function VehicleDetail() {
                         setClientDescription(vehicle.client_description || '');
                         setEditingDescription(false);
                       }}>
-                        Cancelar
+                        {t('vehiclesUI.detail.cancel')}
                       </Button>
                       <Button size="sm" disabled={savingDescription} onClick={async () => {
                         setSavingDescription(true);
                         const { error } = await supabase.from('vehicles').update({ client_description: clientDescription }).eq('id', vehicle.id);
                         setSavingDescription(false);
-                        if (error) { toast.error('Error al guardar'); return; }
+                        if (error) { toast.error(t('vehiclesUI.detail.errorSavingSummary')); return; }
                         setVehicle({ ...vehicle, client_description: clientDescription });
                         setEditingDescription(false);
-                        toast.success('Descripción guardada');
+                        toast.success(t('vehiclesUI.detail.summarySaved'));
                       }}>
-                        {savingDescription ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Guardar'}
+                        {savingDescription ? <Loader2 className="h-4 w-4 animate-spin" /> : t('vehiclesUI.detail.save')}
                       </Button>
                     </div>
                   </div>
                 ) : (
                   <p className="text-muted-foreground text-sm">
-                    {vehicle.client_description || 'Sin descripción. Pulsa Editar para añadir.'}
+                    {vehicle.client_description || t('vehiclesUI.detail.noDescription')}
                   </p>
                 )}
               </CardContent>
@@ -712,10 +714,10 @@ export default function VehicleDetail() {
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Gauge className={`h-5 w-5 ${vehicle.mileage ? 'text-primary' : 'text-amber-500'}`} />
-                  Kilometraje
+                  {t('vehiclesUI.detail.mileage')}
                   {!vehicle.mileage && (
                     <span className="text-xs font-normal text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
-                      Falta indicar
+                      {t('vehiclesUI.detail.missing')}
                     </span>
                   )}
                 </CardTitle>
@@ -726,7 +728,7 @@ export default function VehicleDetail() {
                     <Input
                       type="text"
                       inputMode="numeric"
-                      placeholder="Ej. 123456"
+                      placeholder={t('vehiclesUI.detail.mileagePlaceholder')}
                       value={kmInput}
                       onChange={(e) => setKmInput(e.target.value.replace(/[^\d]/g, ''))}
                       className="flex-1"
@@ -749,7 +751,7 @@ export default function VehicleDetail() {
                       <span className="text-sm text-muted-foreground">km</span>
                     </div>
                     <Button variant="outline" size="sm" onClick={() => setKmEditing(true)}>
-                      {vehicle.mileage ? 'Actualizar' : 'Añadir'}
+                      {vehicle.mileage ? t('vehiclesUI.detail.update') : t('vehiclesUI.detail.add')}
                     </Button>
                   </div>
                 )}
@@ -761,7 +763,7 @@ export default function VehicleDetail() {
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Package className="h-5 w-5" />
-                  Piezas Utilizadas
+                  {t('vehiclesUI.detail.partsUsed')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -770,13 +772,13 @@ export default function VehicleDetail() {
                     <Input
                       type="text"
                       inputMode="decimal"
-                      placeholder="Cant."
+                      placeholder={t('vehiclesUI.detail.quantityPlaceholder')}
                       value={newPart.quantity}
                       onChange={(e) => setNewPart({ ...newPart, quantity: e.target.value })}
                       className="w-20"
                     />
                     <Input
-                      placeholder="Descripción de la pieza"
+                      placeholder={t('vehiclesUI.detail.partDescriptionPlaceholder')}
                       value={newPart.name}
                       onChange={(e) => setNewPart({ ...newPart, name: e.target.value })}
                       className="flex-1"
@@ -784,7 +786,7 @@ export default function VehicleDetail() {
                   </div>
                   <div className="flex gap-2">
                     <Input
-                      placeholder="Referencia (opcional)"
+                      placeholder={t('vehiclesUI.detail.referencePlaceholder')}
                       value={newPart.reference}
                       onChange={(e) => setNewPart({ ...newPart, reference: e.target.value })}
                       className="flex-1"
@@ -797,7 +799,7 @@ export default function VehicleDetail() {
 
                 {parts.length === 0 ? (
                   <p className="text-center text-sm text-muted-foreground py-4">
-                    No hay piezas registradas
+                    {t('vehiclesUI.detail.noPartsRegistered')}
                   </p>
                 ) : (
                   <div className="space-y-2">
@@ -824,7 +826,7 @@ export default function VehicleDetail() {
                             </div>
                             <div className="flex gap-2">
                               <Input
-                                placeholder="Referencia (opcional)"
+                                placeholder={t('vehiclesUI.detail.referencePlaceholder')}
                                 value={editPart.reference}
                                 onChange={(e) => setEditPart({ ...editPart, reference: e.target.value })}
                                 className="flex-1"
@@ -835,7 +837,7 @@ export default function VehicleDetail() {
                                 onClick={async () => {
                                    const quantity = parseDecimalQuantity(editPart.quantity);
                                    if (quantity === null) {
-                                     toast.error('Introduce una cantidad válida, por ejemplo 1,5');
+                                     toast.error(t('vehiclesUI.detail.invalidQuantity'));
                                      return;
                                    }
 
@@ -844,9 +846,9 @@ export default function VehicleDetail() {
                                      .update({ name: editPart.name, quantity, reference: editPart.reference || null })
                                     .eq('id', part.id);
                                   if (error) {
-                                    toast.error('Error al actualizar la pieza');
+                                    toast.error(t('vehiclesUI.detail.errorUpdatingPart'));
                                   } else {
-                                    toast.success('Pieza actualizada');
+                                    toast.success(t('vehiclesUI.detail.partUpdated'));
                                     setEditingPartId(null);
                                     fetchVehicleData();
                                   }
@@ -878,7 +880,7 @@ export default function VehicleDetail() {
                                 <span className="font-medium">{part.name}</span>
                               </div>
                               {part.reference && (
-                                <p className="text-xs text-muted-foreground mt-1">Ref: {part.reference}</p>
+                                <p className="text-xs text-muted-foreground mt-1">{t('vehiclesUI.detail.reference', { reference: part.reference })}</p>
                               )}
                             </div>
                             <Button
@@ -904,7 +906,7 @@ export default function VehicleDetail() {
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <AlertTriangle className="h-5 w-5 text-orange-500" />
-                    Anomalías Encontradas
+                    {t('vehiclesUI.detail.anomaliesFound')}
                   </CardTitle>
                   <AIDiagnosticDialog vehicleId={vehicle.id} initialSymptoms={newAnomaly} />
                 </div>
@@ -912,7 +914,7 @@ export default function VehicleDetail() {
               <CardContent className="space-y-4">
                 <form onSubmit={addAnomaly} className="flex gap-2">
                   <Input
-                    placeholder="Describe la anomalía encontrada..."
+                    placeholder={t('vehiclesUI.detail.anomalyPlaceholder')}
                     value={newAnomaly}
                     onChange={(e) => setNewAnomaly(e.target.value)}
                     className="flex-1"
@@ -928,7 +930,7 @@ export default function VehicleDetail() {
 
                 {anomalies.length === 0 ? (
                   <p className="text-center text-sm text-muted-foreground py-4">
-                    No hay anomalías registradas
+                    {t('vehiclesUI.detail.noAnomaliesRegistered')}
                   </p>
                 ) : (
                   <div className="space-y-2">
@@ -976,7 +978,7 @@ export default function VehicleDetail() {
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Upload className="h-5 w-5" />
-                  Archivos y Fotos
+                  {t('vehiclesUI.detail.filesAndPhotos')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -1000,12 +1002,12 @@ export default function VehicleDetail() {
                       {uploadingFile ? (
                         <>
                           <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                          Subiendo...
+                          {t('vehiclesUI.detail.uploading')}
                         </>
                       ) : (
                         <>
                           <Upload className="h-4 w-4 mr-2" />
-                          Subir Archivo o Foto
+                          {t('vehiclesUI.detail.uploadFileOrPhoto')}
                         </>
                       )}
                     </Button>
@@ -1014,7 +1016,7 @@ export default function VehicleDetail() {
 
                 {vehicleFiles.length === 0 ? (
                   <p className="text-center text-sm text-muted-foreground py-4">
-                    No hay archivos subidos
+                    {t('vehiclesUI.detail.noFilesUploaded')}
                   </p>
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -1066,12 +1068,12 @@ export default function VehicleDetail() {
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <FileText className="h-5 w-5" />
-                  Resumen de Trabajos
+                  {t('vehiclesUI.detail.workSummary')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Textarea
-                  placeholder="Describe los trabajos realizados en el vehículo..."
+                  placeholder={t('vehiclesUI.detail.workSummaryPlaceholder')}
                   value={workSummary}
                   onChange={(e) => setWorkSummary(e.target.value)}
                   rows={4}
@@ -1085,7 +1087,7 @@ export default function VehicleDetail() {
                   {savingSummary ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : null}
-                  Guardar Resumen
+                  {t('vehiclesUI.detail.saveSummary')}
                 </Button>
               </CardContent>
             </Card>
@@ -1102,29 +1104,29 @@ export default function VehicleDetail() {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <FileText className="h-5 w-5" />
-                    Datos técnicos
+                    {t('vehiclesUI.detail.technicalData')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">VIN / Bastidor</p>
+                    <p className="text-xs text-muted-foreground mb-1">{t('vehiclesUI.detail.vin')}</p>
                     <p className="font-mono text-sm break-all">
-                      {(vehicle as any).vin || <span className="italic text-muted-foreground">Sin registrar</span>}
+                      {(vehicle as any).vin || <span className="italic text-muted-foreground">{t('vehiclesUI.detail.notRegistered')}</span>}
                     </p>
                   </div>
                   <ScanVinButton
                     variant="outline"
                     size="sm"
                     className="w-full gap-2"
-                    label={(vehicle as any).vin ? 'Re-escanear VIN' : 'Escanear VIN con cámara'}
+                    label={(vehicle as any).vin ? t('vehiclesUI.detail.rescanVin') : t('vehiclesUI.detail.scanVin')}
                     onScanned={async (data) => {
                       if (!data.vin) return;
                       const update: any = { vin: data.vin };
                       if (data.brand && !vehicle.brand) update.brand = data.brand;
                       if (data.year && !vehicle.year) update.year = data.year;
                       const { error } = await supabase.from('vehicles').update(update).eq('id', vehicle.id);
-                      if (error) { toast.error('Error al guardar VIN'); return; }
-                      toast.success('VIN guardado');
+                      if (error) { toast.error(t('vehiclesUI.detail.errorSavingVin')); return; }
+                      toast.success(t('vehiclesUI.detail.vinSaved'));
                       fetchVehicleData();
                     }}
                   />
@@ -1139,13 +1141,13 @@ export default function VehicleDetail() {
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <User className="h-5 w-5" />
-                  Propietario
+                  {t('vehiclesUI.detail.owner')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {!vehicle.owner_id ? (
                   <div className="text-center py-2 space-y-2">
-                    <p className="text-sm text-muted-foreground italic">Sin propietario asignado</p>
+                    <p className="text-sm text-muted-foreground italic">{t('vehiclesUI.detail.noOwnerAssigned')}</p>
                     {canViewOwner && (
                       <Button
                         variant="outline"
@@ -1156,7 +1158,7 @@ export default function VehicleDetail() {
                           editBtn?.click();
                         }}
                       >
-                        Asignar propietario
+                        {t('vehiclesUI.detail.assignOwner')}
                       </Button>
                     )}
                   </div>
@@ -1180,7 +1182,7 @@ export default function VehicleDetail() {
                       </div>
                     )}
                     {vehicle.owner.dni && (
-                      <div className="text-sm text-muted-foreground">DNI: {vehicle.owner.dni}</div>
+                      <div className="text-sm text-muted-foreground">{t('vehiclesUI.detail.dniLabel', { dni: vehicle.owner.dni })}</div>
                     )}
                     <Separator className="my-2" />
                     <Button
@@ -1190,13 +1192,13 @@ export default function VehicleDetail() {
                       onClick={() => navigate(`/clients/${vehicle.owner_id}`)}
                     >
                       <Clock className="h-4 w-4 mr-2" />
-                      Ver historial del cliente
+                      {t('vehiclesUI.detail.viewClientHistory')}
                     </Button>
                   </>
                 ) : (
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Lock className="h-4 w-4" />
-                    <span className="italic">Datos restringidos (solo admin)</span>
+                    <span className="italic">{t('vehiclesUI.detail.restrictedData')}</span>
                   </div>
                 )}
               </CardContent>
@@ -1206,7 +1208,7 @@ export default function VehicleDetail() {
             <div>
               <h3 className="flex items-center gap-2 font-semibold mb-3">
                 <MessageSquare className="h-5 w-5" />
-                Comunicación Interna
+                {t('vehiclesUI.detail.internalCommunication')}
               </h3>
               <VehicleChat vehicleId={vehicle.id} />
             </div>
