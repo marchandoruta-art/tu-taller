@@ -10,8 +10,10 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Building2, Copy, Check, Users, Phone, Clock } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 export default function OrganizationSettings() {
+  const { t } = useTranslation();
   const { organization, refetch } = useOrganization();
   const { role, user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -86,10 +88,10 @@ export default function OrganizationSettings() {
       if (settingError) throw settingError;
 
       await refetch();
-      toast.success('Taller actualizado correctamente');
+      toast.success(t('adminUI.orgSettings.toast.updated'));
     } catch (error: any) {
       console.error('Error updating organization:', error);
-      toast.error('Error al actualizar el taller');
+      toast.error(t('adminUI.orgSettings.toast.updateError'));
     } finally {
       setLoading(false);
     }
@@ -101,10 +103,10 @@ export default function OrganizationSettings() {
     try {
       await navigator.clipboard.writeText(organization.slug);
       setCopied(true);
-      toast.success('Código copiado al portapapeles');
+      toast.success(t('adminUI.orgSettings.toast.codeCopied'));
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error('Error al copiar el código');
+      toast.error(t('adminUI.orgSettings.toast.copyError'));
     }
   };
 
@@ -122,8 +124,8 @@ export default function OrganizationSettings() {
     <MainLayout>
       <div className="space-y-6 max-w-2xl">
         <div>
-          <h1 className="text-2xl font-bold">Configuración del Taller</h1>
-          <p className="text-muted-foreground">Gestiona la configuración de tu organización</p>
+          <h1 className="text-2xl font-bold">{t('adminUI.orgSettings.title')}</h1>
+          <p className="text-muted-foreground">{t('adminUI.orgSettings.subtitle')}</p>
         </div>
 
         {/* Organization Info */}
@@ -131,16 +133,16 @@ export default function OrganizationSettings() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
-              Información del Taller
+              {t('adminUI.orgSettings.infoTitle')}
             </CardTitle>
             <CardDescription>
-              Datos básicos de tu organización
+              {t('adminUI.orgSettings.infoDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleUpdateOrganization} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="org-name">Nombre del Taller</Label>
+                <Label htmlFor="org-name">{t('adminUI.orgSettings.workshopName')}</Label>
                 <Input
                   id="org-name"
                   value={orgName}
@@ -151,7 +153,7 @@ export default function OrganizationSettings() {
               {isAdmin && (
                 <Button type="submit" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Guardar Cambios
+                  {t('adminUI.orgSettings.saveChanges')}
                 </Button>
               )}
             </form>
@@ -164,16 +166,16 @@ export default function OrganizationSettings() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Phone className="h-5 w-5" />
-                Datos de Contacto
+                {t('adminUI.orgSettings.contactTitle')}
               </CardTitle>
               <CardDescription>
-                Estos datos aparecerán en los mensajes de WhatsApp y correos a clientes
+                {t('adminUI.orgSettings.contactDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleUpdateOrganization} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="taller-telefono">Teléfono de contacto</Label>
+                  <Label htmlFor="taller-telefono">{t('adminUI.orgSettings.contactPhone')}</Label>
                   <Input
                     id="taller-telefono"
                     value={tallerTelefono}
@@ -182,7 +184,7 @@ export default function OrganizationSettings() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="taller-whatsapp">Número de WhatsApp</Label>
+                  <Label htmlFor="taller-whatsapp">{t('adminUI.orgSettings.whatsappNumber')}</Label>
                   <Input
                     id="taller-whatsapp"
                     value={tallerWhatsapp}
@@ -194,19 +196,19 @@ export default function OrganizationSettings() {
                   <Label htmlFor="taller-horario">
                     <span className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />
-                      Horario comercial
+                      {t('adminUI.orgSettings.businessHours')}
                     </span>
                   </Label>
                   <Input
                     id="taller-horario"
                     value={tallerHorario}
                     onChange={(e) => setTallerHorario(e.target.value)}
-                    placeholder="Lunes a viernes: 8:00 – 16:00 h"
+                    placeholder={t('adminUI.orgSettings.businessHoursPlaceholder')}
                   />
                 </div>
                 <Button type="submit" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Guardar Datos de Contacto
+                  {t('adminUI.orgSettings.saveContactDetails')}
                 </Button>
               </form>
             </CardContent>
@@ -218,10 +220,10 @@ export default function OrganizationSettings() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              Código de Invitación
+              {t('adminUI.orgSettings.inviteCodeTitle')}
             </CardTitle>
             <CardDescription>
-              Comparte este código para que otros miembros se unan a tu taller
+              {t('adminUI.orgSettings.inviteCodeDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -238,7 +240,7 @@ export default function OrganizationSettings() {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Los nuevos miembros deberán introducir este código al registrarse para unirse a tu taller.
+              {t('adminUI.orgSettings.inviteCodeHelp')}
             </p>
           </CardContent>
         </Card>
@@ -246,23 +248,23 @@ export default function OrganizationSettings() {
         {/* Organization Stats */}
         <Card>
           <CardHeader>
-            <CardTitle>Estado</CardTitle>
+            <CardTitle>{t('adminUI.orgSettings.statusTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Tu rol</span>
+              <span className="text-muted-foreground">{t('adminUI.orgSettings.yourRole')}</span>
               <Badge variant={isAdmin ? 'destructive' : 'secondary'}>
                 {role}
               </Badge>
             </div>
             {isOwner && (
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Propietario</span>
+                <span className="text-muted-foreground">{t('adminUI.orgSettings.owner')}</span>
                 <Badge variant="outline">Sí</Badge>
               </div>
             )}
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Creado</span>
+              <span className="text-muted-foreground">{t('adminUI.orgSettings.createdAt')}</span>
               <span className="text-sm">
                 {new Date(organization.created_at).toLocaleDateString('es-ES')}
               </span>

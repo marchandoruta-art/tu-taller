@@ -14,6 +14,7 @@ import { es } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import { downloadCsv } from '@/lib/exportCsv';
 import { Profile } from '@/lib/types';
+import { useTranslation } from 'react-i18next';
 
 interface AuditEntry {
   id: string;
@@ -25,14 +26,14 @@ interface AuditEntry {
   created_at: string;
 }
 
-const ACTION_LABELS: Record<string, string> = {
-  vehicle_deleted: '🗑️ Vehículo borrado',
-  vehicle_reassigned: '🔄 Reasignación',
-  client_approval_response: '📬 Respuesta cliente',
-};
-
 export default function AdminAudit() {
+  const { t } = useTranslation();
   const { role } = useAuth();
+  const ACTION_LABELS: Record<string, string> = {
+    vehicle_deleted: t('adminExtraUI.audit.actions.vehicle_deleted'),
+    vehicle_reassigned: t('adminExtraUI.audit.actions.vehicle_reassigned'),
+    client_approval_response: t('adminExtraUI.audit.actions.client_approval_response'),
+  };
   const { organizationId } = useOrganization();
   const navigate = useNavigate();
   const [entries, setEntries] = useState<AuditEntry[]>([]);
@@ -60,7 +61,7 @@ export default function AdminAudit() {
     setLoading(false);
   };
 
-  const getName = (id: string | null) => id ? profiles.find(p => p.user_id === id)?.full_name || 'Usuario' : 'Sistema';
+  const getName = (id: string | null) => id ? profiles.find(p => p.user_id === id)?.full_name || t('adminExtraUI.audit.user') : t('adminExtraUI.audit.system');
 
   const filtered = useMemo(() => entries.filter(e => {
     if (actionFilter !== 'all' && e.action !== actionFilter) return false;
@@ -72,11 +73,11 @@ export default function AdminAudit() {
 
   const exportCsv = () => {
     downloadCsv('log-auditoria', filtered, [
-      { key: 'created_at', label: 'Fecha', value: (r) => format(new Date(r.created_at), 'yyyy-MM-dd HH:mm:ss') },
-      { key: 'user', label: 'Usuario', value: (r) => getName(r.user_id) },
-      { key: 'action', label: 'Acción', value: (r) => ACTION_LABELS[r.action] || r.action },
-      { key: 'entity', label: 'Entidad', value: (r) => `${r.entity_type}:${r.entity_id || ''}` },
-      { key: 'details', label: 'Detalles', value: (r) => JSON.stringify(r.details) },
+      { key: 'created_at', label: t('adminExtraUI.audit.csv.date'), value: (r) => format(new Date(r.created_at), 'yyyy-MM-dd HH:mm:ss') },
+      { key: 'user', label: t('adminExtraUI.audit.csv.user'), value: (r) => getName(r.user_id) },
+      { key: 'action', label: t('adminExtraUI.audit.csv.action'), value: (r) => ACTION_LABELS[r.action] || r.action },
+      { key: 'entity', label: t('adminExtraUI.audit.csv.entity'), value: (r) => `${r.entity_type}:${r.entity_id || ''}` },
+      { key: 'details', label: t('adminExtraUI.audit.csv.details'), value: (r) => JSON.stringify(r.details) },
     ]);
   };
 
@@ -88,46 +89,46 @@ export default function AdminAudit() {
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <ShieldCheck className="h-6 w-6 text-primary"/> Log de auditoría
+              <ShieldCheck className="h-6 w-6 text-primary"/> {t('adminExtraUI.audit.title')}
             </h1>
-            <p className="text-sm text-muted-foreground">Registro de acciones importantes en el taller</p>
+            <p className="text-sm text-muted-foreground">{t('adminExtraUI.audit.subtitle')}</p>
           </div>
           <Button variant="outline" onClick={exportCsv} className="gap-2">
-            <Download className="h-4 w-4"/> Exportar
+            <Download className="h-4 w-4"/> {t('adminExtraUI.audit.export')}
           </Button>
         </div>
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2"><Filter className="h-4 w-4"/>Filtros</CardTitle>
+            <CardTitle className="text-base flex items-center gap-2"><Filter className="h-4 w-4"/>{t('adminExtraUI.audit.filtersTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <Select value={actionFilter} onValueChange={setActionFilter}>
-              <SelectTrigger><SelectValue placeholder="Acción"/></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t('adminExtraUI.audit.filtersTitle')}/></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todas las acciones</SelectItem>
+                <SelectItem value="all">{t('adminExtraUI.audit.allActions')}</SelectItem>
                 {actionOptions.map(a => <SelectItem key={a} value={a}>{ACTION_LABELS[a] || a}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={userFilter} onValueChange={setUserFilter}>
-              <SelectTrigger><SelectValue placeholder="Usuario"/></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t('adminExtraUI.audit.user')}/></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos los usuarios</SelectItem>
+                <SelectItem value="all">{t('adminExtraUI.audit.allUsers')}</SelectItem>
                 {profiles.map(p => <SelectItem key={p.user_id} value={p.user_id}>{p.full_name}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} placeholder="Desde"/>
-            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} placeholder="Hasta"/>
+            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} placeholder={t('adminExtraUI.audit.fromPlaceholder')}/>
+            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} placeholder={t('adminExtraUI.audit.toPlaceholder')}/>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader><CardTitle className="text-base">Eventos ({filtered.length})</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">{t('adminExtraUI.audit.eventsTitle', { count: filtered.length })}</CardTitle></CardHeader>
           <CardContent>
             {loading ? (
               <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground"/></div>
             ) : filtered.length === 0 ? (
-              <p className="text-center py-8 text-muted-foreground text-sm">No hay eventos que coincidan.</p>
+              <p className="text-center py-8 text-muted-foreground text-sm">{t('adminExtraUI.audit.noEvents')}</p>
             ) : (
               <div className="space-y-2">
                 {filtered.map((e) => (

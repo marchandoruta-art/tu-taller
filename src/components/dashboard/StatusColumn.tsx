@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
-import { VehicleStatus, STATUS_LABELS } from '@/lib/types';
+import { VehicleStatus } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useLabels } from '@/hooks/useLabels';
 
 interface StatusColumnProps {
   status: VehicleStatus;
@@ -20,6 +21,8 @@ const statusColors: Record<VehicleStatus, string> = {
 };
 
 export function StatusColumn({ status, count, children }: StatusColumnProps) {
+  const labels = useLabels();
+
   return (
     <div className="flex flex-col min-w-[280px] md:min-w-[300px] lg:min-w-0 lg:max-w-none">
       <div
@@ -29,7 +32,7 @@ export function StatusColumn({ status, count, children }: StatusColumnProps) {
         )}
       >
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-sm md:text-base">{STATUS_LABELS[status]}</h3>
+          <h3 className="font-semibold text-sm md:text-base">{labels.status(status)}</h3>
           <span className="bg-muted text-muted-foreground text-xs font-medium px-2 py-0.5 rounded-full">
             {count}
           </span>

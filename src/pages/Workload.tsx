@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { downloadCsv, formatMinutes } from '@/lib/exportCsv';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface VehicleLite {
   id: string;
@@ -33,6 +34,7 @@ interface OperatorWorkload {
 }
 
 export default function WorkloadPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [operators, setOperators] = useState<OperatorWorkload[]>([]);
@@ -130,17 +132,17 @@ export default function WorkloadPage() {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <Users className="h-6 w-6 text-primary" />
-              Carga de Trabajo
+              {t('adminExtraUI.workload.title')}
             </h1>
-            <p className="text-muted-foreground text-sm">Distribución de vehículos y horas por operario</p>
+            <p className="text-muted-foreground text-sm">{t('adminExtraUI.workload.subtitle')}</p>
           </div>
           <div className="flex items-center gap-2">
             <Select value={selectedUserId} onValueChange={setSelectedUserId}>
               <SelectTrigger className="w-56">
-                <SelectValue placeholder="Filtrar por operario" />
+                <SelectValue placeholder={t('adminExtraUI.workload.filterPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos los operarios</SelectItem>
+                <SelectItem value="all">{t('adminExtraUI.workload.allOperators')}</SelectItem>
                 {operators.map((o) => (
                   <SelectItem key={o.profile.user_id} value={o.profile.user_id}>
                     {o.profile.full_name} ({o.vehicleCount})
@@ -153,17 +155,17 @@ export default function WorkloadPage() {
               size="sm"
               className="gap-2"
               onClick={() => {
-                if (operators.length === 0) return toast.info('Nada que exportar');
+                if (operators.length === 0) return toast.info(t('adminExtraUI.workload.toast.nothingToExport'));
                 downloadCsv('carga-trabajo', operators, [
-                  { key: 'name', label: 'Operario', value: (o) => o.profile.full_name },
-                  { key: 'role', label: 'Rol', value: (o) => ROLE_LABELS[o.role] },
-                  { key: 'vehicles', label: 'Vehículos asignados', value: (o) => o.vehicleCount },
-                  { key: 'time', label: 'Horas totales', value: (o) => formatMinutes(o.totalMinutes) },
-                  { key: 'plates', label: 'Matrículas', value: (o) => o.vehicles.map((v) => v.plate).join(', ') },
+                  { key: 'name', label: t('adminExtraUI.workload.csv.operator'), value: (o) => o.profile.full_name },
+                  { key: 'role', label: t('adminExtraUI.workload.csv.role'), value: (o) => ROLE_LABELS[o.role] },
+                  { key: 'vehicles', label: t('adminExtraUI.workload.csv.vehicles'), value: (o) => o.vehicleCount },
+                  { key: 'time', label: t('adminExtraUI.workload.csv.time'), value: (o) => formatMinutes(o.totalMinutes) },
+                  { key: 'plates', label: t('adminExtraUI.workload.csv.plates'), value: (o) => o.vehicles.map((v) => v.plate).join(', ') },
                 ]);
               }}
             >
-              <Download className="h-4 w-4" /> Exportar
+              <Download className="h-4 w-4" /> {t('adminExtraUI.workload.export')}
             </Button>
           </div>
         </div>
@@ -176,7 +178,7 @@ export default function WorkloadPage() {
                 <div className="p-2 rounded-lg bg-primary/10"><Users className="h-5 w-5 text-primary" /></div>
                 <div>
                   <p className="text-2xl font-bold">{operators.length}</p>
-                  <p className="text-xs text-muted-foreground">Operarios</p>
+                  <p className="text-xs text-muted-foreground">{t('adminExtraUI.workload.operators')}</p>
                 </div>
               </div>
             </CardContent>
@@ -187,7 +189,7 @@ export default function WorkloadPage() {
                 <div className="p-2 rounded-lg bg-primary/10"><Car className="h-5 w-5 text-primary" /></div>
                 <div>
                   <p className="text-2xl font-bold">{operators.reduce((s, o) => s + o.vehicleCount, 0)}</p>
-                  <p className="text-xs text-muted-foreground">Vehículos asignados</p>
+                  <p className="text-xs text-muted-foreground">{t('adminExtraUI.workload.assignedVehicles')}</p>
                 </div>
               </div>
             </CardContent>
@@ -198,7 +200,7 @@ export default function WorkloadPage() {
                 <div className="p-2 rounded-lg bg-primary/10"><Clock className="h-5 w-5 text-primary" /></div>
                 <div>
                   <p className="text-2xl font-bold">{formatTime(operators.reduce((s, o) => s + o.totalMinutes, 0))}</p>
-                  <p className="text-xs text-muted-foreground">Horas totales</p>
+                  <p className="text-xs text-muted-foreground">{t('adminExtraUI.workload.totalHours')}</p>
                 </div>
               </div>
             </CardContent>
@@ -213,7 +215,7 @@ export default function WorkloadPage() {
                       ? (operators.reduce((s, o) => s + o.vehicleCount, 0) / operators.length).toFixed(1)
                       : 0}
                   </p>
-                  <p className="text-xs text-muted-foreground">Media/operario</p>
+                  <p className="text-xs text-muted-foreground">{t('adminExtraUI.workload.averagePerOperator')}</p>
                 </div>
               </div>
             </CardContent>
@@ -238,13 +240,13 @@ export default function WorkloadPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-primary">{op.vehicleCount}</p>
-                    <p className="text-xs text-muted-foreground">vehículos</p>
+                    <p className="text-xs text-muted-foreground">{t('adminExtraUI.workload.vehicles')}</p>
                   </div>
                 </div>
 
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Carga</span>
+                    <span>{t('adminExtraUI.workload.load')}</span>
                     <span>{Math.round((op.vehicleCount / maxVehicles) * 100)}%</span>
                   </div>
                   <Progress value={(op.vehicleCount / maxVehicles) * 100} className="h-2" />
@@ -261,7 +263,7 @@ export default function WorkloadPage() {
                 {op.vehicles.length > 0 ? (
                   <div className="space-y-2 pt-2 border-t border-border">
                     <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-                      Vehículos asignados
+                      {t('adminExtraUI.workload.assignedVehiclesTitle')}
                     </p>
                     <div className="space-y-1.5">
                       {op.vehicles.map((v) => (
@@ -288,7 +290,7 @@ export default function WorkloadPage() {
                   </div>
                 ) : (
                   <p className="text-xs text-muted-foreground italic pt-2 border-t border-border">
-                    Sin vehículos asignados
+                    {t('adminExtraUI.workload.noVehiclesAssigned')}
                   </p>
                 )}
               </CardContent>
@@ -300,7 +302,7 @@ export default function WorkloadPage() {
           <Card>
             <CardContent className="py-12 text-center text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-3 opacity-40" />
-              <p>No hay operarios con vehículos asignados</p>
+              <p>{t('adminExtraUI.workload.noOperators')}</p>
             </CardContent>
           </Card>
         )}

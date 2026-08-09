@@ -36,6 +36,7 @@ import { format, startOfMonth, endOfMonth, isSameDay, addMonths, subMonths } fro
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { safeUUID } from '@/lib/uuid';
+import { useTranslation } from 'react-i18next';
 
 
 interface Appointment {
@@ -62,10 +63,13 @@ interface Appointment {
 }
 
 
-const APPOINTMENT_TYPE_LABELS: Record<string, string> = {
-  mecanica: 'Mecánica',
-  chapa_pintura: 'Chapa y Pintura',
-};
+function useAppointmentTypeLabels() {
+  const { t } = useTranslation();
+  return {
+    mecanica: t('planningUI.appointments.legend.mecanica'),
+    chapa_pintura: t('planningUI.appointments.legend.chapaPintura'),
+  } as Record<string, string>;
+}
 
 const APPOINTMENT_TYPE_COLORS: Record<string, { bg: string; text: string; border: string; dot: string }> = {
   mecanica: {
@@ -96,6 +100,8 @@ const emptyForm = {
 };
 
 export default function AppointmentsPage() {
+  const { t } = useTranslation();
+  const APPOINTMENT_TYPE_LABELS = useAppointmentTypeLabels();
   const { user } = useAuth();
   const { organizationId } = useOrganization();
   const [loading, setLoading] = useState(true);
@@ -165,7 +171,7 @@ export default function AppointmentsPage() {
 
   const handleSave = async () => {
     if (!selectedDate || !form.client_name.trim() || !form.vehicle_plate.trim() || !form.vehicle_brand.trim() || !form.vehicle_model.trim() || !user) {
-      toast.error('Nombre, matrícula, marca y modelo son obligatorios');
+      toast.error(t('planningUI.appointments.toast.requiredFields'));
       return;
     }
 
@@ -196,9 +202,9 @@ export default function AppointmentsPage() {
     }
 
     if (error) {
-      toast.error(editingId ? 'Error al actualizar cita' : 'Error al crear cita');
+      toast.error(editingId ? t('planningUI.appointments.toast.updateError') : t('planningUI.appointments.toast.createError'));
     } else {
-      toast.success(editingId ? 'Cita actualizada' : 'Cita creada');
+      toast.success(editingId ? t('planningUI.appointments.toast.updated') : t('planningUI.appointments.toast.created'));
       setDialogOpen(false);
       resetForm();
       fetchData();
@@ -209,9 +215,9 @@ export default function AppointmentsPage() {
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from('appointments').delete().eq('id', id);
     if (error) {
-      toast.error('Error al eliminar cita');
+      toast.error(t('planningUI.appointments.toast.deleteError'));
     } else {
-      toast.success('Cita eliminada');
+      toast.success(t('planningUI.appointments.toast.deleted'));
       fetchData();
     }
   };
@@ -224,7 +230,7 @@ export default function AppointmentsPage() {
 
   const requestConfirmation = async (apt: Appointment) => {
     if (!apt.client_phone) {
-      toast.error('El cliente no tiene teléfono');
+      toast.error(t('planningUI.appointments.toast.noPhone'));
       return;
     }
     let token = apt.confirmation_token;
@@ -235,16 +241,24 @@ export default function AppointmentsPage() {
         .update({ confirmation_token: token })
         .eq('id', apt.id);
       if (error) {
-        toast.error('Error al generar enlace');
+        toast.error(t('planningUI.appointments.toast.linkError'));
         return;
       }
       setAppointments((prev) => prev.map((a) => (a.id === apt.id ? { ...a, confirmation_token: token } : a)));
     }
     const url = `${window.location.origin}/cita/${token}`;
     const dateStr = format(new Date(apt.appointment_date), "d 'de' MMMM", { locale: es });
-    const timeStr = apt.appointment_time ? ` a las ${apt.appointment_time.slice(0, 5)}` : '';
+    const timeStr = apt.appointment_time
+      ? t('planningUI.appointments.whatsappTimeSuffix', { time: apt.appointment_time.slice(0, 5) })
+      : '';
     const msg = encodeURIComponent(
-      `Hola ${apt.client_name}, le confirmamos su cita el ${dateStr}${timeStr} para su vehículo ${apt.vehicle_plate || ''}. Por favor confirme o cancele aquí: ${url}`
+      t('planningUI.appointments.whatsappMessage', {
+        name: apt.client_name,
+        date: dateStr,
+        time: timeStr,
+        plate: apt.vehicle_plate || '',
+        url,
+      })
     );
     const cleanPhone = apt.client_phone.replace(/[\s\-\(\)]/g, '');
     const phoneWithCode = cleanPhone.startsWith('+') ? cleanPhone : `+34${cleanPhone}`;
@@ -300,15 +314,15 @@ export default function AppointmentsPage() {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <CalendarCheck className="h-6 w-6 text-primary" />
-              Citas Previas
+              {t('planningUI.appointments.title')}
             </h1>
             <p className="text-muted-foreground text-sm">
-              Gestiona las citas del taller por tipo de trabajo
+              {t('planningUI.appointments.subtitle')}
             </p>
           </div>
           <Button className="gap-2" onClick={openNewDialog}>
             <Plus className="h-4 w-4" />
-            Nueva Cita
+            {t('planningUI.appointments.newAppointment')}
           </Button>
         </div>
 
@@ -316,21 +330,21 @@ export default function AppointmentsPage() {
         <div className="flex flex-wrap gap-4">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-blue-500" />
-            <span className="text-sm text-muted-foreground">Mecánica</span>
+            <span className="text-sm text-muted-foreground">{t('planningUI.appointments.legend.mecanica')}</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-amber-500" />
-            <span className="text-sm text-muted-foreground">Chapa y Pintura</span>
+            <span className="text-sm text-muted-foreground">{t('planningUI.appointments.legend.chapaPintura')}</span>
           </div>
         </div>
 
         {/* Confirmation filter */}
         <div className="flex flex-wrap gap-2">
           {([
-            ['todas', 'Todas'],
-            ['pendiente', 'Pendientes'],
-            ['confirmada', 'Confirmadas'],
-            ['cancelada', 'Canceladas'],
+            ['todas', t('planningUI.appointments.filters.all')],
+            ['pendiente', t('planningUI.appointments.filters.pending')],
+            ['confirmada', t('planningUI.appointments.filters.confirmed')],
+            ['cancelada', t('planningUI.appointments.filters.cancelled')],
           ] as const).map(([key, label]) => (
             <Button
               key={key}
@@ -397,11 +411,11 @@ export default function AppointmentsPage() {
               <CardTitle className="text-lg">
                 {selectedDate
                   ? format(selectedDate, "d 'de' MMMM", { locale: es })
-                  : 'Selecciona una fecha'}
+                  : t('planningUI.appointments.selectDate')}
               </CardTitle>
               {selectedDate && (
                 <p className="text-sm text-muted-foreground">
-                  {selectedDateAppointments.length} cita{selectedDateAppointments.length !== 1 ? 's' : ''}
+                  {t('planningUI.appointments.appointmentCount', { count: selectedDateAppointments.length })}
                 </p>
               )}
             </CardHeader>
@@ -409,10 +423,10 @@ export default function AppointmentsPage() {
               {selectedDateAppointments.length === 0 ? (
                 <div className="text-center py-8">
                   <CalendarCheck className="h-10 w-10 mx-auto text-muted-foreground/40 mb-2" />
-                  <p className="text-muted-foreground text-sm">No hay citas para este día</p>
+                  <p className="text-muted-foreground text-sm">{t('planningUI.appointments.noAppointmentsForDay')}</p>
                   <Button variant="outline" size="sm" className="mt-3" onClick={openNewDialog}>
                     <Plus className="h-4 w-4 mr-1" />
-                    Añadir cita
+                    {t('planningUI.appointments.addAppointment')}
                   </Button>
                 </div>
               ) : (
@@ -460,15 +474,15 @@ export default function AppointmentsPage() {
                           </Badge>
                           {apt.confirmation_status === 'confirmada' ? (
                             <Badge variant="outline" className="text-xs border-green-500/40 text-green-600 dark:text-green-400">
-                              <CheckCircle2 className="h-3 w-3 mr-1" /> Confirmada
+                              <CheckCircle2 className="h-3 w-3 mr-1" /> {t('planningUI.appointments.status.confirmed')}
                             </Badge>
                           ) : apt.confirmation_status === 'cancelada' ? (
                             <Badge variant="outline" className="text-xs border-red-500/40 text-red-600 dark:text-red-400">
-                              <XCircle className="h-3 w-3 mr-1" /> Cancelada
+                              <XCircle className="h-3 w-3 mr-1" /> {t('planningUI.appointments.status.cancelled')}
                             </Badge>
                           ) : (
                             <Badge variant="outline" className="text-xs border-muted-foreground/40 text-muted-foreground">
-                              <HelpCircle className="h-3 w-3 mr-1" /> Pendiente
+                              <HelpCircle className="h-3 w-3 mr-1" /> {t('planningUI.appointments.status.pending')}
                             </Badge>
                           )}
                         </div>
@@ -481,7 +495,7 @@ export default function AppointmentsPage() {
                             onClick={() => requestConfirmation(apt)}
                           >
                             <MessageCircle className="h-3.5 w-3.5" />
-                            Pedir confirmación por WhatsApp
+                            {t('planningUI.appointments.requestConfirmation')}
                           </Button>
                         )}
 
@@ -522,7 +536,7 @@ export default function AppointmentsPage() {
                         {apt.assigned_to && (
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
                             <User className="h-3 w-3" />
-                            {getProfileName(apt.assigned_to) || 'Asignado'}
+                            {getProfileName(apt.assigned_to) || t('planningUI.appointments.assignedFallback')}
                           </div>
                         )}
                       </div>
@@ -537,11 +551,11 @@ export default function AppointmentsPage() {
         {/* Upcoming Appointments */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Próximas Citas</CardTitle>
+            <CardTitle className="text-lg">{t('planningUI.appointments.upcomingAppointments')}</CardTitle>
           </CardHeader>
           <CardContent>
             {appointments.length === 0 ? (
-              <p className="text-muted-foreground text-center py-4">No hay citas este mes</p>
+              <p className="text-muted-foreground text-center py-4">{t('planningUI.appointments.noAppointmentsThisMonth')}</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {appointments.slice(0, 9).map((apt) => {
@@ -592,12 +606,12 @@ export default function AppointmentsPage() {
       >
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingId ? 'Editar Cita' : 'Nueva Cita'}</DialogTitle>
+            <DialogTitle>{editingId ? t('planningUI.appointments.dialog.editTitle') : t('planningUI.appointments.dialog.newTitle')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             {/* Date */}
             <div>
-              <label className="text-sm font-medium mb-2 block">Fecha *</label>
+              <label className="text-sm font-medium mb-2 block">{t('planningUI.appointments.dialog.dateLabel')}</label>
               <CalendarComponent
                 mode="single"
                 selected={selectedDate}
@@ -609,7 +623,7 @@ export default function AppointmentsPage() {
 
             {/* Time */}
             <div>
-              <label className="text-sm font-medium mb-2 block">Hora</label>
+              <label className="text-sm font-medium mb-2 block">{t('planningUI.appointments.dialog.timeLabel')}</label>
               <Input
                 type="time"
                 value={form.appointment_time}
@@ -619,7 +633,7 @@ export default function AppointmentsPage() {
 
             {/* Type */}
             <div>
-              <label className="text-sm font-medium mb-2 block">Tipo de trabajo *</label>
+              <label className="text-sm font-medium mb-2 block">{t('planningUI.appointments.dialog.typeLabel')}</label>
               <Select
                 value={form.appointment_type}
                 onValueChange={(v) => updateField('appointment_type', v)}
@@ -631,13 +645,13 @@ export default function AppointmentsPage() {
                   <SelectItem value="mecanica">
                     <div className="flex items-center gap-2">
                       <Wrench className="h-4 w-4 text-blue-500" />
-                      Mecánica
+                      {t('planningUI.appointments.legend.mecanica')}
                     </div>
                   </SelectItem>
                   <SelectItem value="chapa_pintura">
                     <div className="flex items-center gap-2">
                       <Paintbrush className="h-4 w-4 text-amber-500" />
-                      Chapa y Pintura
+                      {t('planningUI.appointments.legend.chapaPintura')}
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -646,51 +660,51 @@ export default function AppointmentsPage() {
 
             {/* Client Name */}
             <div>
-              <label className="text-sm font-medium mb-2 block">Nombre del cliente *</label>
+              <label className="text-sm font-medium mb-2 block">{t('planningUI.appointments.dialog.clientNameLabel')}</label>
               <Input
                 value={form.client_name}
                 onChange={(e) => updateField('client_name', e.target.value)}
-                placeholder="Nombre completo"
+                placeholder={t('planningUI.appointments.dialog.clientNamePlaceholder')}
               />
             </div>
 
             {/* Client Phone */}
             <div>
-              <label className="text-sm font-medium mb-2 block">Teléfono</label>
+              <label className="text-sm font-medium mb-2 block">{t('planningUI.appointments.dialog.phoneLabel')}</label>
               <Input
                 type="tel"
                 value={form.client_phone}
                 onChange={(e) => updateField('client_phone', e.target.value)}
-                placeholder="600 000 000"
+                placeholder={t('planningUI.appointments.dialog.phonePlaceholder')}
               />
             </div>
 
             {/* Vehicle Info */}
             <div className="grid grid-cols-3 gap-2">
               <div>
-                <label className="text-sm font-medium mb-2 block">Matrícula *</label>
+                <label className="text-sm font-medium mb-2 block">{t('planningUI.appointments.dialog.plateLabel')}</label>
                 <Input
                   value={form.vehicle_plate}
                   onChange={(e) => updateField('vehicle_plate', e.target.value.toUpperCase())}
-                  placeholder="1234 ABC"
+                  placeholder={t('planningUI.appointments.dialog.platePlaceholder')}
                   required
                 />
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">Marca *</label>
+                <label className="text-sm font-medium mb-2 block">{t('planningUI.appointments.dialog.brandLabel')}</label>
                 <Input
                   value={form.vehicle_brand}
                   onChange={(e) => updateField('vehicle_brand', e.target.value)}
-                  placeholder="Seat"
+                  placeholder={t('planningUI.appointments.dialog.brandPlaceholder')}
                   required
                 />
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">Modelo *</label>
+                <label className="text-sm font-medium mb-2 block">{t('planningUI.appointments.dialog.modelLabel')}</label>
                 <Input
                   value={form.vehicle_model}
                   onChange={(e) => updateField('vehicle_model', e.target.value)}
-                  placeholder="León"
+                  placeholder={t('planningUI.appointments.dialog.modelPlaceholder')}
                   required
                 />
               </div>
@@ -698,21 +712,21 @@ export default function AppointmentsPage() {
 
             {/* Issue Description */}
             <div>
-              <label className="text-sm font-medium mb-2 block">Avería / Descripción</label>
+              <label className="text-sm font-medium mb-2 block">{t('planningUI.appointments.dialog.issueLabel')}</label>
               <Textarea
                 value={form.issue_description}
                 onChange={(e) => updateField('issue_description', e.target.value)}
-                placeholder="Describe la avería o trabajo a realizar..."
+                placeholder={t('planningUI.appointments.dialog.issuePlaceholder')}
                 rows={3}
               />
             </div>
 
             {/* Assigned To */}
             <div>
-              <label className="text-sm font-medium mb-2 block">Asignar a operario</label>
+              <label className="text-sm font-medium mb-2 block">{t('planningUI.appointments.dialog.assignedToLabel')}</label>
               <Select value={form.assigned_to} onValueChange={(v) => updateField('assigned_to', v)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Sin asignar" />
+                  <SelectValue placeholder={t('planningUI.appointments.dialog.assignedToPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {profiles.map((p) => (
@@ -726,18 +740,18 @@ export default function AppointmentsPage() {
 
             {/* Notes */}
             <div>
-              <label className="text-sm font-medium mb-2 block">Notas internas</label>
+              <label className="text-sm font-medium mb-2 block">{t('planningUI.appointments.dialog.notesLabel')}</label>
               <Textarea
                 value={form.notes}
                 onChange={(e) => updateField('notes', e.target.value)}
-                placeholder="Notas internas del taller..."
+                placeholder={t('planningUI.appointments.dialog.notesPlaceholder')}
                 rows={2}
               />
             </div>
 
             <Button onClick={handleSave} disabled={saving} className="w-full">
               {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              {editingId ? 'Guardar cambios' : 'Crear Cita'}
+              {editingId ? t('planningUI.appointments.dialog.saveChanges') : t('planningUI.appointments.dialog.createAppointment')}
             </Button>
           </div>
         </DialogContent>

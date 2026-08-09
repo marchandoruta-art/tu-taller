@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import { Wrench, Loader2, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function ResetPassword() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -115,11 +117,11 @@ export default function ResetPassword() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      toast.error('Las contraseñas no coinciden');
+      toast.error(t('authUI.resetPassword.mismatchError'));
       return;
     }
     if (password.length < 6) {
-      toast.error('La contraseña debe tener al menos 6 caracteres');
+      toast.error(t('authUI.resetPassword.tooShortError'));
       return;
     }
 
@@ -127,9 +129,9 @@ export default function ResetPassword() {
     const { error } = await supabase.auth.updateUser({ password });
 
     if (error) {
-      toast.error('Error al actualizar la contraseña', { description: error.message });
+      toast.error(t('authUI.resetPassword.updateErrorTitle'), { description: error.message });
     } else {
-      toast.success('Contraseña actualizada correctamente');
+      toast.success(t('authUI.resetPassword.updateSuccess'));
       await supabase.auth.signOut();
       navigate('/');
     }
@@ -144,29 +146,29 @@ export default function ResetPassword() {
             <Wrench className="w-8 h-8 text-primary-foreground" />
           </div>
           <div>
-            <CardTitle className="text-2xl">Nueva contraseña</CardTitle>
-            <CardDescription>Introduce tu nueva contraseña</CardDescription>
+            <CardTitle className="text-2xl">{t('authUI.resetPassword.title')}</CardTitle>
+            <CardDescription>{t('authUI.resetPassword.subtitle')}</CardDescription>
           </div>
         </CardHeader>
         <CardContent>
           {!sessionReady && !linkInvalid ? (
             <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Validando enlace…
+              {t('authUI.resetPassword.validatingLink')}
             </div>
           ) : linkInvalid ? (
             <div className="space-y-3 py-2 text-center">
               <p className="text-sm text-muted-foreground">
-                El enlace no es válido o ha caducado. Solicita uno nuevo.
+                {t('authUI.resetPassword.invalidLink')}
               </p>
               <Button type="button" variant="outline" className="w-full" onClick={() => navigate('/forgot-password')}>
-                Solicitar nuevo enlace
+                {t('authUI.resetPassword.requestNewLink')}
               </Button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="password">Nueva contraseña</Label>
+                <Label htmlFor="password">{t('authUI.resetPassword.newPasswordLabel')}</Label>
                 <Input
                   id="password"
                   type="password"
@@ -178,7 +180,7 @@ export default function ResetPassword() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirm">Confirmar contraseña</Label>
+                <Label htmlFor="confirm">{t('authUI.resetPassword.confirmPasswordLabel')}</Label>
                 <Input
                   id="confirm"
                   type="password"
@@ -191,7 +193,7 @@ export default function ResetPassword() {
               </div>
               <Button type="submit" className="w-full gap-2" disabled={loading}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
-                Actualizar contraseña
+                {t('authUI.resetPassword.updateButton')}
               </Button>
             </form>
           )}

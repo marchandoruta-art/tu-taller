@@ -18,6 +18,7 @@ import {
 import { ClipboardList, Plus, Loader2, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface Template {
   id: string;
@@ -27,6 +28,7 @@ interface Template {
 }
 
 export default function TaskTemplates() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, role } = useAuth();
   const { organizationId } = useOrganization();
@@ -80,7 +82,7 @@ export default function TaskTemplates() {
       .filter(Boolean)
       .map((text) => ({ text, done: false }));
     if (tasks.length === 0) {
-      toast.error('Añade al menos una tarea');
+      toast.error(t('adminUI.taskTemplates.toast.atLeastOneTask'));
       return;
     }
     setSaving(true);
@@ -90,8 +92,8 @@ export default function TaskTemplates() {
         .update({ name: name.trim(), tasks: JSON.parse(JSON.stringify(tasks)) })
         .eq('id', editing.id);
       setSaving(false);
-      if (error) return toast.error('Error al guardar');
-      toast.success('Plantilla actualizada');
+      if (error) return toast.error(t('adminUI.taskTemplates.toast.saveError'));
+      toast.success(t('adminUI.taskTemplates.toast.updated'));
     } else {
       const { error } = await supabase
         .from('task_templates')
@@ -102,8 +104,8 @@ export default function TaskTemplates() {
           created_by: user.id,
         }]);
       setSaving(false);
-      if (error) return toast.error('Error al crear');
-      toast.success('Plantilla creada');
+      if (error) return toast.error(t('adminUI.taskTemplates.toast.createError'));
+      toast.success(t('adminUI.taskTemplates.toast.created'));
     }
     setOpen(false);
     fetchTemplates();
@@ -111,8 +113,8 @@ export default function TaskTemplates() {
 
   const remove = async (id: string) => {
     const { error } = await supabase.from('task_templates').delete().eq('id', id);
-    if (error) return toast.error('Error al eliminar');
-    toast.success('Plantilla eliminada');
+    if (error) return toast.error(t('adminUI.taskTemplates.toast.deleteError'));
+    toast.success(t('adminUI.taskTemplates.toast.deleted'));
     fetchTemplates();
   };
 
@@ -135,12 +137,12 @@ export default function TaskTemplates() {
               <ClipboardList className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">Plantillas de tareas</h1>
-              <p className="text-sm text-muted-foreground">Listas reutilizables para aplicar en cualquier vehículo</p>
+              <h1 className="text-2xl font-bold">{t('adminUI.taskTemplates.title')}</h1>
+              <p className="text-sm text-muted-foreground">{t('adminUI.taskTemplates.subtitle')}</p>
             </div>
           </div>
           <Button onClick={openCreate} className="gap-2">
-            <Plus className="h-4 w-4" /> Nueva
+            <Plus className="h-4 w-4" /> {t('adminUI.taskTemplates.new')}
           </Button>
         </div>
 
@@ -148,17 +150,17 @@ export default function TaskTemplates() {
           <Card>
             <CardContent className="py-12 text-center text-muted-foreground space-y-3">
               <ClipboardList className="h-10 w-10 mx-auto opacity-60" />
-              <p>Aún no hay plantillas. Crea la primera para acelerar trabajos recurrentes como ITV, cambios de aceite o pre-entregas.</p>
+              <p>{t('adminUI.taskTemplates.emptyState')}</p>
             </CardContent>
           </Card>
         ) : (
           <div className="space-y-3">
-            {templates.map((t) => (
-              <Card key={t.id}>
+            {templates.map((tpl) => (
+              <Card key={tpl.id}>
                 <CardHeader className="pb-3 flex flex-row items-start justify-between gap-3">
-                  <CardTitle className="text-lg">{t.name}</CardTitle>
+                  <CardTitle className="text-lg">{tpl.name}</CardTitle>
                   <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(t)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(tpl)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
                     <AlertDialog>
@@ -169,14 +171,14 @@ export default function TaskTemplates() {
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>¿Eliminar plantilla?</AlertDialogTitle>
+                          <AlertDialogTitle>{t('adminUI.taskTemplates.confirmDeleteTitle')}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Se eliminará la plantilla "{t.name}". Los vehículos donde ya se aplicó no se ven afectados.
+                            {t('adminUI.taskTemplates.confirmDeleteDescription', { name: tpl.name })}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => remove(t.id)}>Eliminar</AlertDialogAction>
+                          <AlertDialogCancel>{t('adminUI.taskTemplates.cancel')}</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => remove(tpl.id)}>{t('adminUI.adminData.delete')}</AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
@@ -184,7 +186,7 @@ export default function TaskTemplates() {
                 </CardHeader>
                 <CardContent>
                   <ul className="text-sm space-y-1 list-disc list-inside text-muted-foreground">
-                    {(t.tasks || []).map((task, idx) => (
+                    {(tpl.tasks || []).map((task, idx) => (
                       <li key={idx}>{task.text}</li>
                     ))}
                   </ul>
@@ -197,27 +199,27 @@ export default function TaskTemplates() {
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>{editing ? 'Editar plantilla' : 'Nueva plantilla'}</DialogTitle>
-              <DialogDescription>Una tarea por línea.</DialogDescription>
+              <DialogTitle>{editing ? t('adminUI.taskTemplates.editTitle') : t('adminUI.taskTemplates.newTitle')}</DialogTitle>
+              <DialogDescription>{t('adminUI.taskTemplates.dialogDescription')}</DialogDescription>
             </DialogHeader>
             <div className="space-y-3 pt-2">
               <div className="space-y-2">
-                <Label htmlFor="tpl-name">Nombre</Label>
-                <Input id="tpl-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej. Revisión ITV" />
+                <Label htmlFor="tpl-name">{t('adminUI.taskTemplates.name')}</Label>
+                <Input id="tpl-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t('adminUI.taskTemplates.namePlaceholder')} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="tpl-tasks">Tareas</Label>
+                <Label htmlFor="tpl-tasks">{t('adminUI.taskTemplates.tasks')}</Label>
                 <Textarea
                   id="tpl-tasks"
                   rows={8}
                   value={tasksText}
                   onChange={(e) => setTasksText(e.target.value)}
-                  placeholder={'Revisar luces\nFrenos delanteros\nEstado neumáticos\nDirección y suspensión'}
+                  placeholder={t('adminUI.taskTemplates.tasksPlaceholder')}
                 />
               </div>
               <Button onClick={save} disabled={saving || !name.trim()} className="w-full">
                 {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                Guardar
+                {t('adminUI.adminData.save')}
               </Button>
             </div>
           </DialogContent>

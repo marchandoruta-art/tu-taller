@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
 import { VehicleWithOwner } from '@/lib/types';
@@ -19,15 +20,17 @@ const STATUS_COLORS = {
   entregado: 'hsl(215, 80%, 45%)',
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  recibido: 'Recibido',
-  en_reparacion: 'En Reparación',
-  pendiente_piezas: 'Pend. Piezas',
-  terminado: 'Terminado',
-  entregado: 'Entregado',
-};
-
 export function DashboardCharts({ vehicles }: DashboardChartsProps) {
+  const { t } = useTranslation();
+
+  const STATUS_LABELS: Record<string, string> = {
+    recibido: t('status.recibido'),
+    en_reparacion: t('status.en_reparacion'),
+    pendiente_piezas: t('charts.shortPendingParts'),
+    terminado: t('status.terminado'),
+    entregado: t('status.entregado'),
+  };
+
   // Data for status distribution pie chart
   const statusDistribution = useMemo(() => {
     const counts: Record<string, number> = {
@@ -129,7 +132,7 @@ export function DashboardCharts({ vehicles }: DashboardChartsProps) {
       {/* Status Distribution Pie Chart */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">Distribución por Estado</CardTitle>
+          <CardTitle className="text-base">{t('charts.statusDistribution')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[200px]">
@@ -161,7 +164,7 @@ export function DashboardCharts({ vehicles }: DashboardChartsProps) {
               </ResponsiveContainer>
             ) : (
               <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                Sin datos
+                {t('charts.noData')}
               </div>
             )}
           </div>
@@ -171,7 +174,7 @@ export function DashboardCharts({ vehicles }: DashboardChartsProps) {
       {/* Vehicles per day line chart */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">Actividad Últimos 7 Días</CardTitle>
+          <CardTitle className="text-base">{t('charts.last7Days')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[200px]">
@@ -199,7 +202,7 @@ export function DashboardCharts({ vehicles }: DashboardChartsProps) {
                   dataKey="recibidos" 
                   stroke="hsl(var(--primary))" 
                   strokeWidth={2}
-                  name="Recibidos"
+                  name={t('charts.received')}
                   dot={{ fill: 'hsl(var(--primary))' }}
                 />
                 <Line 
@@ -207,7 +210,7 @@ export function DashboardCharts({ vehicles }: DashboardChartsProps) {
                   dataKey="terminados" 
                   stroke="hsl(var(--status-completed))" 
                   strokeWidth={2}
-                  name="Terminados"
+                  name={t('charts.finished')}
                   dot={{ fill: 'hsl(var(--status-completed))' }}
                 />
                 <Legend />
@@ -220,7 +223,7 @@ export function DashboardCharts({ vehicles }: DashboardChartsProps) {
       {/* Top Brands Bar Chart */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">Marcas Más Frecuentes</CardTitle>
+          <CardTitle className="text-base">{t('charts.topBrands')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[200px]">
@@ -251,13 +254,13 @@ export function DashboardCharts({ vehicles }: DashboardChartsProps) {
                     dataKey="count" 
                     fill="hsl(var(--primary))" 
                     radius={[0, 4, 4, 0]}
-                    name="Vehículos"
+                    name={t('charts.vehicles')}
                   />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
               <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-                Sin datos
+                {t('charts.noData')}
               </div>
             )}
           </div>
@@ -267,7 +270,7 @@ export function DashboardCharts({ vehicles }: DashboardChartsProps) {
       {/* Average Time in Status */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">Promedio Días por Estado</CardTitle>
+          <CardTitle className="text-base">{t('charts.avgDaysPerStatus')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[200px]">

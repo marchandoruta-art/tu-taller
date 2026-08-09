@@ -12,6 +12,7 @@ import { playNotificationSound } from '@/lib/notificationSound';
 import { requestNotificationPermission, sendBrowserNotification } from '@/lib/browserNotification';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,16 +30,17 @@ interface AttendanceLog {
   organization_id: string | null;
 }
 
-const EXIT_TYPES = {
-  normal: { label: 'Salida Normal', icon: LogOut },
-  medico: { label: 'Salida Médico', icon: Stethoscope },
-  descanso: { label: 'Descanso', icon: Coffee },
-  desayuno: { label: 'Desayuno', icon: UtensilsCrossed },
-  auto_8h: { label: 'Auto 8h', icon: Clock },
-  auto_16h: { label: 'Auto 16:00h', icon: Clock },
+const EXIT_TYPE_ICONS = {
+  normal: LogOut,
+  medico: Stethoscope,
+  descanso: Coffee,
+  desayuno: UtensilsCrossed,
+  auto_8h: Clock,
+  auto_16h: Clock,
 } as const;
 
 export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClock(_, ref) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { organizationId } = useOrganization();
   const { executeInsert, executeUpdate, isOnline } = useOfflineOperation();
@@ -94,13 +96,13 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
       if (totalMinutes >= 480) {
         setEightHourAlertShown(true);
         playNotificationSound(true);
-        toast.warning('⏰ ¡Jornada de 8 horas completada!', {
-          description: 'Se ha registrado tu salida automáticamente.',
+        toast.warning(t('planningUI.attendance.eightHourTitle'), {
+          description: t('planningUI.attendance.eightHourDescription'),
           duration: 15000,
         });
         try {
-          sendBrowserNotification('⏰ Jornada completada', {
-            body: '¡Has cumplido 8 horas! Se registró tu salida automáticamente.',
+          sendBrowserNotification(t('planningUI.attendance.eightHourNotifTitle'), {
+            body: t('planningUI.attendance.eightHourNotifBody'),
             tag: 'attendance-8h',
           });
         } catch (e) {
@@ -128,8 +130,8 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
       try {
         const now = new Date();
         if (now.getHours() === 7 && now.getMinutes() === 55 && !activeSession) {
-          toast.info('🕗 Recuerda fichar tu entrada', {
-            description: 'Son las 7:55, ¡empieza tu jornada!',
+          toast.info(t('planningUI.attendance.reminderTitle'), {
+            description: t('planningUI.attendance.reminderDescription'),
             duration: 30000,
           });
         }
@@ -202,7 +204,7 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
         // Still show the component, just empty
         setTodayLogs([]);
         setActiveSession(null);
-        setError('No se pudieron cargar los registros. Comprueba tu conexión.');
+        setError(t('planningUI.attendance.loadError'));
       }
     } finally {
       setLoading(false);
@@ -213,7 +215,7 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
     if (!user) return;
 
     if (!organizationId) {
-      toast.error('No se pudo detectar tu organización. Vuelve a iniciar sesión.');
+      toast.error(t('planningUI.attendance.orgError'));
       return;
     }
 
@@ -236,11 +238,11 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
         } catch (e) {
           console.warn('Failed to cache new log:', e);
         }
-        toast.success(result.offline ? 'Entrada registrada (offline)' : 'Entrada registrada');
+        toast.success(result.offline ? t('planningUI.attendance.clockInOfflineToast') : t('planningUI.attendance.clockInToast'));
       }
     } catch (err) {
       console.error('Clock in error:', err);
-      toast.error('Error al registrar entrada. Inténtalo de nuevo.');
+      toast.error(t('planningUI.attendance.clockInErrorMsg'));
     }
   };
 
@@ -281,14 +283,15 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
           }
         }
 
+        const exitLabel = getExitTypeLabel(exitType) || t('planningUI.attendance.exitFallback');
         toast.success(result.offline
-          ? `${EXIT_TYPES[exitType as keyof typeof EXIT_TYPES]?.label || 'Salida'} registrada (offline)`
-          : `${EXIT_TYPES[exitType as keyof typeof EXIT_TYPES]?.label || 'Salida'} registrada`
+          ? t('planningUI.attendance.exitTypeOfflineToast', { label: exitLabel })
+          : t('planningUI.attendance.exitTypeToast', { label: exitLabel })
         );
       }
     } catch (err) {
       console.error('Clock out error:', err);
-      toast.error('Error al registrar salida. Inténtalo de nuevo.');
+      toast.error(t('planningUI.attendance.clockOutErrorMsg'));
     }
   };
 
@@ -314,7 +317,7 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
 
   const getExitTypeLabel = (exitType: string | null) => {
     if (!exitType) return '';
-    return EXIT_TYPES[exitType as keyof typeof EXIT_TYPES]?.label || exitType;
+    return t(`planningUI.attendance.exitTypes.${exitType}`, { defaultValue: exitType });
   };
 
   if (loading) {
@@ -326,8 +329,8 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Clock className="h-5 w-5 text-primary" />
-          Control Horario
-          {!isOnline && <span className="text-xs text-yellow-500 ml-2">(Offline)</span>}
+          {t('planningUI.attendance.title')}
+          {!isOnline && <span className="text-xs text-yellow-500 ml-2">{t('planningUI.attendance.offline')}</span>}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -342,7 +345,7 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
               onClick={() => { setLoading(true); setError(null); fetchTodayLogs(); }}
               className="ml-auto text-xs"
             >
-              Reintentar
+              {t('planningUI.attendance.retry')}
             </Button>
           </div>
         )}
@@ -355,24 +358,24 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
                 {formatTime(elapsed)}
               </div>
               <p className="text-sm text-muted-foreground">
-                Entrada: {format(new Date(activeSession.clock_in), 'HH:mm', { locale: es })}
+                {t('planningUI.attendance.clockInLabel', { time: format(new Date(activeSession.clock_in), 'HH:mm', { locale: es }) })}
               </p>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="destructive" className="w-full gap-2">
                     <LogOut className="h-4 w-4" />
-                    Registrar Salida
+                    {t('planningUI.attendance.clockOut')}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="center" className="w-48 bg-popover">
-                  {Object.entries(EXIT_TYPES).map(([key, { label, icon: Icon }]) => (
+                  {Object.entries(EXIT_TYPE_ICONS).map(([key, Icon]) => (
                     <DropdownMenuItem
                       key={key}
                       onClick={() => clockOut(key)}
                       className="gap-2 cursor-pointer"
                     >
                       <Icon className="h-4 w-4" />
-                      {label}
+                      {getExitTypeLabel(key)}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
@@ -381,21 +384,21 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
           ) : (
             <Button onClick={clockIn} className="w-full gap-2" size="lg">
               <LogIn className="h-4 w-4" />
-              Registrar Entrada
+              {t('planningUI.attendance.clockIn')}
             </Button>
           )}
         </div>
 
         {/* Today's Summary */}
         <div className="flex justify-between items-center p-3 bg-primary/5 rounded-lg">
-          <span className="text-sm font-medium">Total hoy:</span>
+          <span className="text-sm font-medium">{t('planningUI.attendance.totalToday')}</span>
           <span className="font-bold text-primary">{formatDuration(getTodayTotal())}</span>
         </div>
 
         {/* Today's Logs */}
         {todayLogs.length > 0 && (
           <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">Registros de hoy:</p>
+            <p className="text-sm font-medium text-muted-foreground">{t('planningUI.attendance.todaysLogs')}</p>
             <div className="space-y-1 max-h-32 overflow-y-auto">
               {todayLogs.map(log => (
                 <div
@@ -408,7 +411,7 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
                       {' → '}
                       {log.clock_out
                         ? format(new Date(log.clock_out), 'HH:mm', { locale: es })
-                        : 'En curso...'}
+                        : t('planningUI.attendance.inProgress')}
                     </span>
                     {log.exit_type && log.exit_type !== 'normal' && (
                       <span className="text-xs text-muted-foreground">

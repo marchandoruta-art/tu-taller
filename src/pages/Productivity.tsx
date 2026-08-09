@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useTranslation } from 'react-i18next';
 
 interface UserProductivity {
   user_id: string;
@@ -45,6 +46,7 @@ interface UserProductivity {
 }
 
 export default function Productivity() {
+  const { t } = useTranslation();
   const { role, loading: authLoading } = useAuth();
   const { organizationId, loading: orgLoading } = useOrganization();
   const [productivityData, setProductivityData] = useState<UserProductivity[]>([]);
@@ -134,7 +136,7 @@ export default function Productivity() {
 
       userMap.set(userId, {
         user_id: userId,
-        full_name: profile?.full_name || 'Usuario',
+        full_name: profile?.full_name || t('adminExtraUI.productivity.user'),
         avatar_url: profile?.avatar_url || undefined,
         role: userRole,
         attendanceMinutes,
@@ -229,9 +231,9 @@ export default function Productivity() {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <BarChart3 className="h-6 w-6" />
-              Productividad
+              {t('adminExtraUI.productivity.title')}
             </h1>
-            <p className="text-muted-foreground">Análisis de rendimiento del equipo</p>
+            <p className="text-muted-foreground">{t('adminExtraUI.productivity.subtitle')}</p>
           </div>
           <div className="flex items-center gap-2">
             <Select value={periodType} onValueChange={(v: 'week' | 'month') => setPeriodType(v)}>
@@ -239,8 +241,8 @@ export default function Productivity() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="week">Semanal</SelectItem>
-                <SelectItem value="month">Mensual</SelectItem>
+                <SelectItem value="week">{t('adminExtraUI.productivity.weekly')}</SelectItem>
+                <SelectItem value="month">{t('adminExtraUI.productivity.monthly')}</SelectItem>
               </SelectContent>
             </Select>
             <Button
@@ -265,19 +267,19 @@ export default function Productivity() {
               size="sm"
               className="gap-2"
               onClick={() => {
-                if (productivityData.length === 0) return toast.info('Nada que exportar');
+                if (productivityData.length === 0) return toast.info(t('adminExtraUI.productivity.toast.nothingToExport'));
                 downloadCsv(`productividad-${periodType}`, productivityData, [
-                  { key: 'name', label: 'Empleado', value: (r) => r.full_name },
-                  { key: 'role', label: 'Rol', value: (r) => r.role ? ROLE_LABELS[r.role] : '' },
-                  { key: 'attendance', label: 'Tiempo en taller', value: (r) => formatMinutes(r.attendanceMinutes) },
-                  { key: 'work', label: 'Tiempo en tareas', value: (r) => formatMinutes(r.workMinutes) },
-                  { key: 'productivity', label: 'Productividad %', value: (r) => `${r.productivity}%` },
-                  { key: 'attendance_sessions', label: 'Fichajes', value: (r) => r.attendanceSessions },
-                  { key: 'work_sessions', label: 'Sesiones trabajo', value: (r) => r.workSessions },
+                  { key: 'name', label: t('adminExtraUI.productivity.csv.employee'), value: (r) => r.full_name },
+                  { key: 'role', label: t('adminExtraUI.productivity.csv.role'), value: (r) => r.role ? ROLE_LABELS[r.role] : '' },
+                  { key: 'attendance', label: t('adminExtraUI.productivity.csv.attendance'), value: (r) => formatMinutes(r.attendanceMinutes) },
+                  { key: 'work', label: t('adminExtraUI.productivity.csv.work'), value: (r) => formatMinutes(r.workMinutes) },
+                  { key: 'productivity', label: t('adminExtraUI.productivity.csv.productivity'), value: (r) => `${r.productivity}%` },
+                  { key: 'attendance_sessions', label: t('adminExtraUI.productivity.csv.attendanceSessions'), value: (r) => r.attendanceSessions },
+                  { key: 'work_sessions', label: t('adminExtraUI.productivity.csv.workSessions'), value: (r) => r.workSessions },
                 ]);
               }}
             >
-              <Download className="h-4 w-4" /> Exportar
+              <Download className="h-4 w-4" /> {t('adminExtraUI.productivity.export')}
             </Button>
           </div>
         </div>
@@ -291,7 +293,7 @@ export default function Productivity() {
                   <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Empleados</p>
+                  <p className="text-sm text-muted-foreground">{t('adminExtraUI.productivity.employees')}</p>
                   <p className="text-2xl font-bold">{productivityData.length}</p>
                 </div>
               </div>
@@ -305,7 +307,7 @@ export default function Productivity() {
                   <Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Horas Asistencia</p>
+                  <p className="text-sm text-muted-foreground">{t('adminExtraUI.productivity.attendanceHours')}</p>
                   <p className="text-2xl font-bold">{formatDuration(totalAttendance)}</p>
                 </div>
               </div>
@@ -319,7 +321,7 @@ export default function Productivity() {
                   <Wrench className="h-5 w-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Horas Trabajadas</p>
+                  <p className="text-sm text-muted-foreground">{t('adminExtraUI.productivity.workedHours')}</p>
                   <p className="text-2xl font-bold">{formatDuration(totalWork)}</p>
                 </div>
               </div>
@@ -333,7 +335,7 @@ export default function Productivity() {
                   <TrendingUp className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Productividad Media</p>
+                  <p className="text-sm text-muted-foreground">{t('adminExtraUI.productivity.averageProductivity')}</p>
                   <p className={`text-2xl font-bold ${getProductivityColor(averageProductivity)}`}>
                     {averageProductivity}%
                   </p>
@@ -354,8 +356,8 @@ export default function Productivity() {
           <Card>
             <CardContent className="py-12 text-center">
               <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-lg font-medium">Sin datos de productividad</p>
-              <p className="text-muted-foreground">No hay registros de asistencia o trabajo para este período</p>
+              <p className="text-lg font-medium">{t('adminExtraUI.productivity.noDataTitle')}</p>
+              <p className="text-muted-foreground">{t('adminExtraUI.productivity.noDataDescription')}</p>
             </CardContent>
           </Card>
         ) : (
@@ -373,7 +375,7 @@ export default function Productivity() {
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{user.full_name}</p>
                       <Badge variant="outline" className="text-xs">
-                        {user.role ? ROLE_LABELS[user.role] : 'Usuario'}
+                        {user.role ? ROLE_LABELS[user.role] : t('adminExtraUI.productivity.user')}
                       </Badge>
                     </div>
                     <div className="text-right">
@@ -395,18 +397,18 @@ export default function Productivity() {
                       <div className="p-2 bg-muted/50 rounded-lg">
                         <div className="flex items-center gap-1 text-muted-foreground mb-1">
                           <Clock className="h-3 w-3" />
-                          <span className="text-xs">Asistencia</span>
+                          <span className="text-xs">{t('adminExtraUI.productivity.attendance')}</span>
                         </div>
                         <p className="font-semibold">{formatDuration(user.attendanceMinutes)}</p>
-                        <p className="text-xs text-muted-foreground">{user.attendanceSessions} sesiones</p>
+                        <p className="text-xs text-muted-foreground">{t('adminExtraUI.productivity.sessionsCount', { count: user.attendanceSessions })}</p>
                       </div>
                       <div className="p-2 bg-muted/50 rounded-lg">
                         <div className="flex items-center gap-1 text-muted-foreground mb-1">
                           <Wrench className="h-3 w-3" />
-                          <span className="text-xs">Trabajado</span>
+                          <span className="text-xs">{t('adminExtraUI.productivity.worked')}</span>
                         </div>
                         <p className="font-semibold">{formatDuration(user.workMinutes)}</p>
-                        <p className="text-xs text-muted-foreground">{user.workSessions} tareas</p>
+                        <p className="text-xs text-muted-foreground">{t('adminExtraUI.productivity.tasksCount', { count: user.workSessions })}</p>
                       </div>
                     </div>
                   </div>

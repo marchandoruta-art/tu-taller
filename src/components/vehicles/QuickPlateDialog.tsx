@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Zap, Loader2, CheckCircle2, User, Car, History } from 'lucide-react';
 import { toast } from 'sonner';
 import { ScanTechnicalSheetButton, ScannedVehicleData } from './ScanTechnicalSheetButton';
+import { useTranslation } from 'react-i18next';
 
 interface QuickPlateDialogProps {
   onSuccess?: () => void;
@@ -30,10 +31,12 @@ type PlateMatch =
  * Ultra-fast vehicle creation by license plate only.
  * Detects existing client/vehicle history before creating.
  */
-export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matrícula', triggerVariant = 'outline', size = 'default' }: QuickPlateDialogProps) {
+export function QuickPlateDialog({ onSuccess, triggerLabel, triggerVariant = 'outline', size = 'default' }: QuickPlateDialogProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { organizationId } = useOrganization();
+  const { t } = useTranslation();
+  const resolvedTriggerLabel = triggerLabel ?? t('vehiclesUI.quickPlate.defaultTriggerLabel');
   const [open, setOpen] = useState(false);
   const [plate, setPlate] = useState('');
   const [loading, setLoading] = useState(false);
@@ -160,8 +163,8 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
       // Always create a NEW vehicle row. Only copy client + vehicle data (plate, brand, model, owner).
       // No previous description/tasks/parts/history is carried over.
       const existingMatch = match && match.kind !== 'none' ? match : null;
-      const brand = scanned?.brand || (existingMatch ? (existingMatch.brand || 'Sin especificar') : 'Sin especificar');
-      const model = scanned?.model || (existingMatch ? (existingMatch.model || 'Sin especificar') : 'Sin especificar');
+      const brand = scanned?.brand || (existingMatch ? (existingMatch.brand || t('vehiclesUI.newVehicle.unspecified')) : t('vehiclesUI.newVehicle.unspecified'));
+      const model = scanned?.model || (existingMatch ? (existingMatch.model || t('vehiclesUI.newVehicle.unspecified')) : t('vehiclesUI.newVehicle.unspecified'));
       const ownerId = existingMatch ? existingMatch.ownerId : null;
 
       const { data: created, error } = await supabase
@@ -184,16 +187,16 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
       if (error) throw error;
 
       if (ownerId && existingMatch?.ownerName) {
-        toast.success(`Nueva orden de ${p} creada y vinculada a ${existingMatch.ownerName}`);
+        toast.success(t('vehiclesUI.quickPlate.orderCreatedLinked', { plate: p, owner: existingMatch.ownerName }));
       } else {
-        toast.success(`Nueva orden de ${p} creada`);
+        toast.success(t('vehiclesUI.quickPlate.orderCreated', { plate: p }));
       }
       setOpen(false);
       reset();
       onSuccess?.();
       navigate(`/vehicles/${created.id}`);
     } catch (err: any) {
-      toast.error('Error al crear el vehículo', { description: err?.message });
+      toast.error(t('vehiclesUI.quickPlate.errorCreatingVehicle'), { description: err?.message });
     } finally {
       setLoading(false);
     }
@@ -204,7 +207,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
     if (searching) {
       return (
         <div className="flex items-center gap-2 text-sm text-muted-foreground p-3 rounded-md border bg-muted/30">
-          <Loader2 className="h-4 w-4 animate-spin" /> Buscando histórico...
+          <Loader2 className="h-4 w-4 animate-spin" /> {t('vehiclesUI.quickPlate.searchingHistory')}
         </div>
       );
     }
@@ -214,7 +217,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
       return (
         <div className="p-3 rounded-md border border-primary/40 bg-primary/5 space-y-1">
           <div className="flex items-center gap-2 text-sm font-semibold text-primary">
-            <CheckCircle2 className="h-4 w-4" /> Vehículo encontrado
+            <CheckCircle2 className="h-4 w-4" /> {t('vehiclesUI.quickPlate.vehicleFound')}
           </div>
           <div className="text-sm flex items-center gap-2">
             <Car className="h-3.5 w-3.5 text-muted-foreground" />
@@ -226,7 +229,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
               {match.ownerName}{match.ownerPhone ? ` · ${match.ownerPhone}` : ''}
             </div>
           )}
-          <p className="text-xs text-muted-foreground pt-1">Se creará una orden nueva en recibido, copiando solo cliente, matrícula, marca y modelo. No se abre ni se copia la avería anterior.</p>
+          <p className="text-xs text-muted-foreground pt-1">{t('vehiclesUI.quickPlate.newOrderNote')}</p>
         </div>
       );
     }
@@ -235,7 +238,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
       return (
         <div className="p-3 rounded-md border border-amber-500/40 bg-amber-500/5 space-y-1">
           <div className="flex items-center gap-2 text-sm font-semibold text-amber-600 dark:text-amber-400">
-            <History className="h-4 w-4" /> Cliente recurrente detectado
+            <History className="h-4 w-4" /> {t('vehiclesUI.quickPlate.recurringClient')}
           </div>
           <div className="text-sm flex items-center gap-2">
             <Car className="h-3.5 w-3.5 text-muted-foreground" />
@@ -247,10 +250,10 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
               {match.ownerName}{match.ownerPhone ? ` · ${match.ownerPhone}` : ''}
             </div>
           ) : (
-            <div className="text-xs text-muted-foreground">Sin propietario registrado.</div>
+            <div className="text-xs text-muted-foreground">{t('vehiclesUI.quickPlate.noOwnerRegistered')}</div>
           )}
           <p className="text-xs text-muted-foreground pt-1">
-            Se creará una ficha nueva {match.ownerId ? 'vinculada al mismo cliente' : 'sin propietario'}, copiando solo los datos del vehículo (matrícula, marca y modelo). No se arrastra ninguna avería ni historial anterior.
+            {match.ownerId ? t('vehiclesUI.quickPlate.newFileNoteLinked') : t('vehiclesUI.quickPlate.newFileNoteUnlinked')}
           </p>
         </div>
       );
@@ -258,7 +261,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
 
     return (
       <div className="p-3 rounded-md border bg-muted/30 text-sm text-muted-foreground">
-        Matrícula nueva. Se creará una ficha en blanco.
+        {t('vehiclesUI.quickPlate.newPlate')}
       </div>
     );
   };
@@ -268,28 +271,28 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
       <DialogTrigger asChild>
         <Button variant={triggerVariant} size={size} className="gap-2">
           <Zap className="h-4 w-4" />
-          {triggerLabel}
+          {resolvedTriggerLabel}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-primary" />
-            Crear rápido por matrícula
+            {t('vehiclesUI.quickPlate.title')}
           </DialogTitle>
           <DialogDescription>
-            Detectamos automáticamente si ya ha venido antes y reutilizamos el cliente.
+            {t('vehiclesUI.quickPlate.description')}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-2">
-            <Label htmlFor="quick-plate">Matrícula</Label>
+            <Label htmlFor="quick-plate">{t('vehiclesUI.quickPlate.plate')}</Label>
             <Input
               id="quick-plate"
               autoFocus
               value={plate}
               onChange={(e) => setPlate(e.target.value.toUpperCase())}
-              placeholder="1234ABC"
+              placeholder={t('vehiclesUI.quickPlate.platePlaceholder')}
               className="uppercase font-mono text-lg tracking-wider"
               maxLength={12}
             />
@@ -297,7 +300,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
 
           <div className="flex items-center gap-2">
             <div className="flex-1 h-px bg-border" />
-            <span className="text-xs text-muted-foreground">o rellena con foto</span>
+            <span className="text-xs text-muted-foreground">{t('vehiclesUI.quickPlate.orFillWithPhoto')}</span>
             <div className="flex-1 h-px bg-border" />
           </div>
 
@@ -312,13 +315,13 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
           {scanned && (
             <div className="p-3 rounded-md border bg-primary/5 text-xs space-y-0.5">
               <div className="font-semibold text-primary flex items-center gap-1">
-                <CheckCircle2 className="h-3 w-3" /> Datos detectados
+                <CheckCircle2 className="h-3 w-3" /> {t('vehiclesUI.quickPlate.detectedData')}
               </div>
-              {scanned.brand && <div>Marca: {scanned.brand}</div>}
-              {scanned.model && <div>Modelo: {scanned.model}</div>}
-              {scanned.year && <div>Año: {scanned.year}</div>}
-              {scanned.vin && <div>VIN: {scanned.vin}</div>}
-              {scanned.color && <div>Color: {scanned.color}</div>}
+              {scanned.brand && <div>{t('vehiclesUI.quickPlate.brandLabel', { brand: scanned.brand })}</div>}
+              {scanned.model && <div>{t('vehiclesUI.quickPlate.modelLabel', { model: scanned.model })}</div>}
+              {scanned.year && <div>{t('vehiclesUI.quickPlate.yearLabel', { year: scanned.year })}</div>}
+              {scanned.vin && <div>{t('vehiclesUI.quickPlate.vinLabel', { vin: scanned.vin })}</div>}
+              {scanned.color && <div>{t('vehiclesUI.quickPlate.colorLabel', { color: scanned.color })}</div>}
             </div>
           )}
 
@@ -326,7 +329,7 @@ export function QuickPlateDialog({ onSuccess, triggerLabel = 'Crear / Abrir matr
 
           <Button type="submit" className="w-full" disabled={loading || !plate.trim()}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Zap className="h-4 w-4 mr-2" />}
-            {loading ? 'Creando...' : 'Crear orden nueva'}
+            {loading ? t('vehiclesUI.quickPlate.creating') : t('vehiclesUI.quickPlate.createNewOrder')}
           </Button>
         </form>
       </DialogContent>

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Play, StopCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface WorkTimerProps {
   vehicleId: string;
@@ -15,6 +16,7 @@ interface WorkTimerProps {
 }
 
 export function WorkTimer({ vehicleId, vehicleStatus, onUpdate }: WorkTimerProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { organizationId } = useOrganization();
   const { executeInsert, executeUpdate, isOnline } = useOfflineOperation();
@@ -91,9 +93,7 @@ export function WorkTimer({ vehicleId, vehicleStatus, onUpdate }: WorkTimerProps
       .join(', ');
 
     const ok = window.confirm(
-      `Ya tienes un cronómetro activo en ${plates || 'otro vehículo'}.\n\n` +
-      `Un operario no puede trabajar en dos coches a la vez.\n\n` +
-      `¿Detener el cronómetro anterior y empezar este?`
+      t('planningUI.workTimer.confirmSwitch', { plates: plates || t('planningUI.workTimer.otherVehicleFallback') })
     );
     if (!ok) return false;
 
@@ -109,7 +109,7 @@ export function WorkTimer({ vehicleId, vehicleStatus, onUpdate }: WorkTimerProps
       }, { showToast: false });
     }
 
-    toast.info(`Cronómetro anterior detenido (${plates})`);
+    toast.info(t('planningUI.workTimer.previousTimerStopped', { plates }));
     return true;
   };
 
@@ -134,7 +134,7 @@ export function WorkTimer({ vehicleId, vehicleStatus, onUpdate }: WorkTimerProps
         setStartTime(now);
         setIsRunning(true);
         setElapsed(0);
-        toast.success(result.offline ? 'Cronómetro iniciado (offline)' : 'Cronómetro iniciado');
+        toast.success(result.offline ? t('planningUI.workTimer.timerStartedOffline') : t('planningUI.workTimer.timerStarted'));
 
         // Auto-change vehicle status from 'recibido' to 'en_reparacion'
         if (vehicleStatus === 'recibido') {
@@ -142,12 +142,12 @@ export function WorkTimer({ vehicleId, vehicleStatus, onUpdate }: WorkTimerProps
             .from('vehicles')
             .update({ status: 'en_reparacion' })
             .eq('id', vehicleId);
-          toast.info('Vehículo pasado a "En Reparación" automáticamente');
+          toast.info(t('planningUI.workTimer.vehicleAutoInProgress'));
           onUpdate?.();
         }
       }
     } catch (error) {
-      toast.error('Error al iniciar el cronómetro');
+      toast.error(t('planningUI.workTimer.startError'));
     }
   };
 
@@ -169,13 +169,13 @@ export function WorkTimer({ vehicleId, vehicleStatus, onUpdate }: WorkTimerProps
         const formattedTime = formatTime(elapsed);
         setElapsed(0);
         toast.success(result.offline 
-          ? `Tiempo registrado (offline): ${formattedTime}` 
-          : `Tiempo registrado: ${formattedTime}`
+          ? t('planningUI.workTimer.timeLoggedOffline', { time: formattedTime })
+          : t('planningUI.workTimer.timeLogged', { time: formattedTime })
         );
         onUpdate?.();
       }
     } catch (error) {
-      toast.error('Error al detener el cronómetro');
+      toast.error(t('planningUI.workTimer.stopError'));
     }
   };
 
@@ -190,7 +190,7 @@ export function WorkTimer({ vehicleId, vehicleStatus, onUpdate }: WorkTimerProps
     return (
       <div className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border">
         <div className="timer-display text-muted-foreground">--:--:--</div>
-        <div className="text-sm text-muted-foreground">Cargando...</div>
+        <div className="text-sm text-muted-foreground">{t('planningUI.workTimer.loading')}</div>
       </div>
     );
   }
@@ -204,15 +204,15 @@ export function WorkTimer({ vehicleId, vehicleStatus, onUpdate }: WorkTimerProps
         {!isRunning ? (
           <Button onClick={startTimer} size="sm" className="gap-2">
             <Play className="h-4 w-4" />
-            Iniciar
+            {t('planningUI.workTimer.start')}
           </Button>
         ) : (
           <Button onClick={stopTimer} size="sm" variant="destructive" className="gap-2">
             <StopCircle className="h-4 w-4" />
-            Detener
+            {t('planningUI.workTimer.stop')}
           </Button>
         )}
-        {!isOnline && <span className="text-xs text-yellow-500">(Offline)</span>}
+        {!isOnline && <span className="text-xs text-yellow-500">{t('planningUI.workTimer.offline')}</span>}
       </div>
     </div>
   );

@@ -1,7 +1,9 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
-import { ROLE_LABELS } from '@/lib/types';
+import { useLabels } from '@/hooks/useLabels';
+import { useTranslation } from 'react-i18next';
+import { LanguageSelector } from '@/components/settings/LanguageSelector';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import {
   Car,
@@ -36,30 +38,30 @@ import { usePendingAssignedCount } from '@/hooks/usePendingAssignedCount';
 import { useActiveTimersCount } from '@/hooks/useActiveTimersCount';
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Vehículos', href: '/vehicles', icon: Car, badgeKey: 'pending' as const },
-  { name: 'Buscar Matrícula', href: '/plate-history', icon: Search },
-  { name: 'Archivados', href: '/repair-history', icon: Archive },
-  { name: 'Entregas', href: '/calendar', icon: Calendar },
-  { name: 'Citas Previas', href: '/appointments', icon: CalendarCheck },
-  { name: 'Registro Tiempo', href: '/time-logs', icon: Clock },
-  { name: 'Notificaciones', href: '/notifications', icon: Bell },
-  { name: 'Instalar App', href: '/install', icon: Download },
+  { key: 'nav.dashboard', href: '/', icon: LayoutDashboard },
+  { key: 'nav.vehicles', href: '/vehicles', icon: Car, badgeKey: 'pending' as const },
+  { key: 'nav.plateSearch', href: '/plate-history', icon: Search },
+  { key: 'nav.archived', href: '/repair-history', icon: Archive },
+  { key: 'nav.deliveries', href: '/calendar', icon: Calendar },
+  { key: 'nav.appointments', href: '/appointments', icon: CalendarCheck },
+  { key: 'nav.timeLogs', href: '/time-logs', icon: Clock },
+  { key: 'nav.notifications', href: '/notifications', icon: Bell },
+  { key: 'nav.installApp', href: '/install', icon: Download },
 ];
 
 const adminNavigation = [
-  { name: 'Trabajo en Curso', href: '/admin/active-work', icon: Timer, badgeKey: 'active' as const },
-  { name: 'Usuarios', href: '/users', icon: Users },
-  { name: 'Mi Taller', href: '/organization', icon: Building2 },
-  { name: 'Carga Trabajo', href: '/admin/workload', icon: Users },
-  { name: 'Control Horario', href: '/admin/attendance', icon: CalendarClock },
-  { name: 'Productividad', href: '/admin/productivity', icon: BarChart3 },
-  { name: 'Alertas', href: '/admin/alerts', icon: AlertTriangle },
-  { name: 'Gestión Datos', href: '/admin/data', icon: Database },
-  { name: 'Log Auditoría', href: '/admin/audit', icon: ShieldCheck },
-  { name: 'Legal', href: '/legal', icon: Scale },
-  { name: 'Plantillas Tareas', href: '/settings/templates', icon: ClipboardList },
-  { name: 'Ajustes', href: '/settings', icon: Settings },
+  { key: 'nav.activeWork', href: '/admin/active-work', icon: Timer, badgeKey: 'active' as const },
+  { key: 'nav.users', href: '/users', icon: Users },
+  { key: 'nav.myWorkshop', href: '/organization', icon: Building2 },
+  { key: 'nav.workload', href: '/admin/workload', icon: Users },
+  { key: 'nav.attendance', href: '/admin/attendance', icon: CalendarClock },
+  { key: 'nav.productivity', href: '/admin/productivity', icon: BarChart3 },
+  { key: 'nav.alerts', href: '/admin/alerts', icon: AlertTriangle },
+  { key: 'nav.dataManagement', href: '/admin/data', icon: Database },
+  { key: 'nav.auditLog', href: '/admin/audit', icon: ShieldCheck },
+  { key: 'nav.legal', href: '/legal', icon: Scale },
+  { key: 'nav.taskTemplates', href: '/settings/templates', icon: ClipboardList },
+  { key: 'nav.settings', href: '/settings', icon: Settings },
 ];
 
 interface SidebarProps {
@@ -73,6 +75,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const location = useLocation();
   const pendingCount = usePendingAssignedCount();
   const activeTimersCount = useActiveTimersCount();
+  const { t } = useTranslation();
+  const labels = useLabels();
 
   const getInitials = (name: string) => {
     return name
@@ -101,7 +105,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               <h1 className="font-bold text-sm leading-tight truncate">
                 {organization?.name || 'TallerPro'}
               </h1>
-              <p className="text-xs text-muted-foreground">Gestión</p>
+              <p className="text-xs text-muted-foreground">{t('nav.management')}</p>
             </div>
           )}
         </div>
@@ -129,7 +133,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               const badge = item.badgeKey === 'pending' && pendingCount > 0 ? pendingCount : 0;
               return (
                 <NavLink
-                  key={item.name}
+                  key={item.key}
                   to={item.href}
                   className={({ isActive }) =>
                     cn(
@@ -140,7 +144,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       collapsed && 'justify-center px-2'
                     )
                   }
-                  title={collapsed ? `${item.name}${badge ? ` (${badge} pendientes)` : ''}` : undefined}
+                  title={collapsed ? `${t(item.key)}${badge ? ` (${t('nav.pendingCount', { count: badge })})` : ''}` : undefined}
                 >
                   <div className="relative flex-shrink-0">
                     <item.icon className="h-5 w-5" />
@@ -152,7 +156,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   </div>
                   {!collapsed && (
                     <>
-                      <span className="flex-1">{item.name}</span>
+                      <span className="flex-1">{t(item.key)}</span>
                       {badge > 0 && (
                         <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-xs font-bold flex items-center justify-center leading-none">
                           {badge > 99 ? '99+' : badge}
@@ -169,7 +173,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             <div className="pt-4">
               {!collapsed && (
                 <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                  Admin
+                  {t('nav.admin')}
                 </p>
               )}
               <div className="space-y-1">
@@ -180,7 +184,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       : 0;
                   return (
                     <NavLink
-                      key={item.name}
+                      key={item.key}
                       to={item.href}
                       className={({ isActive }) =>
                         cn(
@@ -191,7 +195,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                           collapsed && 'justify-center px-2'
                         )
                       }
-                      title={collapsed ? `${item.name}${badge ? ` (${badge} activos)` : ''}` : undefined}
+                      title={collapsed ? `${t(item.key)}${badge ? ` (${t('nav.activeCount', { count: badge })})` : ''}` : undefined}
                     >
                       <div className="relative flex-shrink-0">
                         <item.icon className={cn('h-5 w-5', badge > 0 && 'text-primary animate-pulse')} />
@@ -203,7 +207,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       </div>
                       {!collapsed && (
                         <>
-                          <span className="flex-1">{item.name}</span>
+                          <span className="flex-1">{t(item.key)}</span>
                           {badge > 0 && (
                             <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center leading-none animate-pulse">
                               {badge > 99 ? '99+' : badge}
@@ -229,10 +233,10 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     collapsed && 'justify-center px-2'
                   )
                 }
-                title={collapsed ? 'Plantillas' : undefined}
+                title={collapsed ? t('nav.templates') : undefined}
               >
                 <ClipboardList className="h-5 w-5 flex-shrink-0" />
-                {!collapsed && <span>Plantillas Tareas</span>}
+                {!collapsed && <span>{t('nav.taskTemplates')}</span>}
               </NavLink>
             </div>
           )}
@@ -252,9 +256,12 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{profile?.full_name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {role ? ROLE_LABELS[role] : 'Usuario'}
+                    {role ? labels.role(role) : ''}
                   </p>
                 </div>
+              </div>
+              <div className="px-1 pb-2">
+                <LanguageSelector compact />
               </div>
               <div className="flex items-center gap-1">
                 <ThemeToggle />
@@ -264,7 +271,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                   onClick={signOut}
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  Cerrar sesión
+                  {t('nav.signOut')}
                 </Button>
               </div>
             </>
@@ -281,7 +288,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 size="icon"
                 className="text-muted-foreground hover:text-destructive"
                 onClick={signOut}
-                title="Cerrar sesión"
+                title={t('nav.signOut')}
               >
                 <LogOut className="h-4 w-4" />
               </Button>

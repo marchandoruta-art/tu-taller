@@ -1,0 +1,14 @@
+{
+  "charts": {
+    "statusDistribution": "Verteilung nach Status",
+    "last7Days": "Aktivität der letzten 7 Tage",
+    "topBrands": "Häufigste Marken",
+    "avgDaysPerStatus": "Durchschnittliche Tage pro Status",
+    "noData": "Keine Daten",
+    "received": "Angenommen",
+    "finished": "Fertig",
+    "vehicles": "Fahrzeuge",
+    "shortPendingParts": "Teile fehlen",
+    "days": "Tage"
+  }
+}

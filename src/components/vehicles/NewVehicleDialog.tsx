@@ -24,6 +24,7 @@ import { SignaturePad } from './reception/SignaturePad';
 import { DepositReceipt } from './reception/DepositReceipt';
 import { ScanTechnicalSheetButton } from './ScanTechnicalSheetButton';
 import { ScanVinButton } from './ScanVinButton';
+import { useTranslation } from 'react-i18next';
 
 interface NewVehicleDialogProps {
   onSuccess?: () => void;
@@ -31,18 +32,19 @@ interface NewVehicleDialogProps {
 
 type Step = 'owner' | 'vehicle' | 'inspection' | 'review';
 
-const STEP_TITLES: Record<Step, { icon: React.ReactNode; title: string }> = {
-  owner: { icon: <User className="h-5 w-5" />, title: 'Datos del Propietario' },
-  vehicle: { icon: <Car className="h-5 w-5" />, title: 'Datos del Vehículo' },
-  inspection: { icon: <ClipboardCheck className="h-5 w-5" />, title: 'Inspección de Recepción' },
-  review: { icon: <FileText className="h-5 w-5" />, title: 'Resumen y Recibo' },
-};
+const getStepTitles = (t: (key: string) => string): Record<Step, { icon: React.ReactNode; title: string }> => ({
+  owner: { icon: <User className="h-5 w-5" />, title: t('vehiclesUI.newVehicle.steps.owner') },
+  vehicle: { icon: <Car className="h-5 w-5" />, title: t('vehiclesUI.newVehicle.steps.vehicle') },
+  inspection: { icon: <ClipboardCheck className="h-5 w-5" />, title: t('vehiclesUI.newVehicle.steps.inspection') },
+  review: { icon: <FileText className="h-5 w-5" />, title: t('vehiclesUI.newVehicle.steps.review') },
+});
 
 const STEP_ORDER: Step[] = ['owner', 'vehicle', 'inspection', 'review'];
 
 export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
   const { user } = useAuth();
   const { organizationId } = useOrganization();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<Step>('owner');
@@ -134,7 +136,7 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
 
     setLoading(true);
     try {
-      if (!user) throw new Error('Sesión no válida. Vuelve a iniciar sesión.');
+      if (!user) throw new Error(t('vehiclesUI.newVehicle.sessionInvalid'));
 
       const { data: profileOrg } = organizationId
         ? { data: { organization_id: organizationId } }
@@ -147,7 +149,7 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
       const resolvedOrganizationId = profileOrg?.organization_id ?? null;
 
       if (!resolvedOrganizationId) {
-        throw new Error('Tu usuario no está asociado a ningún taller.');
+        throw new Error(t('vehiclesUI.newVehicle.noOrganization'));
       }
 
       let ownerId: string | null = null;
@@ -200,13 +202,13 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
 
       if (vehicleError) throw vehicleError;
 
-      toast.success('Vehículo registrado correctamente');
+      toast.success(t('vehiclesUI.newVehicle.vehicleRegistered'));
       setOpen(false);
       resetForm();
       onSuccess?.();
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      toast.error('Error al registrar el vehículo', { description: errorMessage });
+      const errorMessage = error instanceof Error ? error.message : t('vehiclesUI.newVehicle.unknownError');
+      toast.error(t('vehiclesUI.newVehicle.errorRegisteringVehicle'), { description: errorMessage });
     } finally {
       setLoading(false);
     }
@@ -269,6 +271,7 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
     }
   };
 
+  const STEP_TITLES = getStepTitles(t);
   const stepConfig = STEP_TITLES[step];
 
   return (
@@ -276,7 +279,7 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          Nuevo Vehículo
+          {t('vehiclesUI.newVehicle.trigger')}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-2xl max-h-[90vh]">
@@ -317,57 +320,57 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
                 {!isAdmin && (
                   <div className="bg-muted/50 p-3 rounded-lg mb-4">
                     <p className="text-sm text-muted-foreground">
-                      Puedes omitir los datos del propietario y registrar solo el vehículo.
+                      {t('vehiclesUI.newVehicle.skipOwnerHint')}
                     </p>
                   </div>
                 )}
                 <div className="space-y-2">
-                  <Label htmlFor="owner-name">Nombre {isAdmin && '*'}</Label>
+                  <Label htmlFor="owner-name">{t('vehiclesUI.newVehicle.name')} {isAdmin && '*'}</Label>
                   <Input
                     id="owner-name"
                     value={ownerData.name}
                     onChange={(e) => setOwnerData({ ...ownerData, name: e.target.value })}
-                    placeholder="Juan Pérez"
+                    placeholder={t('vehiclesUI.newVehicle.namePlaceholder')}
                     required={isAdmin}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="owner-phone">Teléfono</Label>
+                    <Label htmlFor="owner-phone">{t('vehiclesUI.newVehicle.phone')}</Label>
                     <Input
                       id="owner-phone"
                       value={ownerData.phone}
                       onChange={(e) => setOwnerData({ ...ownerData, phone: e.target.value })}
-                      placeholder="612 345 678"
+                      placeholder={t('vehiclesUI.newVehicle.phonePlaceholder')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="owner-dni">DNI/NIF</Label>
+                    <Label htmlFor="owner-dni">{t('vehiclesUI.newVehicle.dni')}</Label>
                     <Input
                       id="owner-dni"
                       value={ownerData.dni}
                       onChange={(e) => setOwnerData({ ...ownerData, dni: e.target.value })}
-                      placeholder="12345678A"
+                      placeholder={t('vehiclesUI.newVehicle.dniPlaceholder')}
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="owner-email">Email</Label>
+                  <Label htmlFor="owner-email">{t('vehiclesUI.newVehicle.email')}</Label>
                   <Input
                     id="owner-email"
                     type="email"
                     value={ownerData.email}
                     onChange={(e) => setOwnerData({ ...ownerData, email: e.target.value })}
-                    placeholder="cliente@email.com"
+                    placeholder={t('vehiclesUI.newVehicle.emailPlaceholder')}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="owner-address">Dirección</Label>
+                  <Label htmlFor="owner-address">{t('vehiclesUI.newVehicle.address')}</Label>
                   <Input
                     id="owner-address"
                     value={ownerData.address}
                     onChange={(e) => setOwnerData({ ...ownerData, address: e.target.value })}
-                    placeholder="Calle Principal, 123"
+                    placeholder={t('vehiclesUI.newVehicle.addressPlaceholder')}
                   />
                 </div>
               </>
@@ -392,66 +395,66 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
                 />
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="vehicle-plate">Matrícula *</Label>
+                    <Label htmlFor="vehicle-plate">{t('vehiclesUI.newVehicle.plate')} *</Label>
                     <Input
                       id="vehicle-plate"
                       value={vehicleData.plate}
                       onChange={(e) => setVehicleData({ ...vehicleData, plate: e.target.value.toUpperCase() })}
-                      placeholder="1234 ABC"
+                      placeholder={t('vehiclesUI.newVehicle.platePlaceholder')}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="vehicle-year">Año</Label>
+                    <Label htmlFor="vehicle-year">{t('vehiclesUI.newVehicle.year')}</Label>
                     <Input
                       id="vehicle-year"
                       type="number"
                       value={vehicleData.year}
                       onChange={(e) => setVehicleData({ ...vehicleData, year: e.target.value })}
-                      placeholder="2020"
+                      placeholder={t('vehiclesUI.newVehicle.yearPlaceholder')}
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="vehicle-brand">Marca *</Label>
+                    <Label htmlFor="vehicle-brand">{t('vehiclesUI.newVehicle.brand')} *</Label>
                     <Input
                       id="vehicle-brand"
                       value={vehicleData.brand}
                       onChange={(e) => setVehicleData({ ...vehicleData, brand: e.target.value })}
-                      placeholder="Volkswagen"
+                      placeholder={t('vehiclesUI.newVehicle.brandPlaceholder')}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="vehicle-model">Modelo *</Label>
+                    <Label htmlFor="vehicle-model">{t('vehiclesUI.newVehicle.model')} *</Label>
                     <Input
                       id="vehicle-model"
                       value={vehicleData.model}
                       onChange={(e) => setVehicleData({ ...vehicleData, model: e.target.value })}
-                      placeholder="Golf"
+                      placeholder={t('vehiclesUI.newVehicle.modelPlaceholder')}
                       required
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="vehicle-color">Color</Label>
+                    <Label htmlFor="vehicle-color">{t('vehiclesUI.newVehicle.color')}</Label>
                     <Input
                       id="vehicle-color"
                       value={vehicleData.color}
                       onChange={(e) => setVehicleData({ ...vehicleData, color: e.target.value })}
-                      placeholder="Blanco"
+                      placeholder={t('vehiclesUI.newVehicle.colorPlaceholder')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="vehicle-vin">Nº Bastidor</Label>
+                    <Label htmlFor="vehicle-vin">{t('vehiclesUI.newVehicle.vin')}</Label>
                     <div className="flex gap-2">
                       <Input
                         id="vehicle-vin"
                         value={vehicleData.vin}
                         onChange={(e) => setVehicleData({ ...vehicleData, vin: e.target.value.toUpperCase() })}
-                        placeholder="VIN"
+                        placeholder={t('vehiclesUI.newVehicle.vinPlaceholder')}
                         className="flex-1"
                       />
                       <ScanVinButton
@@ -471,12 +474,12 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="vehicle-description">¿Qué le ocurre al vehículo?</Label>
+                  <Label htmlFor="vehicle-description">{t('vehiclesUI.newVehicle.clientDescriptionLabel')}</Label>
                   <Textarea
                     id="vehicle-description"
                     value={vehicleData.client_description}
                     onChange={(e) => setVehicleData({ ...vehicleData, client_description: e.target.value })}
-                    placeholder="Escribe cada trabajo o problema en una línea separada. Ej:&#10;Ruido en frenos delanteros&#10;Cambio de aceite&#10;Revisar luces traseras"
+                    placeholder={t('vehiclesUI.newVehicle.clientDescriptionPlaceholder')}
                     rows={3}
                   />
                 </div>
@@ -492,15 +495,15 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
                     onChange={(value) => setInspectionData({ ...inspectionData, fuel_level: value })}
                   />
                   <div className="space-y-2">
-                    <Label htmlFor="mileage">Kilometraje</Label>
+                    <Label htmlFor="mileage">{t('vehiclesUI.newVehicle.mileage')}</Label>
                     <Input
                       id="mileage"
                       type="number"
                       value={inspectionData.mileage}
                       onChange={(e) => setInspectionData({ ...inspectionData, mileage: e.target.value })}
-                      placeholder="125.000"
+                      placeholder={t('vehiclesUI.newVehicle.mileagePlaceholder')}
                     />
-                    <p className="text-xs text-muted-foreground">km</p>
+                    <p className="text-xs text-muted-foreground">{t('vehiclesUI.newVehicle.km')}</p>
                   </div>
                 </div>
 
@@ -518,24 +521,24 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
 
                 {/* Client Belongings */}
                 <div className="space-y-2">
-                  <Label htmlFor="belongings">Objetos personales del cliente en el vehículo</Label>
+                  <Label htmlFor="belongings">{t('vehiclesUI.newVehicle.clientBelongings')}</Label>
                   <Textarea
                     id="belongings"
                     value={inspectionData.client_belongings}
                     onChange={(e) => setInspectionData({ ...inspectionData, client_belongings: e.target.value })}
-                    placeholder="Gafas de sol, cargador móvil, paraguas..."
+                    placeholder={t('vehiclesUI.newVehicle.clientBelongingsPlaceholder')}
                     rows={2}
                   />
                 </div>
 
                 {/* Reception Notes */}
                 <div className="space-y-2">
-                  <Label htmlFor="reception-notes">Observaciones adicionales</Label>
+                  <Label htmlFor="reception-notes">{t('vehiclesUI.newVehicle.additionalNotes')}</Label>
                   <Textarea
                     id="reception-notes"
                     value={inspectionData.reception_notes}
                     onChange={(e) => setInspectionData({ ...inspectionData, reception_notes: e.target.value })}
-                    placeholder="Cualquier observación adicional sobre el estado del vehículo..."
+                    placeholder={t('vehiclesUI.newVehicle.additionalNotesPlaceholder')}
                     rows={2}
                   />
                 </div>
@@ -555,15 +558,15 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
                   <div className="p-4 rounded-lg border bg-muted/30">
                     <h4 className="font-medium mb-2 flex items-center gap-2">
                       <User className="h-4 w-4" />
-                      Cliente
+                      {t('vehiclesUI.newVehicle.client')}
                     </h4>
                     {skipOwner || !ownerData.name ? (
-                      <p className="text-sm text-muted-foreground">Sin datos de propietario</p>
+                      <p className="text-sm text-muted-foreground">{t('vehiclesUI.newVehicle.noOwnerData')}</p>
                     ) : (
                       <div className="text-sm space-y-1">
-                        <p><strong>Nombre:</strong> {ownerData.name}</p>
-                        {ownerData.phone && <p><strong>Teléfono:</strong> {ownerData.phone}</p>}
-                        {ownerData.dni && <p><strong>DNI:</strong> {ownerData.dni}</p>}
+                        <p><strong>{t('vehiclesUI.newVehicle.name')}:</strong> {ownerData.name}</p>
+                        {ownerData.phone && <p><strong>{t('vehiclesUI.newVehicle.phone')}:</strong> {ownerData.phone}</p>}
+                        {ownerData.dni && <p><strong>{t('vehiclesUI.newVehicle.dni')}:</strong> {ownerData.dni}</p>}
                       </div>
                     )}
                   </div>
@@ -571,21 +574,21 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
                   <div className="p-4 rounded-lg border bg-muted/30">
                     <h4 className="font-medium mb-2 flex items-center gap-2">
                       <Car className="h-4 w-4" />
-                      Vehículo
+                      {t('vehiclesUI.newVehicle.vehicle')}
                     </h4>
                     <div className="text-sm space-y-1">
-                      <p><strong>Matrícula:</strong> {vehicleData.plate}</p>
-                      <p><strong>Vehículo:</strong> {vehicleData.brand} {vehicleData.model} {vehicleData.year && `(${vehicleData.year})`}</p>
-                      {vehicleData.color && <p><strong>Color:</strong> {vehicleData.color}</p>}
-                      {inspectionData.mileage && <p><strong>Km:</strong> {inspectionData.mileage}</p>}
-                      <p><strong>Combustible:</strong> {inspectionData.fuel_level}/8</p>
+                      <p><strong>{t('vehiclesUI.newVehicle.plate')}:</strong> {vehicleData.plate}</p>
+                      <p><strong>{t('vehiclesUI.newVehicle.vehicle')}:</strong> {vehicleData.brand} {vehicleData.model} {vehicleData.year && `(${vehicleData.year})`}</p>
+                      {vehicleData.color && <p><strong>{t('vehiclesUI.newVehicle.color')}:</strong> {vehicleData.color}</p>}
+                      {inspectionData.mileage && <p><strong>{t('vehiclesUI.newVehicle.km')}:</strong> {inspectionData.mileage}</p>}
+                      <p><strong>{t('vehiclesUI.newVehicle.fuel')}:</strong> {inspectionData.fuel_level}/8</p>
                     </div>
                   </div>
 
                   {inspectionData.exterior_damages.length > 0 && (
                     <div className="p-4 rounded-lg border border-destructive/30 bg-destructive/5">
                       <h4 className="font-medium mb-2 text-destructive">
-                        ⚠️ {inspectionData.exterior_damages.length} daño(s) registrado(s)
+                        {t('vehiclesUI.newVehicle.damagesRegistered', { count: inspectionData.exterior_damages.length })}
                       </h4>
                     </div>
                   )}
@@ -604,22 +607,22 @@ export function NewVehicleDialog({ onSuccess }: NewVehicleDialogProps) {
               {step === 'owner' && !isAdmin && (
                 <Button type="button" variant="outline" onClick={handleSkipOwner}>
                   <SkipForward className="mr-2 h-4 w-4" />
-                  Omitir
+                  {t('vehiclesUI.newVehicle.skip')}
                 </Button>
               )}
               {currentStepIndex > 0 && (
                 <Button type="button" variant="outline" onClick={goToPreviousStep}>
                   <ChevronLeft className="mr-2 h-4 w-4" />
-                  Atrás
+                  {t('vehiclesUI.newVehicle.back')}
                 </Button>
               )}
               <Button type="submit" className="flex-1" disabled={loading || !canProceed()}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {step === 'review' ? (
-                  'Registrar Vehículo'
+                  t('vehiclesUI.newVehicle.registerVehicle')
                 ) : (
                   <>
-                    Siguiente
+                    {t('vehiclesUI.newVehicle.next')}
                     <ChevronRight className="ml-2 h-4 w-4" />
                   </>
                 )}

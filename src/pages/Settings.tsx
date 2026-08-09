@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTranslation } from 'react-i18next';
+import { LanguageSelector } from '@/components/settings/LanguageSelector';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -43,6 +45,7 @@ interface Holiday {
 }
 
 export default function Settings() {
+  const { t } = useTranslation();
   const { role } = useAuth();
   const { organization, loading: organizationLoading } = useOrganization();
   const navigate = useNavigate();
@@ -127,13 +130,13 @@ export default function Settings() {
         name: newHolidayName.trim(),
       });
       if (error) throw error;
-      toast.success('Festivo añadido');
+      toast.success(t('adminUI.settingsPage.toast.holidayAdded'));
       setNewHolidayDate('');
       setNewHolidayName('');
       await fetchHolidays();
     } catch (error) {
       console.error('Error adding holiday:', error);
-      toast.error('Error al añadir festivo');
+      toast.error(t('adminUI.settingsPage.toast.addHolidayError'));
     } finally {
       setAddingHoliday(false);
     }
@@ -143,11 +146,11 @@ export default function Settings() {
     try {
       const { error } = await supabase.from('organization_holidays').delete().eq('id', id);
       if (error) throw error;
-      toast.success('Festivo eliminado');
+      toast.success(t('adminUI.settingsPage.toast.holidayDeleted'));
       setHolidays((prev) => prev.filter((h) => h.id !== id));
     } catch (error) {
       console.error('Error deleting holiday:', error);
-      toast.error('Error al eliminar festivo');
+      toast.error(t('adminUI.settingsPage.toast.deleteHolidayError'));
     }
   };
 
@@ -171,10 +174,10 @@ export default function Settings() {
       await saveSetting('archive_hours', archiveHours);
       await saveSetting('auto_archive', autoArchive.toString());
       await saveSetting('whatsapp_message', whatsappMessage);
-      toast.success('Configuración guardada correctamente');
+      toast.success(t('adminUI.settingsPage.toast.settingsSaved'));
     } catch (error) {
       console.error('Error saving settings:', error);
-      toast.error('Error al guardar la configuración');
+      toast.error(t('adminUI.settingsPage.toast.saveSettingsError'));
     } finally {
       setSaving(false);
     }
@@ -184,10 +187,10 @@ export default function Settings() {
     try {
       const { error } = await supabase.rpc('archive_old_delivered_vehicles');
       if (error) throw error;
-      toast.success('Vehículos entregados archivados correctamente');
+      toast.success(t('adminUI.settingsPage.toast.vehiclesArchived'));
     } catch (error) {
       console.error('Error archiving vehicles:', error);
-      toast.error('Error al archivar vehículos');
+      toast.error(t('adminUI.settingsPage.toast.archiveError'));
     }
   };
 
@@ -219,25 +222,37 @@ export default function Settings() {
             <SettingsIcon className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">Ajustes</h1>
-            <p className="text-sm text-muted-foreground">Configuración general de la aplicación</p>
+            <h1 className="text-2xl font-bold">{t('adminUI.settingsPage.title')}</h1>
+            <p className="text-sm text-muted-foreground">{t('adminUI.settingsPage.subtitle')}</p>
           </div>
         </div>
 
-        {/* General Settings */}
+        {/* Language */}
         <Card>
           <CardHeader>
-            <CardTitle>Configuración General</CardTitle>
-            <CardDescription>Personaliza el nombre y apariencia de la aplicación</CardDescription>
+            <CardTitle>{t('language.label')}</CardTitle>
+            <CardDescription>{t('settings.languageDescription')}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <LanguageSelector />
+          </CardContent>
+        </Card>
+
+        {/* General Settings */}
+
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('adminUI.settingsPage.generalTitle')}</CardTitle>
+            <CardDescription>{t('adminUI.settingsPage.generalDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="appName">Nombre de la Aplicación</Label>
+              <Label htmlFor="appName">{t('adminUI.settingsPage.appName')}</Label>
               <Input
                 id="appName"
                 value={appName}
                 onChange={(e) => setAppName(e.target.value)}
-                placeholder="Nombre de tu taller"
+                placeholder={t('adminUI.settingsPage.appNamePlaceholder')}
               />
             </div>
           </CardContent>
@@ -248,11 +263,10 @@ export default function Settings() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MessageCircle className="h-5 w-5" />
-              Mensaje de WhatsApp
+              {t('adminUI.settingsPage.whatsappTitle')}
             </CardTitle>
             <CardDescription>
-              Personaliza el mensaje que se envía al cliente cuando su vehículo está terminado.
-              Variables disponibles: <code className="text-xs bg-muted px-1 rounded">{'{matricula}'}</code>{' '}
+              {t('adminUI.settingsPage.whatsappDescription')} <code className="text-xs bg-muted px-1 rounded">{'{matricula}'}</code>{' '}
               <code className="text-xs bg-muted px-1 rounded">{'{marca}'}</code>{' '}
               <code className="text-xs bg-muted px-1 rounded">{'{modelo}'}</code>{' '}
               <code className="text-xs bg-muted px-1 rounded">{'{nombre_taller}'}</code>{' '}
@@ -266,7 +280,7 @@ export default function Settings() {
               value={whatsappMessage}
               onChange={(e) => setWhatsappMessage(e.target.value)}
               rows={8}
-              placeholder="Escribe aquí el mensaje de WhatsApp..."
+              placeholder={t('adminUI.settingsPage.whatsappPlaceholder')}
               className="font-mono text-sm"
             />
             <Button
@@ -274,7 +288,7 @@ export default function Settings() {
               size="sm"
               onClick={() => setWhatsappMessage(DEFAULT_WHATSAPP_MESSAGE)}
             >
-              Restaurar mensaje por defecto
+              {t('adminUI.settingsPage.restoreDefaultMessage')}
             </Button>
           </CardContent>
         </Card>
@@ -282,24 +296,24 @@ export default function Settings() {
         {/* Archive Settings */}
         <Card>
           <CardHeader>
-            <CardTitle>Archivado Automático</CardTitle>
+            <CardTitle>{t('adminUI.settingsPage.autoArchiveTitle')}</CardTitle>
             <CardDescription>
-              Los vehículos entregados se archivan automáticamente y se mueven al historial
+              {t('adminUI.settingsPage.autoArchiveDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <Label>Archivado automático</Label>
+                <Label>{t('adminUI.settingsPage.autoArchiveLabel')}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Archivar vehículos entregados automáticamente
+                  {t('adminUI.settingsPage.autoArchiveHelp')}
                 </p>
               </div>
               <Switch checked={autoArchive} onCheckedChange={setAutoArchive} />
             </div>
             <Separator />
             <div className="space-y-2">
-              <Label htmlFor="archiveHours">Horas hasta archivar</Label>
+              <Label htmlFor="archiveHours">{t('adminUI.settingsPage.hoursUntilArchive')}</Label>
               <div className="flex items-center gap-2">
                 <Input
                   id="archiveHours"
@@ -310,19 +324,19 @@ export default function Settings() {
                   onChange={(e) => setArchiveHours(e.target.value)}
                   className="w-24"
                 />
-                <span className="text-sm text-muted-foreground">horas después de entregar</span>
+                <span className="text-sm text-muted-foreground">{t('adminUI.settingsPage.hoursAfterDelivery')}</span>
               </div>
             </div>
             <Separator />
             <div className="flex items-center justify-between">
               <div>
-                <Label>Archivar ahora</Label>
+                <Label>{t('adminUI.settingsPage.archiveNow')}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Archivar manualmente todos los vehículos entregados con más de 24h
+                  {t('adminUI.settingsPage.archiveNowHelp')}
                 </p>
               </div>
               <Button variant="outline" onClick={archiveDeliveredVehicles}>
-                Archivar
+                {t('adminUI.settingsPage.archive')}
               </Button>
             </div>
           </CardContent>
@@ -333,16 +347,16 @@ export default function Settings() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CalendarDays className="h-5 w-5" />
-              Festivos del Taller
+              {t('adminUI.settingsPage.holidaysTitle')}
             </CardTitle>
             <CardDescription>
-              Define los días que el taller está cerrado. Los temporizadores de reparación no se pararán automáticamente en festivos.
+              {t('adminUI.settingsPage.holidaysDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-end gap-2">
               <div className="flex-1 space-y-2">
-                <Label htmlFor="holidayDate">Fecha</Label>
+                <Label htmlFor="holidayDate">{t('adminUI.settingsPage.date')}</Label>
                 <Input
                   id="holidayDate"
                   type="date"
@@ -351,12 +365,12 @@ export default function Settings() {
                 />
               </div>
               <div className="flex-[2] space-y-2">
-                <Label htmlFor="holidayName">Nombre del festivo</Label>
+                <Label htmlFor="holidayName">{t('adminUI.settingsPage.holidayName')}</Label>
                 <Input
                   id="holidayName"
                   value={newHolidayName}
                   onChange={(e) => setNewHolidayName(e.target.value)}
-                  placeholder="Ej: Festividad local, Puente..."
+                  placeholder={t('adminUI.settingsPage.holidayNamePlaceholder')}
                 />
               </div>
               <Button
@@ -395,7 +409,7 @@ export default function Settings() {
               </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-4">
-                No hay festivos configurados. Los temporizadores se pararán de lunes a viernes a las 17:15.
+                {t('adminUI.settingsPage.noHolidays')}
               </p>
             )}
           </CardContent>
@@ -406,36 +420,36 @@ export default function Settings() {
           <CardHeader>
             <CardTitle className="text-destructive flex items-center gap-2">
               <AlertTriangle className="h-5 w-5" />
-              Zona de Peligro
+              {t('adminUI.settingsPage.dangerZoneTitle')}
             </CardTitle>
             <CardDescription>
-              Acciones que pueden afectar permanentemente los datos
+              {t('adminUI.settingsPage.dangerZoneDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <Label>Eliminar vehículos archivados</Label>
+                <Label>{t('adminUI.settingsPage.deleteArchivedVehicles')}</Label>
                 <p className="text-sm text-muted-foreground">
-                  Esta acción no se puede deshacer
+                  {t('adminUI.settingsPage.deleteArchivedVehiclesHelp')}
                 </p>
               </div>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive" size="sm">
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Eliminar
+                    {t('adminUI.settingsPage.delete')}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                    <AlertDialogTitle>{t('adminUI.settingsPage.confirmDeleteTitle')}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Esta acción eliminará permanentemente todos los vehículos archivados y no se puede deshacer.
+                      {t('adminUI.settingsPage.confirmDeleteArchivedVehicles')}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogCancel>{t('adminUI.adminData.cancel')}</AlertDialogCancel>
                     <AlertDialogAction
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       onClick={async () => {
@@ -445,13 +459,13 @@ export default function Settings() {
                             .delete()
                             .eq('archived', true);
                           if (error) throw error;
-                          toast.success('Vehículos archivados eliminados');
+                          toast.success(t('adminUI.settingsPage.toast.archivedVehiclesDeleted'));
                         } catch (error) {
-                          toast.error('Error al eliminar vehículos');
+                          toast.error(t('adminUI.settingsPage.toast.deleteVehiclesError'));
                         }
                       }}
                     >
-                      Eliminar
+                      {t('adminUI.settingsPage.delete')}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -467,7 +481,7 @@ export default function Settings() {
           ) : (
             <Save className="h-4 w-4 mr-2" />
           )}
-          Guardar Configuración
+          {t('adminUI.settingsPage.saveConfiguration')}
         </Button>
       </div>
     </MainLayout>

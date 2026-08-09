@@ -1,0 +1,14 @@
+{
+  "charts": {
+    "statusDistribution": "Distribución por Estado",
+    "last7Days": "Actividad Últimos 7 Días",
+    "topBrands": "Marcas Más Frecuentes",
+    "avgDaysPerStatus": "Promedio Días por Estado",
+    "noData": "Sin datos",
+    "received": "Recibidos",
+    "finished": "Terminados",
+    "vehicles": "Vehículos",
+    "shortPendingParts": "Pend. Piezas",
+    "days": "Días"
+  }
+}

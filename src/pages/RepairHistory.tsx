@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { VehicleWithOwner, VehicleStatus, STATUS_LABELS } from '@/lib/types';
@@ -35,6 +36,7 @@ interface ArchivedVehicle extends VehicleWithOwner {
 }
 
 export default function RepairHistory() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { role } = useAuth();
   const [vehicles, setVehicles] = useState<ArchivedVehicle[]>([]);
@@ -91,7 +93,7 @@ export default function RepairHistory() {
         ...v,
         parts_list: parts,
         anomalies_list: anomalies,
-        time_logs_list: timeLogs.map((t: any) => ({ ...t, profile_name: profileMap[t.user_id] || 'Desconocido' })),
+        time_logs_list: timeLogs.map((tl: any) => ({ ...tl, profile_name: profileMap[tl.user_id] || t('authUI.repairHistory.unknownOperator') })),
         total_work_minutes: totalMinutes,
         source: 'archived' as const,
       } as ArchivedVehicle;
@@ -113,7 +115,7 @@ export default function RepairHistory() {
         owner: a.owner_snapshot || null,
         parts_list: parts,
         anomalies_list: anomalies,
-        time_logs_list: timeLogs.map((t: any) => ({ ...t, profile_name: profileMap[t?.user_id] || 'Desconocido' })),
+        time_logs_list: timeLogs.map((tl: any) => ({ ...tl, profile_name: profileMap[tl?.user_id] || t('authUI.repairHistory.unknownOperator') })),
         total_work_minutes: totalMinutes,
         source: 'deleted' as const,
         archived_at: a.archived_at,
@@ -142,20 +144,20 @@ export default function RepairHistory() {
   const deleteVehicle = async (vehicleId: string) => {
     const { error } = await deleteVehiclePermanently(vehicleId);
     if (error) {
-      toast.error('Error al eliminar el vehículo');
+      toast.error(t('authUI.repairHistory.deleteError'));
     } else {
       setVehicles(vehicles.filter(v => v.id !== vehicleId));
-      toast.success('Vehículo eliminado del historial');
+      toast.success(t('authUI.repairHistory.deleteSuccess'));
     }
   };
 
   const restoreVehicle = async (vehicleId: string) => {
     const { error } = await supabase.from('vehicles').update({ archived: false, status: 'recibido' as VehicleStatus }).eq('id', vehicleId);
     if (error) {
-      toast.error('Error al restaurar el vehículo');
+      toast.error(t('authUI.repairHistory.restoreError'));
     } else {
       setVehicles(vehicles.filter(v => v.id !== vehicleId));
-      toast.success('Vehículo restaurado al taller');
+      toast.success(t('authUI.repairHistory.restoreSuccess'));
     }
   };
 
@@ -208,9 +210,9 @@ export default function RepairHistory() {
               <History className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">Historial de Reparaciones</h1>
+              <h1 className="text-2xl font-bold">{t('authUI.repairHistory.title')}</h1>
               <p className="text-sm text-muted-foreground">
-                {vehicles.length} reparaciones archivadas
+                {t('authUI.repairHistory.count', { count: vehicles.length })}
               </p>
             </div>
           </div>
@@ -219,24 +221,24 @@ export default function RepairHistory() {
             size="sm"
             className="gap-2"
             onClick={() => {
-              if (filteredVehicles.length === 0) return toast.info('Nada que exportar');
+              if (filteredVehicles.length === 0) return toast.info(t('authUI.repairHistory.nothingToExport'));
               downloadCsv('historial-reparaciones', filteredVehicles, [
-                { key: 'plate', label: 'Matrícula', value: (v) => v.plate },
-                { key: 'brand', label: 'Marca', value: (v) => v.brand },
-                { key: 'model', label: 'Modelo', value: (v) => v.model },
-                { key: 'owner', label: 'Cliente', value: (v) => v.owner?.name || '' },
-                { key: 'phone', label: 'Teléfono', value: (v) => v.owner?.phone || '' },
-                { key: 'status', label: 'Estado', value: (v) => STATUS_LABELS[v.status] || v.status },
-                { key: 'source', label: 'Origen', value: (v) => (v.source === 'deleted' ? 'Eliminado' : 'Archivado') },
-                { key: 'time', label: 'Tiempo trabajado', value: (v) => formatMinutes(v.total_work_minutes || 0) },
-                { key: 'parts_count', label: 'Nº recambios', value: (v) => v.parts_list?.length || 0 },
-                { key: 'work_summary', label: 'Resumen', value: (v) => v.work_summary || '' },
-                { key: 'delivered_at', label: 'Entregado', value: (v) => v.delivered_at ? format(new Date(v.delivered_at), 'dd/MM/yyyy') : '' },
-                { key: 'archived_at', label: 'Archivado', value: (v) => v.archived_at ? format(new Date(v.archived_at), 'dd/MM/yyyy HH:mm') : '' },
+                { key: 'plate', label: t('authUI.repairHistory.csv.plate'), value: (v) => v.plate },
+                { key: 'brand', label: t('authUI.repairHistory.csv.brand'), value: (v) => v.brand },
+                { key: 'model', label: t('authUI.repairHistory.csv.model'), value: (v) => v.model },
+                { key: 'owner', label: t('authUI.repairHistory.csv.client'), value: (v) => v.owner?.name || '' },
+                { key: 'phone', label: t('authUI.repairHistory.csv.phone'), value: (v) => v.owner?.phone || '' },
+                { key: 'status', label: t('authUI.repairHistory.csv.status'), value: (v) => STATUS_LABELS[v.status] || v.status },
+                { key: 'source', label: t('authUI.repairHistory.csv.source'), value: (v) => (v.source === 'deleted' ? t('authUI.repairHistory.csv.sourceDeleted') : t('authUI.repairHistory.csv.sourceArchived')) },
+                { key: 'time', label: t('authUI.repairHistory.csv.time'), value: (v) => formatMinutes(v.total_work_minutes || 0) },
+                { key: 'parts_count', label: t('authUI.repairHistory.csv.partsCount'), value: (v) => v.parts_list?.length || 0 },
+                { key: 'work_summary', label: t('authUI.repairHistory.csv.summary'), value: (v) => v.work_summary || '' },
+                { key: 'delivered_at', label: t('authUI.repairHistory.csv.delivered'), value: (v) => v.delivered_at ? format(new Date(v.delivered_at), 'dd/MM/yyyy') : '' },
+                { key: 'archived_at', label: t('authUI.repairHistory.csv.archived'), value: (v) => v.archived_at ? format(new Date(v.archived_at), 'dd/MM/yyyy HH:mm') : '' },
               ]);
             }}
           >
-            <Download className="h-4 w-4" /> Exportar CSV
+            <Download className="h-4 w-4" /> {t('authUI.repairHistory.exportCsv')}
           </Button>
         </div>
 
@@ -247,7 +249,7 @@ export default function RepairHistory() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar por matrícula, marca, modelo o cliente..."
+                  placeholder={t('authUI.repairHistory.searchPlaceholder')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-10"
@@ -255,10 +257,10 @@ export default function RepairHistory() {
               </div>
               <Select value={yearFilter} onValueChange={setYearFilter}>
                 <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Filtrar por año" />
+                  <SelectValue placeholder={t('authUI.repairHistory.filterByYear')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos los años</SelectItem>
+                  <SelectItem value="all">{t('authUI.repairHistory.allYears')}</SelectItem>
                   {getYears().map(year => (
                     <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
                   ))}
@@ -273,7 +275,7 @@ export default function RepairHistory() {
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Car className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No hay reparaciones en el historial</p>
+              <p className="text-muted-foreground">{t('authUI.repairHistory.empty')}</p>
             </CardContent>
           </Card>
         ) : (
@@ -299,56 +301,56 @@ export default function RepairHistory() {
                           )}
                           {vehicle.source === 'deleted' && (
                             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-destructive/10 text-destructive uppercase tracking-wide">
-                              Eliminado
+                              {t('authUI.repairHistory.deletedTag')}
                             </span>
                           )}
                         </div>
                         <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-muted-foreground">
                           {vehicle.source === 'deleted' && vehicle.archived_at ? (
-                            <span>Eliminado: {format(new Date(vehicle.archived_at), 'dd MMM yyyy', { locale: es })}</span>
+                            <span>{t('authUI.repairHistory.deletedAt', { date: format(new Date(vehicle.archived_at), 'dd MMM yyyy', { locale: es }) })}</span>
                           ) : vehicle.delivered_at && (
-                            <span>Entregado: {format(new Date(vehicle.delivered_at), 'dd MMM yyyy', { locale: es })}</span>
+                            <span>{t('authUI.repairHistory.deliveredAt', { date: format(new Date(vehicle.delivered_at), 'dd MMM yyyy', { locale: es }) })}</span>
                           )}
                           {(vehicle.total_work_minutes ?? 0) > 0 && (
                             <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {formatTime(vehicle.total_work_minutes!)}</span>
                           )}
                           {(vehicle.parts_list?.length ?? 0) > 0 && (
-                            <span className="flex items-center gap-1"><Wrench className="h-3 w-3" /> {vehicle.parts_list!.length} piezas</span>
+                            <span className="flex items-center gap-1"><Wrench className="h-3 w-3" /> {t('authUI.repairHistory.partsCount', { count: vehicle.parts_list!.length })}</span>
                           )}
                           {(vehicle.anomalies_list?.length ?? 0) > 0 && (
-                            <span className="flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> {vehicle.anomalies_list!.length} anomalías</span>
+                            <span className="flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> {t('authUI.repairHistory.anomaliesCount', { count: vehicle.anomalies_list!.length })}</span>
                           )}
                         </div>
                       </div>
 
                       <div className="flex items-center gap-1 shrink-0">
                         {vehicle.source !== 'deleted' && (
-                          <Button variant="ghost" size="icon" onClick={() => navigate(`/vehicles/${vehicle.id}`)} title="Ver ficha completa">
+                          <Button variant="ghost" size="icon" onClick={() => navigate(`/vehicles/${vehicle.id}`)} title={t('authUI.repairHistory.viewFullRecord')}>
                             <Eye className="h-4 w-4" />
                           </Button>
                         )}
                         {isAdmin && vehicle.source !== 'deleted' && (
                           <>
-                            <Button variant="ghost" size="icon" onClick={() => restoreVehicle(vehicle.id)} title="Restaurar">
+                            <Button variant="ghost" size="icon" onClick={() => restoreVehicle(vehicle.id)} title={t('authUI.repairHistory.restore')}>
                               <RotateCcw className="h-4 w-4" />
                             </Button>
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" title="Eliminar">
+                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" title={t('authUI.repairHistory.delete')}>
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>¿Eliminar vehículo?</AlertDialogTitle>
+                                  <AlertDialogTitle>{t('authUI.repairHistory.confirmDeleteTitle')}</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Se eliminará permanentemente {vehicle.plate} y toda su información.
+                                    {t('authUI.repairHistory.confirmDeleteDescription', { plate: vehicle.plate })}
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogCancel>{t('authUI.repairHistory.cancel')}</AlertDialogCancel>
                                   <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deleteVehicle(vehicle.id)}>
-                                    Eliminar
+                                    {t('authUI.repairHistory.delete')}
                                   </AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
@@ -365,7 +367,7 @@ export default function RepairHistory() {
                         {vehicle.work_summary && (
                           <div>
                             <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-1 flex items-center gap-1">
-                              <FileText className="h-3 w-3" /> Resumen de Trabajo
+                              <FileText className="h-3 w-3" /> {t('authUI.repairHistory.workSummary')}
                             </h4>
                             <p className="text-sm">{vehicle.work_summary}</p>
                           </div>
@@ -374,7 +376,7 @@ export default function RepairHistory() {
                         {/* Client Description */}
                         {vehicle.client_description && (
                           <div>
-                            <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-1">Descripción del Cliente</h4>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-1">{t('authUI.repairHistory.clientDescription')}</h4>
                             <p className="text-sm">{vehicle.client_description}</p>
                           </div>
                         )}
@@ -383,16 +385,16 @@ export default function RepairHistory() {
                         {vehicle.parts_list && vehicle.parts_list.length > 0 && (
                           <div>
                             <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2 flex items-center gap-1">
-                              <Wrench className="h-3 w-3" /> Piezas Utilizadas ({vehicle.parts_list.length})
+                              <Wrench className="h-3 w-3" /> {t('authUI.repairHistory.partsUsed', { count: vehicle.parts_list.length })}
                             </h4>
                             <div className="overflow-x-auto">
                               <Table>
                                 <TableHeader>
                                   <TableRow>
-                                    <TableHead className="text-xs">Pieza</TableHead>
-                                    <TableHead className="text-xs">Cant.</TableHead>
-                                    <TableHead className="text-xs">Referencia</TableHead>
-                                    <TableHead className="text-xs">Notas</TableHead>
+                                    <TableHead className="text-xs">{t('authUI.repairHistory.part')}</TableHead>
+                                    <TableHead className="text-xs">{t('authUI.repairHistory.quantity')}</TableHead>
+                                    <TableHead className="text-xs">{t('authUI.repairHistory.reference')}</TableHead>
+                                    <TableHead className="text-xs">{t('authUI.repairHistory.notes')}</TableHead>
                                   </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -414,7 +416,7 @@ export default function RepairHistory() {
                         {vehicle.anomalies_list && vehicle.anomalies_list.length > 0 && (
                           <div>
                             <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2 flex items-center gap-1">
-                              <AlertTriangle className="h-3 w-3" /> Anomalías Detectadas ({vehicle.anomalies_list.length})
+                              <AlertTriangle className="h-3 w-3" /> {t('authUI.repairHistory.anomaliesDetected', { count: vehicle.anomalies_list.length })}
                             </h4>
                             <ul className="space-y-1">
                               {vehicle.anomalies_list.map(a => (
@@ -431,17 +433,17 @@ export default function RepairHistory() {
                         {vehicle.time_logs_list && vehicle.time_logs_list.length > 0 && (
                           <div>
                             <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2 flex items-center gap-1">
-                              <Clock className="h-3 w-3" /> Registro de Tiempos ({vehicle.time_logs_list.length} sesiones — Total: {formatTime(vehicle.total_work_minutes || 0)})
+                              <Clock className="h-3 w-3" /> {t('authUI.repairHistory.timeLog', { count: vehicle.time_logs_list.length, time: formatTime(vehicle.total_work_minutes || 0) })}
                             </h4>
                             <div className="overflow-x-auto">
                               <Table>
                                 <TableHeader>
                                   <TableRow>
-                                    <TableHead className="text-xs">Operario</TableHead>
-                                    <TableHead className="text-xs">Inicio</TableHead>
-                                    <TableHead className="text-xs">Fin</TableHead>
-                                    <TableHead className="text-xs">Duración</TableHead>
-                                    <TableHead className="text-xs">Notas</TableHead>
+                                    <TableHead className="text-xs">{t('authUI.repairHistory.operator')}</TableHead>
+                                    <TableHead className="text-xs">{t('authUI.repairHistory.start')}</TableHead>
+                                    <TableHead className="text-xs">{t('authUI.repairHistory.end')}</TableHead>
+                                    <TableHead className="text-xs">{t('authUI.repairHistory.duration')}</TableHead>
+                                    <TableHead className="text-xs">{t('authUI.repairHistory.notes')}</TableHead>
                                   </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -449,7 +451,7 @@ export default function RepairHistory() {
                                     <TableRow key={log.id}>
                                       <TableCell className="text-sm">{log.profile_name}</TableCell>
                                       <TableCell className="text-sm">{format(new Date(log.started_at), 'dd/MM HH:mm', { locale: es })}</TableCell>
-                                      <TableCell className="text-sm">{log.ended_at ? format(new Date(log.ended_at), 'dd/MM HH:mm', { locale: es }) : 'En curso'}</TableCell>
+                                      <TableCell className="text-sm">{log.ended_at ? format(new Date(log.ended_at), 'dd/MM HH:mm', { locale: es }) : t('authUI.repairHistory.inProgress')}</TableCell>
                                       <TableCell className="text-sm">{log.total_minutes ? formatTime(log.total_minutes) : '-'}</TableCell>
                                       <TableCell className="text-sm text-muted-foreground">{log.notes || '-'}</TableCell>
                                     </TableRow>
@@ -463,12 +465,12 @@ export default function RepairHistory() {
                         {/* Owner info */}
                         {vehicle.owner && (
                           <div>
-                            <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-1">Propietario</h4>
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-1">{t('authUI.repairHistory.owner')}</h4>
                             <div className="text-sm space-y-0.5">
                               <p>{vehicle.owner.name}</p>
-                              {vehicle.owner.phone && <p className="text-muted-foreground">Tel: {vehicle.owner.phone}</p>}
-                              {vehicle.owner.email && <p className="text-muted-foreground">Email: {vehicle.owner.email}</p>}
-                              {vehicle.owner.dni && <p className="text-muted-foreground">DNI: {vehicle.owner.dni}</p>}
+                              {vehicle.owner.phone && <p className="text-muted-foreground">{t('authUI.repairHistory.phone', { phone: vehicle.owner.phone })}</p>}
+                              {vehicle.owner.email && <p className="text-muted-foreground">{t('authUI.repairHistory.email', { email: vehicle.owner.email })}</p>}
+                              {vehicle.owner.dni && <p className="text-muted-foreground">{t('authUI.repairHistory.dni', { dni: vehicle.owner.dni })}</p>}
                             </div>
                           </div>
                         )}
@@ -478,7 +480,7 @@ export default function RepairHistory() {
                          (!vehicle.parts_list || vehicle.parts_list.length === 0) && 
                          (!vehicle.anomalies_list || vehicle.anomalies_list.length === 0) && 
                          (!vehicle.time_logs_list || vehicle.time_logs_list.length === 0) && (
-                          <p className="text-sm text-muted-foreground italic">No hay información de trabajo registrada para este vehículo.</p>
+                          <p className="text-sm text-muted-foreground italic">{t('authUI.repairHistory.noWorkInfo')}</p>
                         )}
                       </div>
                     </CollapsibleContent>

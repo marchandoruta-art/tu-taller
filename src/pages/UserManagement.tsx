@@ -6,6 +6,7 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Profile, UserRole, ROLE_LABELS } from '@/lib/types';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,6 +42,7 @@ interface UserWithRole extends Profile {
 }
 
 const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
+  const { t } = useTranslation();
   const { role } = useAuth();
   const { organizationId } = useOrganization();
   const navigate = useNavigate();
@@ -81,7 +83,7 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
       setUsers(usersWithRoles);
     } catch (error: any) {
       console.error('Error fetching users:', error);
-      toast.error('Error al cargar usuarios');
+      toast.error(t('adminUI.userManagement.toast.loadUsersError'));
     } finally {
       setLoading(false);
     }
@@ -89,12 +91,12 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
 
   const handleCreateUser = async () => {
     if (!newUser.email || !newUser.password || !newUser.fullName) {
-      toast.error('Completa todos los campos');
+      toast.error(t('adminUI.userManagement.toast.fillAllFields'));
       return;
     }
 
     if (!organizationId) {
-      toast.error('No se encontró la organización');
+      toast.error(t('adminUI.userManagement.toast.organizationNotFound'));
       return;
     }
 
@@ -127,7 +129,7 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
         }
       }
 
-      toast.success('Usuario creado correctamente');
+      toast.success(t('adminUI.userManagement.toast.userCreated'));
       setShowNewUserDialog(false);
       setNewUser({ email: '', password: '', fullName: '' });
       
@@ -135,7 +137,7 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
       setTimeout(() => fetchUsers(), 500);
     } catch (error: any) {
       console.error('Error creating user:', error);
-      toast.error(error.message || 'Error al crear usuario');
+      toast.error(error.message || t('adminUI.userManagement.toast.createUserError'));
     } finally {
       setProcessing(false);
     }
@@ -153,20 +155,20 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
 
       if (error) throw error;
 
-      toast.success('Rol actualizado correctamente');
+      toast.success(t('adminUI.userManagement.toast.roleUpdated'));
       setShowEditRoleDialog(false);
       setSelectedUser(null);
       fetchUsers();
     } catch (error: any) {
       console.error('Error updating role:', error);
-      toast.error('Error al actualizar rol');
+      toast.error(t('adminUI.userManagement.toast.updateRoleError'));
     } finally {
       setProcessing(false);
     }
   };
 
   const handleDeleteUser = async (user: UserWithRole) => {
-    if (!confirm(`¿Estás seguro de eliminar a ${user.full_name}?`)) return;
+    if (!confirm(t('adminUI.userManagement.confirmDeleteUser', { name: user.full_name }))) return;
 
     try {
       // Delete profile (will cascade to user_roles due to foreign key)
@@ -177,16 +179,16 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
 
       if (error) throw error;
 
-      toast.success('Usuario eliminado correctamente');
+      toast.success(t('adminUI.userManagement.toast.userDeleted'));
       fetchUsers();
     } catch (error: any) {
       console.error('Error deleting user:', error);
-      toast.error('Error al eliminar usuario');
+      toast.error(t('adminUI.userManagement.toast.deleteUserError'));
     }
   };
 
   const handleSendPasswordReset = async (user: UserWithRole) => {
-    if (!confirm(`¿Enviar email de recuperación de contraseña a ${user.full_name}?`)) return;
+    if (!confirm(t('adminUI.userManagement.confirmSendPasswordReset', { name: user.full_name }))) return;
     try {
       const { data, error } = await supabase.functions.invoke('send-password-reset', {
         body: {
@@ -195,10 +197,10 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
         },
       });
       if (error) throw error;
-      toast.success(`Email enviado a ${data?.email || user.full_name}`);
+      toast.success(t('adminUI.userManagement.toast.passwordResetSent', { email: data?.email || user.full_name }));
     } catch (error: any) {
       console.error('Error sending password reset:', error);
-      toast.error(error.message || 'Error al enviar email de recuperación');
+      toast.error(error.message || t('adminUI.userManagement.toast.passwordResetError'));
     }
   };
 
@@ -239,49 +241,49 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
       <div ref={ref} className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Gestión de Usuarios</h1>
-            <p className="text-muted-foreground">Administra los usuarios y sus roles</p>
+            <h1 className="text-2xl font-bold">{t('adminUI.userManagement.title')}</h1>
+            <p className="text-muted-foreground">{t('adminUI.userManagement.subtitle')}</p>
           </div>
           
           <Dialog open={showNewUserDialog} onOpenChange={setShowNewUserDialog}>
             <DialogTrigger asChild>
               <Button>
                 <UserPlus className="mr-2 h-4 w-4" />
-                Nuevo Usuario
+                {t('adminUI.userManagement.newUser')}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Crear Nuevo Usuario</DialogTitle>
+                <DialogTitle>{t('adminUI.userManagement.createUserTitle')}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="fullName">Nombre Completo</Label>
+                  <Label htmlFor="fullName">{t('adminUI.userManagement.fullName')}</Label>
                   <Input
                     id="fullName"
                     value={newUser.fullName}
                     onChange={(e) => setNewUser({ ...newUser, fullName: e.target.value })}
-                    placeholder="Nombre del usuario"
+                    placeholder={t('adminUI.userManagement.fullNamePlaceholder')}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t('adminUI.userManagement.email')}</Label>
                   <Input
                     id="email"
                     type="email"
                     value={newUser.email}
                     onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                    placeholder="email@ejemplo.com"
+                    placeholder={t('adminUI.userManagement.emailPlaceholder')}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Contraseña</Label>
+                  <Label htmlFor="password">{t('adminUI.userManagement.password')}</Label>
                   <Input
                     id="password"
                     type="password"
                     value={newUser.password}
                     onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                    placeholder="Mínimo 8 caracteres"
+                    placeholder={t('adminUI.userManagement.passwordPlaceholder')}
                   />
                 </div>
                 <Button 
@@ -292,7 +294,7 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
                   {processing ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : null}
-                  Crear Usuario
+                  {t('adminUI.userManagement.createUser')}
                 </Button>
               </div>
             </DialogContent>
@@ -303,17 +305,17 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
-              Usuarios Registrados
+              {t('adminUI.userManagement.registeredUsers')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Usuario</TableHead>
-                  <TableHead>Rol</TableHead>
-                  <TableHead>Fecha Registro</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
+                  <TableHead>{t('adminUI.userManagement.user')}</TableHead>
+                  <TableHead>{t('adminUI.userManagement.role')}</TableHead>
+                  <TableHead>{t('adminUI.userManagement.registrationDate')}</TableHead>
+                  <TableHead className="text-right">{t('adminUI.userManagement.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -334,7 +336,7 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
                     </TableCell>
                     <TableCell>
                       <Badge variant={getRoleBadgeVariant(user.role)}>
-                        {user.role ? ROLE_LABELS[user.role] : 'Sin rol'}
+                        {user.role ? ROLE_LABELS[user.role] : t('adminUI.userManagement.noRole')}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -346,7 +348,7 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
                           variant="outline"
                           size="sm"
                           onClick={() => handleSendPasswordReset(user)}
-                          title="Enviar email de recuperación de contraseña"
+                          title={t('adminUI.userManagement.sendPasswordReset')}
                         >
                           <KeyRound className="h-4 w-4" />
                         </Button>
@@ -384,20 +386,20 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
         <Dialog open={showEditRoleDialog} onOpenChange={setShowEditRoleDialog}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Cambiar Rol de {selectedUser?.full_name}</DialogTitle>
+              <DialogTitle>{t('adminUI.userManagement.changeRoleTitle', { name: selectedUser?.full_name })}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label>Rol</Label>
+                <Label>{t('adminUI.userManagement.role')}</Label>
                 <Select value={newRole} onValueChange={(value: UserRole) => setNewRole(value)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="mecanico">Mecánico</SelectItem>
-                    <SelectItem value="chapista">Chapista</SelectItem>
-                    <SelectItem value="oficina">Oficina</SelectItem>
-                    <SelectItem value="admin">Administrador</SelectItem>
+                    <SelectItem value="mecanico">{ROLE_LABELS.mecanico}</SelectItem>
+                    <SelectItem value="chapista">{ROLE_LABELS.chapista}</SelectItem>
+                    <SelectItem value="oficina">{ROLE_LABELS.oficina}</SelectItem>
+                    <SelectItem value="admin">{ROLE_LABELS.admin}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -409,7 +411,7 @@ const UserManagement = forwardRef<HTMLDivElement>((_, ref) => {
                 {processing ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : null}
-                Guardar Cambios
+                {t('adminUI.userManagement.saveChanges')}
               </Button>
             </div>
           </DialogContent>

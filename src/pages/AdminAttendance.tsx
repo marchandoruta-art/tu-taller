@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface AttendanceWithUser {
   id: string;
@@ -44,16 +45,17 @@ interface UserSummary {
   sessions: number;
 }
 
-const EXIT_TYPES = {
-  normal: { label: 'Normal', icon: LogOut, color: 'default' },
-  medico: { label: 'Médico', icon: Stethoscope, color: 'destructive' },
-  descanso: { label: 'Descanso', icon: Coffee, color: 'secondary' },
-  desayuno: { label: 'Desayuno', icon: UtensilsCrossed, color: 'outline' },
-  auto_8h: { label: 'Auto 8h', icon: Clock, color: 'secondary' },
-  auto_16h: { label: 'Auto 16:00h', icon: Clock, color: 'secondary' },
+const EXIT_TYPE_ICONS = {
+  normal: { icon: LogOut, color: 'default' },
+  medico: { icon: Stethoscope, color: 'destructive' },
+  descanso: { icon: Coffee, color: 'secondary' },
+  desayuno: { icon: UtensilsCrossed, color: 'outline' },
+  auto_8h: { icon: Clock, color: 'secondary' },
+  auto_16h: { icon: Clock, color: 'secondary' },
 } as const;
 
 export default function AdminAttendance() {
+  const { t } = useTranslation();
   const { role, loading: authLoading } = useAuth();
   const [logs, setLogs] = useState<AttendanceWithUser[]>([]);
   const [userSummaries, setUserSummaries] = useState<UserSummary[]>([]);
@@ -121,7 +123,7 @@ export default function AdminAttendance() {
       } else {
         summaryMap.set(log.user_id, {
           user_id: log.user_id,
-          full_name: log.profile?.full_name || 'Usuario',
+          full_name: log.profile?.full_name || t('adminExtraUI.attendance.user'),
           avatar_url: log.profile?.avatar_url,
           role: log.role,
           totalMinutes: log.total_minutes || 0,
@@ -161,7 +163,7 @@ export default function AdminAttendance() {
       if (error) throw error;
 
       if (!logsData || logsData.length === 0) {
-        toast.error('No hay registros para exportar');
+        toast.error(t('adminExtraUI.attendance.toast.noRecordsToExport'));
         return;
       }
 
@@ -181,19 +183,28 @@ export default function AdminAttendance() {
         .in('user_id', userIds);
 
       // Create CSV content
-      const headers = ['Empleado', 'Rol', 'Fecha', 'Entrada', 'Salida', 'Tipo Salida', 'Minutos Totales', 'Horas Totales'];
+      const headers = [
+        t('adminExtraUI.attendance.csvHeaders.employee'),
+        t('adminExtraUI.attendance.csvHeaders.role'),
+        t('adminExtraUI.attendance.csvHeaders.date'),
+        t('adminExtraUI.attendance.csvHeaders.clockIn'),
+        t('adminExtraUI.attendance.csvHeaders.clockOut'),
+        t('adminExtraUI.attendance.csvHeaders.exitType'),
+        t('adminExtraUI.attendance.csvHeaders.totalMinutes'),
+        t('adminExtraUI.attendance.csvHeaders.totalHours'),
+      ];
       const rows = logsData.map(log => {
         const profile = profiles?.find(p => p.user_id === log.user_id);
         const userRole = roles?.find(r => r.user_id === log.user_id)?.role;
         const exitType = (log as any).exit_type || 'normal';
-        const exitLabel = EXIT_TYPES[exitType as keyof typeof EXIT_TYPES]?.label || exitType;
+        const exitLabel = t(`adminExtraUI.attendance.exitTypes.${exitType}`, { defaultValue: exitType });
         
         return [
-          profile?.full_name || 'Usuario',
-          userRole ? ROLE_LABELS[userRole] : 'Sin rol',
+          profile?.full_name || t('adminExtraUI.attendance.user'),
+          userRole ? ROLE_LABELS[userRole] : t('adminExtraUI.attendance.noRole'),
           format(new Date(log.clock_in), 'dd/MM/yyyy', { locale: es }),
           format(new Date(log.clock_in), 'HH:mm', { locale: es }),
-          log.clock_out ? format(new Date(log.clock_out), 'HH:mm', { locale: es }) : 'En curso',
+          log.clock_out ? format(new Date(log.clock_out), 'HH:mm', { locale: es }) : t('adminExtraUI.attendance.inProgress'),
           exitLabel,
           log.total_minutes || 0,
           log.total_minutes ? (log.total_minutes / 60).toFixed(2) : '0',
@@ -213,10 +224,10 @@ export default function AdminAttendance() {
       link.href = url;
       
       const periodLabel = exportPeriod === 'week' 
-        ? `semana_${format(startDate, 'dd-MM-yyyy')}`
+        ? `${t('adminExtraUI.attendance.csvFileNamePrefix.week')}_${format(startDate, 'dd-MM-yyyy')}`
         : exportPeriod === 'month'
-        ? `mes_${format(startDate, 'MM-yyyy')}`
-        : 'historico';
+        ? `${t('adminExtraUI.attendance.csvFileNamePrefix.month')}_${format(startDate, 'MM-yyyy')}`
+        : t('adminExtraUI.attendance.csvFileNamePrefix.all');
       
       link.download = `registro_horario_${periodLabel}.csv`;
       document.body.appendChild(link);
@@ -224,10 +235,10 @@ export default function AdminAttendance() {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      toast.success('Archivo CSV descargado correctamente');
+      toast.success(t('adminExtraUI.attendance.toast.csvDownloaded'));
     } catch (error) {
       console.error('Error exporting CSV:', error);
-      toast.error('Error al exportar los datos');
+      toast.error(t('adminExtraUI.attendance.toast.exportError'));
     }
   };
 
@@ -251,13 +262,13 @@ export default function AdminAttendance() {
 
   const getExitTypeBadge = (exitType: string | null) => {
     const type = exitType || 'normal';
-    const config = EXIT_TYPES[type as keyof typeof EXIT_TYPES] || EXIT_TYPES.normal;
+    const config = EXIT_TYPE_ICONS[type as keyof typeof EXIT_TYPE_ICONS] || EXIT_TYPE_ICONS.normal;
     const Icon = config.icon;
     
     return (
       <Badge variant={config.color as any} className="gap-1 text-xs">
         <Icon className="h-3 w-3" />
-        {config.label}
+        {t(`adminExtraUI.attendance.exitTypes.${type}`, { defaultValue: type })}
       </Badge>
     );
   };
@@ -290,8 +301,8 @@ export default function AdminAttendance() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">Control Horario</h1>
-            <p className="text-muted-foreground">Gestión de asistencia de empleados</p>
+            <h1 className="text-2xl font-bold">{t('adminExtraUI.attendance.title')}</h1>
+            <p className="text-muted-foreground">{t('adminExtraUI.attendance.subtitle')}</p>
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -321,7 +332,7 @@ export default function AdminAttendance() {
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar empleado..."
+              placeholder={t('adminExtraUI.attendance.searchPlaceholder')}
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="pl-10"
@@ -333,14 +344,14 @@ export default function AdminAttendance() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="week">Esta semana</SelectItem>
-                <SelectItem value="month">Este mes</SelectItem>
-                <SelectItem value="all">Todo el historial</SelectItem>
+                <SelectItem value="week">{t('adminExtraUI.attendance.periodWeek')}</SelectItem>
+                <SelectItem value="month">{t('adminExtraUI.attendance.periodMonth')}</SelectItem>
+                <SelectItem value="all">{t('adminExtraUI.attendance.periodAll')}</SelectItem>
               </SelectContent>
             </Select>
             <Button onClick={exportToCSV} className="gap-2">
               <Download className="h-4 w-4" />
-              Exportar CSV
+              {t('adminExtraUI.attendance.exportCsv')}
             </Button>
           </div>
         </div>
@@ -368,17 +379,17 @@ export default function AdminAttendance() {
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate">{user.full_name}</p>
                         <p className="text-sm text-muted-foreground">
-                          {user.role ? ROLE_LABELS[user.role] : 'Usuario'}
+                          {user.role ? ROLE_LABELS[user.role] : t('adminExtraUI.attendance.user')}
                         </p>
                       </div>
                     </div>
                     <div className="mt-4 grid grid-cols-2 gap-4">
                       <div className="p-3 bg-primary/5 rounded-lg text-center">
-                        <p className="text-xs text-muted-foreground">Horas totales</p>
+                        <p className="text-xs text-muted-foreground">{t('adminExtraUI.attendance.totalHours')}</p>
                         <p className="font-bold text-primary">{formatDuration(user.totalMinutes)}</p>
                       </div>
                       <div className="p-3 bg-muted/50 rounded-lg text-center">
-                        <p className="text-xs text-muted-foreground">Sesiones</p>
+                        <p className="text-xs text-muted-foreground">{t('adminExtraUI.attendance.sessions')}</p>
                         <p className="font-bold">{user.sessions}</p>
                       </div>
                     </div>
@@ -392,13 +403,13 @@ export default function AdminAttendance() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5" />
-                  Registros Detallados
+                  {t('adminExtraUI.attendance.detailedRecords')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {filteredLogs.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">
-                    No hay registros para esta semana
+                    {t('adminExtraUI.attendance.noRecordsThisWeek')}
                   </p>
                 ) : (
                   <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -429,7 +440,7 @@ export default function AdminAttendance() {
                               {' → '}
                               {log.clock_out
                                 ? format(new Date(log.clock_out), 'HH:mm', { locale: es })
-                                : 'En curso'}
+                                : t('adminExtraUI.attendance.inProgress')}
                             </p>
                             {log.total_minutes && (
                               <p className="text-xs text-primary font-medium">
