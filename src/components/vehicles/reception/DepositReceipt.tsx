@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { FileText, Printer, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import type { ExteriorDamage } from './VehicleDiagram';
 import type { InteriorCheckData } from './InteriorChecklist';
 
@@ -72,6 +73,7 @@ const INTERIOR_LABELS: Record<string, string> = {
 };
 
 export function DepositReceipt({ ownerData, vehicleData, inspectionData }: DepositReceiptProps) {
+  const { t } = useTranslation();
   const generateReceiptHTML = () => {
     const now = new Date();
     const formattedDate = format(now, "d 'de' MMMM 'de' yyyy", { locale: es });
@@ -247,21 +249,21 @@ export function DepositReceipt({ ownerData, vehicleData, inspectionData }: Depos
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <FileText className="h-5 w-5 text-primary" />
-        <span className="font-medium">Generar Recibo de Depósito</span>
+        <span className="font-medium">{t('depositReceipt.generateTitle')}</span>
       </div>
       
       <p className="text-sm text-muted-foreground">
-        El recibo incluirá todos los datos del cliente, vehículo, inspección realizada y los textos legales correspondientes.
+        {t('depositReceipt.generateDescription')}
       </p>
 
       <div className="flex gap-2">
         <Button type="button" variant="outline" onClick={handlePrint}>
           <Printer className="h-4 w-4 mr-2" />
-          Imprimir
+          {t('depositReceipt.print')}
         </Button>
         <Button type="button" variant="outline" onClick={handleDownload}>
           <Download className="h-4 w-4 mr-2" />
-          Descargar
+          {t('depositReceipt.download')}
         </Button>
       </div>
     </div>

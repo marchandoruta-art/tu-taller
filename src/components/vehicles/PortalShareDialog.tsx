@@ -12,6 +12,7 @@ import { Share2, Copy, MessageCircle, Loader2, Plus, Trash2, ExternalLink } from
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 interface PortalShareDialogProps {
   vehicleId: string;
@@ -28,6 +29,7 @@ interface PortalToken {
 }
 
 export function PortalShareDialog({ vehicleId, vehiclePlate, ownerPhone }: PortalShareDialogProps) {
+  const { t } = useTranslation();
   const { user, role } = useAuth();
   const { organizationId } = useOrganization();
   const [open, setOpen] = useState(false);
@@ -62,9 +64,9 @@ export function PortalShareDialog({ vehicleId, vehiclePlate, ownerPhone }: Porta
       .insert([{ vehicle_id: vehicleId, organization_id: organizationId, created_by: user.id }]);
     setCreating(false);
     if (error) {
-      toast.error('Error al crear el enlace');
+      toast.error(t('portalShareDialog.linkCreationError'));
     } else {
-      toast.success('Enlace generado');
+      toast.success(t('portalShareDialog.linkGenerated'));
       fetchTokens();
     }
   };
@@ -75,9 +77,9 @@ export function PortalShareDialog({ vehicleId, vehiclePlate, ownerPhone }: Porta
       .update({ revoked: true })
       .eq('id', id);
     if (error) {
-      toast.error('Error al revocar');
+      toast.error(t('portalShareDialog.revokeError'));
     } else {
-      toast.success('Enlace revocado');
+      toast.success(t('portalShareDialog.linkRevoked'));
       fetchTokens();
     }
   };
@@ -85,50 +87,50 @@ export function PortalShareDialog({ vehicleId, vehiclePlate, ownerPhone }: Porta
   const copyLink = async (token: string) => {
     try {
       await navigator.clipboard.writeText(portalUrl(token));
-      toast.success('Enlace copiado');
+      toast.success(t('portalShareDialog.linkCopied'));
     } catch {
-      toast.error('No se pudo copiar');
+      toast.error(t('portalShareDialog.copyError'));
     }
   };
 
   const sendWhatsApp = (token: string) => {
     if (!ownerPhone) {
-      toast.error('No hay teléfono del cliente');
+      toast.error(t('portalShareDialog.noClientPhone'));
       return;
     }
     const phone = ownerPhone.replace(/[\s\-\(\)]/g, '').replace(/^\+/, '');
     const intl = phone.startsWith('34') ? phone : `34${phone}`;
-    const msg = `Hola, puedes consultar el estado de tu vehículo ${vehiclePlate} aquí: ${portalUrl(token)}`;
+    const msg = t('portalShareDialog.whatsappMessage', { plate: vehiclePlate, portalUrl: portalUrl(token) });
     window.open(`https://wa.me/${intl}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   if (!canShare) return null;
 
-  const activeTokens = tokens.filter((t) => !t.revoked && new Date(t.expires_at) > new Date());
+  const activeTokens = tokens.filter((tk) => !tk.revoked && new Date(tk.expires_at) > new Date());
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="gap-2">
           <Share2 className="h-4 w-4" />
-          <span className="hidden sm:inline">Compartir con cliente</span>
-          <span className="sm:hidden">Compartir</span>
+          <span className="hidden sm:inline">{t('portalShareDialog.shareWithClient')}</span>
+          <span className="sm:hidden">{t('portalShareDialog.share')}</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Share2 className="h-5 w-5" /> Portal del cliente
+            <Share2 className="h-5 w-5" /> {t('portalShareDialog.dialogTitle')}
           </DialogTitle>
           <DialogDescription>
-            Genera un enlace seguro para que el cliente consulte el estado del vehículo {vehiclePlate} sin necesidad de cuenta.
+            {t('portalShareDialog.dialogDescription', { plate: vehiclePlate })}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 pt-2">
           <Button onClick={createToken} disabled={creating} className="w-full gap-2">
             {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            Generar nuevo enlace (30 días)
+            {t('portalShareDialog.generateNewLink')}
           </Button>
 
           {loading ? (
@@ -137,39 +139,39 @@ export function PortalShareDialog({ vehicleId, vehiclePlate, ownerPhone }: Porta
             </div>
           ) : tokens.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4">
-              Aún no se ha generado ningún enlace.
+              {t('portalShareDialog.noLinksYet')}
             </p>
           ) : (
             <div className="space-y-2 max-h-72 overflow-y-auto">
-              {tokens.map((t) => {
-                const expired = new Date(t.expires_at) < new Date();
-                const inactive = t.revoked || expired;
+              {tokens.map((tk) => {
+                const expired = new Date(tk.expires_at) < new Date();
+                const inactive = tk.revoked || expired;
                 return (
-                  <div key={t.id} className={`p-3 border rounded-lg space-y-2 ${inactive ? 'opacity-60' : ''}`}>
+                  <div key={tk.id} className={`p-3 border rounded-lg space-y-2 ${inactive ? 'opacity-60' : ''}`}>
                     <div className="flex items-center justify-between gap-2 flex-wrap">
                       <div className="text-xs text-muted-foreground">
-                        Caduca: {format(new Date(t.expires_at), 'dd/MM/yy', { locale: es })}
-                        {t.revoked && ' · Revocado'}
-                        {expired && !t.revoked && ' · Caducado'}
+                        {t('portalShareDialog.expires', { date: format(new Date(tk.expires_at), 'dd/MM/yy', { locale: es }) })}
+                        {tk.revoked && ` · ${t('portalShareDialog.revoked')}`}
+                        {expired && !tk.revoked && ` · ${t('portalShareDialog.expired')}`}
                       </div>
                       {!inactive && (
-                        <Button variant="ghost" size="sm" onClick={() => revokeToken(t.id)} className="h-7 text-destructive">
+                        <Button variant="ghost" size="sm" onClick={() => revokeToken(tk.id)} className="h-7 text-destructive">
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       )}
                     </div>
-                    <Input readOnly value={portalUrl(t.token)} className="text-xs font-mono" onFocus={(e) => e.target.select()} />
+                    <Input readOnly value={portalUrl(tk.token)} className="text-xs font-mono" onFocus={(e) => e.target.select()} />
                     {!inactive && (
                       <div className="flex gap-2 flex-wrap">
-                        <Button size="sm" variant="outline" onClick={() => copyLink(t.token)} className="gap-1.5 h-8">
-                          <Copy className="h-3.5 w-3.5" /> Copiar
+                        <Button size="sm" variant="outline" onClick={() => copyLink(tk.token)} className="gap-1.5 h-8">
+                          <Copy className="h-3.5 w-3.5" /> {t('portalShareDialog.copy')}
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => window.open(portalUrl(t.token), '_blank')} className="gap-1.5 h-8">
-                          <ExternalLink className="h-3.5 w-3.5" /> Abrir
+                        <Button size="sm" variant="outline" onClick={() => window.open(portalUrl(tk.token), '_blank')} className="gap-1.5 h-8">
+                          <ExternalLink className="h-3.5 w-3.5" /> {t('portalShareDialog.open')}
                         </Button>
                         {ownerPhone && (
-                          <Button size="sm" onClick={() => sendWhatsApp(t.token)} className="gap-1.5 h-8 bg-green-600 hover:bg-green-700 text-white">
-                            <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+                          <Button size="sm" onClick={() => sendWhatsApp(tk.token)} className="gap-1.5 h-8 bg-green-600 hover:bg-green-700 text-white">
+                            <MessageCircle className="h-3.5 w-3.5" /> {t('portalShareDialog.whatsapp')}
                           </Button>
                         )}
                       </div>
@@ -182,7 +184,7 @@ export function PortalShareDialog({ vehicleId, vehiclePlate, ownerPhone }: Porta
 
           {activeTokens.length === 0 && tokens.length > 0 && (
             <p className="text-xs text-muted-foreground text-center">
-              No hay enlaces activos. Genera uno nuevo para compartir.
+              {t('portalShareDialog.noActiveLinks')}
             </p>
           )}
         </div>

@@ -13,6 +13,7 @@ import { CheckCircle2, XCircle, Clock, Plus, Loader2, MessageCircle, ShieldCheck
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 interface Approval {
   id: string;
@@ -31,6 +32,7 @@ interface Props {
 }
 
 export function ClientApprovalsPanel({ vehicleId, vehiclePlate, ownerPhone }: Props) {
+  const { t } = useTranslation();
   const { user, role } = useAuth();
   const { organizationId } = useOrganization();
   const [items, setItems] = useState<Approval[]>([]);
@@ -66,14 +68,14 @@ export function ClientApprovalsPanel({ vehicleId, vehiclePlate, ownerPhone }: Pr
       requested_by: user.id,
     });
     setSaving(false);
-    if (error) return toast.error('Error al crear solicitud');
-    toast.success('Solicitud creada');
+    if (error) return toast.error(t('clientApprovals.errorCreatingRequest'));
+    toast.success(t('clientApprovals.requestCreated'));
     setDescription(''); setEstimated(''); setOpen(false);
     fetchItems();
   };
 
   const shareOnWhatsApp = async (approval: Approval) => {
-    if (!ownerPhone) return toast.error('El cliente no tiene teléfono');
+    if (!ownerPhone) return toast.error(t('clientApprovals.noPhoneError'));
     // Get or create a portal token
     const { data: existing } = await supabase
       .from('client_portal_tokens')
@@ -92,21 +94,21 @@ export function ClientApprovalsPanel({ vehicleId, vehiclePlate, ownerPhone }: Pr
         .from('client_portal_tokens')
         .insert([{ vehicle_id: vehicleId, organization_id: organizationId, created_by: user!.id }])
         .select('token').single();
-      if (error || !created) return toast.error('No se pudo generar el enlace');
+      if (error || !created) return toast.error(t('clientApprovals.linkGenerationError'));
       token = created.token;
     }
 
     const portalUrl = `${window.location.origin}/c/${token}`;
     const phone = ownerPhone.replace(/[\s\-\(\)]/g, '').replace(/^\+/, '');
     const intl = phone.startsWith('34') ? phone : `34${phone}`;
-    const msg = `Hola, necesitamos su aprobación para un trabajo adicional en su vehículo ${vehiclePlate}:\n\n"${approval.description}"\n\nRevíselo y apruébelo/recházelo aquí: ${portalUrl}`;
+    const msg = t('clientApprovals.whatsappMessage', { plate: vehiclePlate, description: approval.description, portalUrl });
     window.open(`https://wa.me/${intl}?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
   const statusBadge = (s: Approval['status']) => {
-    if (s === 'aprobado') return <Badge className="bg-green-600 hover:bg-green-700"><CheckCircle2 className="h-3 w-3 mr-1"/>Aprobado</Badge>;
-    if (s === 'rechazado') return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1"/>Rechazado</Badge>;
-    return <Badge variant="outline"><Clock className="h-3 w-3 mr-1"/>Pendiente</Badge>;
+    if (s === 'aprobado') return <Badge className="bg-green-600 hover:bg-green-700"><CheckCircle2 className="h-3 w-3 mr-1"/>{t('clientApprovals.approved')}</Badge>;
+    if (s === 'rechazado') return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1"/>{t('clientApprovals.rejected')}</Badge>;
+    return <Badge variant="outline"><Clock className="h-3 w-3 mr-1"/>{t('clientApprovals.pending')}</Badge>;
   };
 
   return (
@@ -114,38 +116,38 @@ export function ClientApprovalsPanel({ vehicleId, vehiclePlate, ownerPhone }: Pr
       <CardHeader className="flex flex-row items-center justify-between pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <ShieldCheck className="h-4 w-4 text-primary" />
-          Aprobaciones del cliente
+          {t('clientApprovals.title')}
         </CardTitle>
         {canManage && (
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" variant="outline" className="gap-1.5"><Plus className="h-3.5 w-3.5"/>Solicitar</Button>
+              <Button size="sm" variant="outline" className="gap-1.5"><Plus className="h-3.5 w-3.5"/>{t('clientApprovals.request')}</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Solicitar aprobación al cliente</DialogTitle>
+                <DialogTitle>{t('clientApprovals.dialogTitle')}</DialogTitle>
                 <DialogDescription>
-                  Describe el trabajo adicional. El cliente lo verá y podrá aprobarlo desde su enlace del portal.
+                  {t('clientApprovals.dialogDescription')}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-3 pt-2">
                 <Textarea
-                  placeholder="Descripción del trabajo adicional a autorizar…"
+                  placeholder={t('clientApprovals.descriptionPlaceholder')}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={4}
                 />
                 <Textarea
-                  placeholder="Información adicional para el cliente (opcional)…"
+                  placeholder={t('clientApprovals.additionalInfoPlaceholder')}
                   value={estimated}
                   onChange={(e) => setEstimated(e.target.value)}
                   rows={2}
                 />
               </div>
               <DialogFooter>
-                <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
+                <Button variant="ghost" onClick={() => setOpen(false)}>{t('clientApprovals.cancel')}</Button>
                 <Button onClick={create} disabled={saving || !description.trim()}>
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1"/> : null}Crear solicitud
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1"/> : null}{t('clientApprovals.createRequest')}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -156,7 +158,7 @@ export function ClientApprovalsPanel({ vehicleId, vehiclePlate, ownerPhone }: Pr
         {loading ? (
           <div className="flex justify-center py-4"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground"/></div>
         ) : items.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-3">Aún no hay solicitudes de aprobación.</p>
+          <p className="text-sm text-muted-foreground text-center py-3">{t('clientApprovals.noRequestsYet')}</p>
         ) : (
           <div className="space-y-2">
             {items.map((a) => (
@@ -174,13 +176,13 @@ export function ClientApprovalsPanel({ vehicleId, vehiclePlate, ownerPhone }: Pr
                 )}
                 {a.client_response_at && (
                   <p className="text-xs text-muted-foreground">
-                    Respondido: {format(new Date(a.client_response_at), 'd MMM HH:mm', { locale: es })}
+                    {t('clientApprovals.respondedAt', { date: format(new Date(a.client_response_at), 'd MMM HH:mm', { locale: es }) })}
                   </p>
                 )}
                 {a.status === 'pendiente' && canManage && ownerPhone && (
                   <Button size="sm" variant="outline" onClick={() => shareOnWhatsApp(a)}
                     className="gap-1.5 h-8 text-green-600 border-green-500/30 hover:bg-green-500/10">
-                    <MessageCircle className="h-3.5 w-3.5"/> Enviar por WhatsApp
+                    <MessageCircle className="h-3.5 w-3.5"/> {t('clientApprovals.sendViaWhatsApp')}
                   </Button>
                 )}
               </div>
