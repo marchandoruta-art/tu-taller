@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { ScanLine, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,9 +25,11 @@ async function compressImage(file: File, maxSize = 1600, quality = 0.85) {
   return { base64: dataUrl.split(',')[1], mimeType: 'image/jpeg' };
 }
 
-export function ScanVinButton({ onScanned, variant = 'outline', size = 'default', className, label = 'Escanear VIN' }: Props) {
+export function ScanVinButton({ onScanned, variant = 'outline', size = 'default', className, label }: Props) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const buttonLabel = label ?? t('scanVin.buttonLabel');
 
   const handleFile = async (file: File) => {
     setLoading(true);
@@ -38,13 +41,13 @@ export function ScanVinButton({ onScanned, variant = 'outline', size = 'default'
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       if (!data?.vin) {
-        toast.warning('No se pudo leer el VIN', { description: 'Enfoca bien la etiqueta y asegura buena luz.' });
+        toast.warning(t('scanVin.vinNotReadTitle'), { description: t('scanVin.vinNotReadDescription') });
       } else {
-        toast.success('VIN detectado', { description: data.vin });
+        toast.success(t('scanVin.vinDetectedTitle'), { description: data.vin });
         onScanned(data);
       }
     } catch (err: any) {
-      toast.error('Error al escanear', { description: err?.message ?? 'Inténtalo de nuevo' });
+      toast.error(t('scanVin.scanErrorTitle'), { description: err?.message ?? t('scanVin.scanErrorDefault') });
     } finally {
       setLoading(false);
       if (inputRef.current) inputRef.current.value = '';
@@ -58,7 +61,7 @@ export function ScanVinButton({ onScanned, variant = 'outline', size = 'default'
       <Button type="button" variant={variant} size={size} className={className} disabled={loading}
         onClick={() => inputRef.current?.click()}>
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ScanLine className="h-4 w-4" />}
-        {label}
+        {buttonLabel}
       </Button>
     </>
   );

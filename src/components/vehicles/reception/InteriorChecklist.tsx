@@ -1,5 +1,6 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { useTranslation } from 'react-i18next';
 
 export interface InteriorCheckData {
   spare_wheel: boolean;
@@ -21,46 +22,47 @@ interface InteriorChecklistProps {
   onChange: (data: InteriorCheckData) => void;
 }
 
-const CHECKLIST_ITEMS: { key: keyof Omit<InteriorCheckData, 'keys_count'>; label: string }[] = [
-  { key: 'spare_wheel', label: 'Rueda de repuesto' },
-  { key: 'jack', label: 'Gato' },
-  { key: 'tools', label: 'Herramientas' },
-  { key: 'warning_triangle', label: 'Triángulos de emergencia' },
-  { key: 'first_aid_kit', label: 'Botiquín' },
-  { key: 'fire_extinguisher', label: 'Extintor' },
-  { key: 'radio', label: 'Radio/Navegador' },
-  { key: 'navigation', label: 'Sistema navegación' },
-  { key: 'floor_mats', label: 'Alfombrillas' },
-  { key: 'antenna', label: 'Antena' },
-  { key: 'documents', label: 'Documentación vehículo' },
+const CHECKLIST_KEYS: (keyof Omit<InteriorCheckData, 'keys_count'>)[] = [
+  'spare_wheel',
+  'jack',
+  'tools',
+  'warning_triangle',
+  'first_aid_kit',
+  'fire_extinguisher',
+  'radio',
+  'navigation',
+  'floor_mats',
+  'antenna',
+  'documents',
 ];
 
 export function InteriorChecklist({ data, onChange }: InteriorChecklistProps) {
+  const { t } = useTranslation();
   const handleCheck = (key: keyof Omit<InteriorCheckData, 'keys_count'>, checked: boolean) => {
     onChange({ ...data, [key]: checked });
   };
 
   return (
     <div className="space-y-4">
-      <Label className="text-base font-medium">Comprobaciones del Interior</Label>
+      <Label className="text-base font-medium">{t('interiorChecklist.title')}</Label>
       
       <div className="grid grid-cols-2 gap-3">
-        {CHECKLIST_ITEMS.map((item) => (
-          <div key={item.key} className="flex items-center space-x-2">
+        {CHECKLIST_KEYS.map((key) => (
+          <div key={key} className="flex items-center space-x-2">
             <Checkbox
-              id={item.key}
-              checked={data[item.key]}
-              onCheckedChange={(checked) => handleCheck(item.key, !!checked)}
+              id={key}
+              checked={data[key]}
+              onCheckedChange={(checked) => handleCheck(key, !!checked)}
             />
-            <Label htmlFor={item.key} className="text-sm font-normal cursor-pointer">
-              {item.label}
+            <Label htmlFor={key} className="text-sm font-normal cursor-pointer">
+              {t(`interiorChecklist.items.${key}`)}
             </Label>
           </div>
         ))}
       </div>
 
       <div className="flex items-center gap-3 pt-2">
-        <Label htmlFor="keys_count" className="text-sm">Número de llaves:</Label>
+        <Label htmlFor="keys_count" className="text-sm">{t('interiorChecklist.keysCount')}</Label>
         <div className="flex items-center gap-1">
           {[1, 2, 3].map((num) => (
             <button

@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, Loader2, Clock, Wrench, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface RepairEstimate {
   min_hours: number;
@@ -24,13 +25,14 @@ interface Props {
 }
 
 export function AIRepairEstimateButton({ vehicleId, anomalyDescription, disabled, variant = 'icon' }: Props) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [estimate, setEstimate] = useState<RepairEstimate | null>(null);
 
   const handleEstimate = async () => {
     if (!anomalyDescription.trim()) {
-      toast.error('Describe la anomalía primero');
+      toast.error(t('aiRepairEstimate.describeAnomalyFirst'));
       return;
     }
     setLoading(true);
@@ -40,7 +42,7 @@ export function AIRepairEstimateButton({ vehicleId, anomalyDescription, disabled
         body: { vehicle_id: vehicleId, anomaly_description: anomalyDescription.trim() },
       });
       if (error) {
-        const msg = (error as { message?: string }).message || 'Error al estimar';
+        const msg = (error as { message?: string }).message || t('aiRepairEstimate.errorEstimating');
         toast.error(msg);
         return;
       }
@@ -51,7 +53,7 @@ export function AIRepairEstimateButton({ vehicleId, anomalyDescription, disabled
       setEstimate(data.estimate);
       setOpen(true);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Error de red');
+      toast.error(e instanceof Error ? e.message : t('aiRepairEstimate.networkError'));
     } finally {
       setLoading(false);
     }
@@ -72,11 +74,11 @@ export function AIRepairEstimateButton({ vehicleId, anomalyDescription, disabled
           size="sm"
           onClick={handleEstimate}
           disabled={disabled || loading || !anomalyDescription.trim()}
-          title="Estimar tiempo con IA"
+          title={t('aiRepairEstimate.estimateWithAiTitle')}
           className="h-8 gap-1 text-primary hover:bg-primary/10"
         >
           {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-          <span className="text-xs">Estimar IA</span>
+          <span className="text-xs">{t('aiRepairEstimate.estimateIaButton')}</span>
         </Button>
       ) : (
         <Button
@@ -85,7 +87,7 @@ export function AIRepairEstimateButton({ vehicleId, anomalyDescription, disabled
           size="icon"
           onClick={handleEstimate}
           disabled={disabled || loading || !anomalyDescription.trim()}
-          title="Estimar tiempo con IA"
+          title={t('aiRepairEstimate.estimateWithAiTitle')}
           className="border-primary/40 hover:bg-primary/10"
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 text-primary" />}
@@ -97,10 +99,10 @@ export function AIRepairEstimateButton({ vehicleId, anomalyDescription, disabled
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
-              Estimación con IA
+              {t('aiRepairEstimate.dialogTitle')}
             </DialogTitle>
             <DialogDescription className="text-xs">
-              Estimación orientativa. El tiempo real puede variar según el estado del vehículo.
+              {t('aiRepairEstimate.dialogDescription')}
             </DialogDescription>
           </DialogHeader>
 
@@ -108,7 +110,7 @@ export function AIRepairEstimateButton({ vehicleId, anomalyDescription, disabled
             <div className="space-y-4">
               <div className="rounded-lg border bg-muted/30 p-4 text-center">
                 <div className="flex items-center justify-center gap-2 text-muted-foreground text-xs mb-1">
-                  <Clock className="h-3 w-3" /> Tiempo estimado
+                  <Clock className="h-3 w-3" /> {t('aiRepairEstimate.estimatedTime')}
                 </div>
                 <div className="text-3xl font-bold">
                   {estimate.min_hours}h – {estimate.max_hours}h
@@ -117,13 +119,13 @@ export function AIRepairEstimateButton({ vehicleId, anomalyDescription, disabled
 
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Dificultad:</span>
+                  <span className="text-xs text-muted-foreground">{t('aiRepairEstimate.difficulty')}</span>
                   <Badge variant="outline" className={difficultyColor[estimate.difficulty]}>
                     {estimate.difficulty}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Confianza:</span>
+                  <span className="text-xs text-muted-foreground">{t('aiRepairEstimate.confidence')}</span>
                   <Badge variant="outline">{estimate.confidence}</Badge>
                 </div>
               </div>
@@ -131,7 +133,7 @@ export function AIRepairEstimateButton({ vehicleId, anomalyDescription, disabled
               {estimate.operations.length > 0 && (
                 <div>
                   <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2 flex items-center gap-1">
-                    <Wrench className="h-3 w-3" /> Operaciones probables
+                    <Wrench className="h-3 w-3" /> {t('aiRepairEstimate.likelyOperations')}
                   </h4>
                   <ul className="space-y-1">
                     {estimate.operations.map((op, i) => (
@@ -147,7 +149,7 @@ export function AIRepairEstimateButton({ vehicleId, anomalyDescription, disabled
               {estimate.possible_complications.length > 0 && (
                 <div>
                   <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2 flex items-center gap-1">
-                    <AlertTriangle className="h-3 w-3 text-amber-500" /> A vigilar
+                    <AlertTriangle className="h-3 w-3 text-amber-500" /> {t('aiRepairEstimate.watchOutFor')}
                   </h4>
                   <ul className="space-y-1">
                     {estimate.possible_complications.map((c, i) => (

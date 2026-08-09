@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, CheckCircle2, XCircle, CalendarCheck, AlertCircle } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 interface Data {
   appointment: {
@@ -21,6 +22,7 @@ interface Data {
 }
 
 export default function AppointmentConfirm() {
+  const { t } = useTranslation();
   const { token } = useParams();
   const [data, setData] = useState<Data | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -38,10 +40,10 @@ export default function AppointmentConfirm() {
         { method: action ? 'POST' : 'GET', headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } }
       );
       const j = await res.json();
-      if (!res.ok) throw new Error(j?.error || 'Cita no encontrada');
+      if (!res.ok) throw new Error(j?.error || t('appointmentConfirm.appointmentNotFound'));
       setData(j);
     } catch (e: any) {
-      setError(e?.message || 'Error');
+      setError(e?.message || t('appointmentConfirm.genericError'));
     } finally {
       setLoading(false); setSubmitting(false);
     }
@@ -57,8 +59,8 @@ export default function AppointmentConfirm() {
       <div className="min-h-screen flex items-center justify-center bg-background p-6">
         <Card className="max-w-md w-full"><CardContent className="py-10 text-center space-y-3">
           <AlertCircle className="h-10 w-10 mx-auto text-destructive"/>
-          <h2 className="text-lg font-semibold">Enlace no válido</h2>
-          <p className="text-sm text-muted-foreground">{error || 'La cita no existe o el enlace ha caducado.'}</p>
+          <h2 className="text-lg font-semibold">{t('appointmentConfirm.linkInvalid')}</h2>
+          <p className="text-sm text-muted-foreground">{error || t('appointmentConfirm.linkInvalidDescription')}</p>
         </CardContent></Card>
       </div>
     );
@@ -72,13 +74,13 @@ export default function AppointmentConfirm() {
       <div className="max-w-md mx-auto space-y-5">
         <header className="text-center space-y-1">
           <h1 className="text-xl font-bold">{data.workshop.name}</h1>
-          <p className="text-xs text-muted-foreground">Confirmación de cita</p>
+          <p className="text-xs text-muted-foreground">{t('appointmentConfirm.subtitle')}</p>
         </header>
 
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
-              <CalendarCheck className="h-5 w-5 text-primary"/>Cita programada
+              <CalendarCheck className="h-5 w-5 text-primary"/>{t('appointmentConfirm.scheduledAppointment')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
@@ -88,7 +90,7 @@ export default function AppointmentConfirm() {
             </p>
             {apt.plate && (
               <p className="text-muted-foreground">
-                Vehículo: <span className="font-mono">{apt.plate}</span>
+                {t('appointmentConfirm.vehicleLabel')}: <span className="font-mono">{apt.plate}</span>
                 {apt.brand ? ` — ${apt.brand} ${apt.model || ''}` : ''}
               </p>
             )}
@@ -99,26 +101,26 @@ export default function AppointmentConfirm() {
           <div className="grid grid-cols-2 gap-3">
             <Button disabled={submitting} className="bg-green-600 hover:bg-green-700 h-12"
               onClick={() => load('confirm')}>
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin"/> : <><CheckCircle2 className="h-5 w-5 mr-1"/>Confirmar</>}
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin"/> : <><CheckCircle2 className="h-5 w-5 mr-1"/>{t('appointmentConfirm.confirm')}</>}
             </Button>
             <Button disabled={submitting} variant="destructive" className="h-12" onClick={() => load('cancel')}>
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin"/> : <><XCircle className="h-5 w-5 mr-1"/>Cancelar</>}
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin"/> : <><XCircle className="h-5 w-5 mr-1"/>{t('appointmentConfirm.cancel')}</>}
             </Button>
           </div>
         ) : apt.status === 'confirmada' ? (
           <Card className="border-green-500/40 bg-green-500/5">
             <CardContent className="py-6 text-center space-y-2">
               <CheckCircle2 className="h-10 w-10 mx-auto text-green-600"/>
-              <p className="font-semibold">Cita confirmada</p>
-              <p className="text-sm text-muted-foreground">Le esperamos en la fecha indicada.</p>
+              <p className="font-semibold">{t('appointmentConfirm.confirmedTitle')}</p>
+              <p className="text-sm text-muted-foreground">{t('appointmentConfirm.confirmedDescription')}</p>
             </CardContent>
           </Card>
         ) : (
           <Card className="border-destructive/40 bg-destructive/5">
             <CardContent className="py-6 text-center space-y-2">
               <XCircle className="h-10 w-10 mx-auto text-destructive"/>
-              <p className="font-semibold">Cita cancelada</p>
-              <p className="text-sm text-muted-foreground">Puede contactar con el taller para reprogramarla.</p>
+              <p className="font-semibold">{t('appointmentConfirm.cancelledTitle')}</p>
+              <p className="text-sm text-muted-foreground">{t('appointmentConfirm.cancelledDescription')}</p>
             </CardContent>
           </Card>
         )}

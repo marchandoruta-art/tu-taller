@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Camera, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,9 +39,11 @@ async function compressImage(file: File, maxSize = 1600, quality = 0.85): Promis
   return { base64, mimeType: 'image/jpeg' };
 }
 
-export function ScanTechnicalSheetButton({ onScanned, variant = 'outline', size = 'default', className, label = 'Escanear ficha técnica' }: Props) {
+export function ScanTechnicalSheetButton({ onScanned, variant = 'outline', size = 'default', className, label }: Props) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const buttonLabel = label ?? t('scanTechnicalSheet.buttonLabel');
 
   const handleFile = async (file: File) => {
     setLoading(true);
@@ -55,15 +58,15 @@ export function ScanTechnicalSheetButton({ onScanned, variant = 'outline', size 
       const result = data as ScannedVehicleData;
       const filled = [result.plate, result.brand, result.model].filter(Boolean).length;
       if (filled === 0) {
-        toast.warning('No se han detectado datos', {
-          description: 'Asegúrate de que la imagen es un permiso de circulación o ficha técnica y está bien enfocada.',
+        toast.warning(t('scanTechnicalSheet.noDataDetectedTitle'), {
+          description: t('scanTechnicalSheet.noDataDetectedDescription'),
         });
       } else {
-        toast.success('Datos extraídos', { description: `${filled} campo(s) reconocidos. Revísalos antes de guardar.` });
+        toast.success(t('scanTechnicalSheet.dataExtractedTitle'), { description: t('scanTechnicalSheet.dataExtractedDescription', { count: filled }) });
         onScanned(result);
       }
     } catch (err: any) {
-      toast.error('Error al escanear', { description: err?.message ?? 'Inténtalo de nuevo' });
+      toast.error(t('scanTechnicalSheet.scanErrorTitle'), { description: err?.message ?? t('scanTechnicalSheet.scanErrorDefault') });
     } finally {
       setLoading(false);
       if (inputRef.current) inputRef.current.value = '';
@@ -92,7 +95,7 @@ export function ScanTechnicalSheetButton({ onScanned, variant = 'outline', size 
         onClick={() => inputRef.current?.click()}
       >
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
-        {label}
+        {buttonLabel}
       </Button>
     </>
   );
