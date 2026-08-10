@@ -317,6 +317,45 @@
         "terminado": "Completed",
         "entregado": "Delivered"
       }
+    },
+    "importPage": {
+      "title": "Import data (CSV)",
+      "subtitle": "Migrate your database from your previous software",
+      "step1Title": "What do you want to import?",
+      "step1Description": "Choose the type of data in your CSV file",
+      "modeVehicles": "Vehicles + clients",
+      "modeVehiclesHelp": "Creates records in Received status with their owners",
+      "modeHistory": "Repair history",
+      "modeHistoryHelp": "Past jobs, stored as archived and searchable by plate",
+      "downloadTemplate": "Download sample template",
+      "step2Title": "Upload your CSV file",
+      "step2Description": "We auto-detect the separator (; , tab or |)",
+      "selectFile": "Select CSV file",
+      "rows": "rows",
+      "step3Title": "Map the columns",
+      "step3Description": "Tell us which column matches each field",
+      "required": "Required",
+      "selectColumn": "Select a column",
+      "ignore": "— Do not import —",
+      "skipDuplicates": "Skip existing plates",
+      "skipDuplicatesHelp": "Avoids creating duplicates of vehicles already in the app",
+      "step4Title": "Review and import",
+      "step4Description": "Preview of the first rows before importing",
+      "missingRequired": "Missing required fields",
+      "startImport": "Import now",
+      "resultCreated": "Created",
+      "resultSkipped": "Skipped",
+      "resultErrors": "Errors",
+      "line": "Row",
+      "toast": {
+        "emptyFile": "The file is empty or has no data",
+        "readError": "Could not read the CSV file",
+        "missingPlate": "missing licence plate",
+        "missingHistoryData": "missing date or work description",
+        "imported": "Records imported:",
+        "nothingImported": "No records were imported",
+        "importError": "Error during import"
+      }
     }
   }
 }

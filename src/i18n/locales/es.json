@@ -34,7 +34,8 @@
     "templates": "Plantillas",
     "pendingCount": "{{count}} pendientes",
     "activeCount": "{{count}} activos",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "importData": "Importar datos"
   },
   "status": {
     "recibido": "Recibido",

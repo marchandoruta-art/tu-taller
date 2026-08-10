@@ -34,7 +34,8 @@
     "templates": "Vorlagen",
     "pendingCount": "{{count}} offen",
     "activeCount": "{{count}} aktiv",
-    "signOut": "Abmelden"
+    "signOut": "Abmelden",
+    "importData": "Daten importieren"
   },
   "status": {
     "recibido": "Angenommen",
