@@ -317,6 +317,45 @@
         "terminado": "Terminé",
         "entregado": "Livré"
       }
+    },
+    "importPage": {
+      "title": "Importer des données (CSV)",
+      "subtitle": "Migrez la base de données de votre ancien logiciel",
+      "step1Title": "Que voulez-vous importer ?",
+      "step1Description": "Choisissez le type de données de votre fichier CSV",
+      "modeVehicles": "Véhicules + clients",
+      "modeVehiclesHelp": "Crée les fiches au statut Reçu avec leurs propriétaires",
+      "modeHistory": "Historique des réparations",
+      "modeHistoryHelp": "Anciens travaux, archivés et recherchables par plaque",
+      "downloadTemplate": "Télécharger un modèle",
+      "step2Title": "Téléversez votre fichier CSV",
+      "step2Description": "Le séparateur est détecté automatiquement (; , tabulation ou |)",
+      "selectFile": "Sélectionner un fichier CSV",
+      "rows": "lignes",
+      "step3Title": "Associez les colonnes",
+      "step3Description": "Indiquez quelle colonne correspond à chaque champ",
+      "required": "Obligatoire",
+      "selectColumn": "Choisir une colonne",
+      "ignore": "— Ne pas importer —",
+      "skipDuplicates": "Ignorer les plaques existantes",
+      "skipDuplicatesHelp": "Évite de créer des doublons de véhicules déjà présents",
+      "step4Title": "Vérifiez et importez",
+      "step4Description": "Aperçu des premières lignes avant l'import",
+      "missingRequired": "Champs obligatoires manquants",
+      "startImport": "Importer maintenant",
+      "resultCreated": "Créés",
+      "resultSkipped": "Ignorés",
+      "resultErrors": "Erreurs",
+      "line": "Ligne",
+      "toast": {
+        "emptyFile": "Le fichier est vide ou sans données",
+        "readError": "Impossible de lire le fichier CSV",
+        "missingPlate": "plaque manquante",
+        "missingHistoryData": "date ou travail manquant",
+        "imported": "Enregistrements importés :",
+        "nothingImported": "Aucun enregistrement importé",
+        "importError": "Erreur lors de l'import"
+      }
     }
   }
 }

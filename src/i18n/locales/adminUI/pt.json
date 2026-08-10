@@ -317,6 +317,45 @@
         "terminado": "Concluído",
         "entregado": "Entregue"
       }
+    },
+    "importPage": {
+      "title": "Importar dados (CSV)",
+      "subtitle": "Migre a base de dados do seu programa anterior",
+      "step1Title": "O que quer importar?",
+      "step1Description": "Escolha o tipo de dados do seu ficheiro CSV",
+      "modeVehicles": "Veículos + clientes",
+      "modeVehiclesHelp": "Cria as fichas no estado Recebido com os proprietários",
+      "modeHistory": "Histórico de reparações",
+      "modeHistoryHelp": "Trabalhos antigos, arquivados e pesquisáveis por matrícula",
+      "downloadTemplate": "Descarregar modelo de exemplo",
+      "step2Title": "Carregue o seu ficheiro CSV",
+      "step2Description": "Detetamos o separador automaticamente (; , tabulação ou |)",
+      "selectFile": "Selecionar ficheiro CSV",
+      "rows": "linhas",
+      "step3Title": "Associe as colunas",
+      "step3Description": "Indique que coluna corresponde a cada campo",
+      "required": "Obrigatório",
+      "selectColumn": "Selecione uma coluna",
+      "ignore": "— Não importar —",
+      "skipDuplicates": "Ignorar matrículas existentes",
+      "skipDuplicatesHelp": "Evita criar duplicados de veículos já existentes",
+      "step4Title": "Reveja e importe",
+      "step4Description": "Pré-visualização das primeiras linhas antes de importar",
+      "missingRequired": "Faltam campos obrigatórios",
+      "startImport": "Importar agora",
+      "resultCreated": "Criados",
+      "resultSkipped": "Ignorados",
+      "resultErrors": "Erros",
+      "line": "Linha",
+      "toast": {
+        "emptyFile": "O ficheiro está vazio ou sem dados",
+        "readError": "Não foi possível ler o ficheiro CSV",
+        "missingPlate": "falta a matrícula",
+        "missingHistoryData": "falta a data ou o trabalho realizado",
+        "imported": "Registos importados:",
+        "nothingImported": "Nenhum registo foi importado",
+        "importError": "Erro durante a importação"
+      }
     }
   }
 }

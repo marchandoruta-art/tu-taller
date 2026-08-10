@@ -317,6 +317,45 @@
         "terminado": "Fertiggestellt",
         "entregado": "Ausgeliefert"
       }
+    },
+    "importPage": {
+      "title": "Daten importieren (CSV)",
+      "subtitle": "Migrieren Sie die Datenbank Ihrer bisherigen Software",
+      "step1Title": "Was möchten Sie importieren?",
+      "step1Description": "Wählen Sie die Datenart Ihrer CSV-Datei",
+      "modeVehicles": "Fahrzeuge + Kunden",
+      "modeVehiclesHelp": "Erstellt Akten im Status Empfangen mit Eigentümern",
+      "modeHistory": "Reparaturhistorie",
+      "modeHistoryHelp": "Alte Aufträge, archiviert und über das Kennzeichen suchbar",
+      "downloadTemplate": "Beispielvorlage herunterladen",
+      "step2Title": "CSV-Datei hochladen",
+      "step2Description": "Das Trennzeichen wird automatisch erkannt (; , Tab oder |)",
+      "selectFile": "CSV-Datei auswählen",
+      "rows": "Zeilen",
+      "step3Title": "Spalten zuordnen",
+      "step3Description": "Geben Sie an, welche Spalte zu welchem Feld gehört",
+      "required": "Pflichtfeld",
+      "selectColumn": "Spalte auswählen",
+      "ignore": "— Nicht importieren —",
+      "skipDuplicates": "Vorhandene Kennzeichen überspringen",
+      "skipDuplicatesHelp": "Verhindert Duplikate bereits vorhandener Fahrzeuge",
+      "step4Title": "Prüfen und importieren",
+      "step4Description": "Vorschau der ersten Zeilen vor dem Import",
+      "missingRequired": "Pflichtfelder fehlen",
+      "startImport": "Jetzt importieren",
+      "resultCreated": "Erstellt",
+      "resultSkipped": "Übersprungen",
+      "resultErrors": "Fehler",
+      "line": "Zeile",
+      "toast": {
+        "emptyFile": "Die Datei ist leer oder enthält keine Daten",
+        "readError": "CSV-Datei konnte nicht gelesen werden",
+        "missingPlate": "Kennzeichen fehlt",
+        "missingHistoryData": "Datum oder Arbeit fehlt",
+        "imported": "Importierte Datensätze:",
+        "nothingImported": "Es wurden keine Datensätze importiert",
+        "importError": "Fehler beim Import"
+      }
     }
   }
 }

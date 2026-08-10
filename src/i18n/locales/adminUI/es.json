@@ -317,6 +317,45 @@
         "terminado": "Terminado",
         "entregado": "Entregado"
       }
+    },
+    "importPage": {
+      "title": "Importar datos (CSV)",
+      "subtitle": "Migra la base de datos de tu programa anterior",
+      "step1Title": "¿Qué quieres importar?",
+      "step1Description": "Elige el tipo de datos de tu archivo CSV",
+      "modeVehicles": "Vehículos + clientes",
+      "modeVehiclesHelp": "Crea las fichas en estado Recibido con sus propietarios",
+      "modeHistory": "Histórico de reparaciones",
+      "modeHistoryHelp": "Trabajos antiguos, se guardan como archivados y buscables por matrícula",
+      "downloadTemplate": "Descargar plantilla de ejemplo",
+      "step2Title": "Sube tu archivo CSV",
+      "step2Description": "Detectamos automáticamente el separador (; , tabulador o |)",
+      "selectFile": "Seleccionar archivo CSV",
+      "rows": "filas",
+      "step3Title": "Asigna las columnas",
+      "step3Description": "Indica qué columna de tu archivo corresponde a cada campo",
+      "required": "Obligatorio",
+      "selectColumn": "Selecciona una columna",
+      "ignore": "— No importar —",
+      "skipDuplicates": "Omitir matrículas ya existentes",
+      "skipDuplicatesHelp": "Evita crear fichas duplicadas de vehículos que ya están en la app",
+      "step4Title": "Revisa e importa",
+      "step4Description": "Vista previa de las primeras filas antes de importar",
+      "missingRequired": "Faltan campos obligatorios",
+      "startImport": "Importar ahora",
+      "resultCreated": "Creados",
+      "resultSkipped": "Omitidos",
+      "resultErrors": "Errores",
+      "line": "Fila",
+      "toast": {
+        "emptyFile": "El archivo está vacío o no tiene datos",
+        "readError": "No se pudo leer el archivo CSV",
+        "missingPlate": "falta la matrícula",
+        "missingHistoryData": "faltan la fecha o el trabajo realizado",
+        "imported": "Registros importados:",
+        "nothingImported": "No se importó ningún registro",
+        "importError": "Error durante la importación"
+      }
     }
   }
 }

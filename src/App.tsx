@@ -46,6 +46,7 @@ import AppointmentConfirm from "./pages/AppointmentConfirm";
 import AdminAudit from "./pages/AdminAudit";
 import OAuthConsent from "./pages/OAuthConsent";
 import ActiveWork from "./pages/ActiveWork";
+import DataImport from "./pages/DataImport";
 
 const queryClient = new QueryClient();
 
@@ -90,6 +91,7 @@ const App = () => (
                 <Route path="/admin/productivity" element={<Productivity />} />
                 <Route path="/admin/alerts" element={<Alerts />} />
                 <Route path="/admin/data" element={<AdminData />} />
+                <Route path="/admin/import" element={<DataImport />} />
                 <Route path="/users" element={<UserManagement />} />
                 <Route path="/install" element={<InstallApp />} />
                 <Route path="/settings" element={<Settings />} />

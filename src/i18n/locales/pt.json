@@ -34,7 +34,8 @@
     "templates": "Modelos",
     "pendingCount": "{{count}} pendentes",
     "activeCount": "{{count}} ativos",
-    "signOut": "Sair"
+    "signOut": "Sair",
+    "importData": "Importar dados"
   },
   "status": {
     "recibido": "Recebido",

@@ -34,7 +34,8 @@
     "templates": "Modèles",
     "pendingCount": "{{count}} en attente",
     "activeCount": "{{count}} actifs",
-    "signOut": "Se déconnecter"
+    "signOut": "Se déconnecter",
+    "importData": "Importer des données"
   },
   "status": {
     "recibido": "Reçu",

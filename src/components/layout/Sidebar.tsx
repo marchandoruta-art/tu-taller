@@ -30,6 +30,7 @@ import {
   ClipboardList,
   ShieldCheck,
   Timer,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -58,6 +59,7 @@ const adminNavigation = [
   { key: 'nav.productivity', href: '/admin/productivity', icon: BarChart3 },
   { key: 'nav.alerts', href: '/admin/alerts', icon: AlertTriangle },
   { key: 'nav.dataManagement', href: '/admin/data', icon: Database },
+  { key: 'nav.importData', href: '/admin/import', icon: FileSpreadsheet },
   { key: 'nav.auditLog', href: '/admin/audit', icon: ShieldCheck },
   { key: 'nav.legal', href: '/legal', icon: Scale },
   { key: 'nav.taskTemplates', href: '/settings/templates', icon: ClipboardList },

@@ -34,7 +34,8 @@
     "templates": "Templates",
     "pendingCount": "{{count}} pending",
     "activeCount": "{{count}} active",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "importData": "Import data"
   },
   "status": {
     "recibido": "Received",
