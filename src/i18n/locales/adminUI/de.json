@@ -134,7 +134,8 @@
         "created": "Vorlage erstellt",
         "deleteError": "Fehler beim Löschen",
         "deleted": "Vorlage gelöscht"
-      }
+      },
+      "cancel": "Abbrechen"
     },
     "attendance": {
       "title": "Zeiterfassung",
@@ -267,7 +268,8 @@
         "vehicleUpdated": "Fahrzeug aktualisiert",
         "saveOwnerError": "Fehler beim Speichern des Besitzers",
         "ownerUpdated": "Besitzer aktualisiert"
-      }
+      },
+      "delete": "Löschen"
     },
     "audit": {
       "title": "Prüfprotokoll",

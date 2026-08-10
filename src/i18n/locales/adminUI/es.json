@@ -134,7 +134,8 @@
         "created": "Plantilla creada",
         "deleteError": "Error al eliminar",
         "deleted": "Plantilla eliminada"
-      }
+      },
+      "cancel": "Cancelar"
     },
     "attendance": {
       "title": "Control Horario",
@@ -267,7 +268,8 @@
         "vehicleUpdated": "Vehículo actualizado",
         "saveOwnerError": "Error al guardar propietario",
         "ownerUpdated": "Propietario actualizado"
-      }
+      },
+      "delete": "Eliminar"
     },
     "audit": {
       "title": "Log de auditoría",

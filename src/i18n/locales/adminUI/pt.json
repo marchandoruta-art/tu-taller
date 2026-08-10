@@ -134,7 +134,8 @@
         "created": "Modelo criado",
         "deleteError": "Erro ao excluir",
         "deleted": "Modelo excluído"
-      }
+      },
+      "cancel": "Cancelar"
     },
     "attendance": {
       "title": "Controle de Ponto",
@@ -267,7 +268,8 @@
         "vehicleUpdated": "Veículo atualizado",
         "saveOwnerError": "Erro ao salvar proprietário",
         "ownerUpdated": "Proprietário atualizado"
-      }
+      },
+      "delete": "Eliminar"
     },
     "audit": {
       "title": "Log de auditoria",

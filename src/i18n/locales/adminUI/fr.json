@@ -134,7 +134,8 @@
         "created": "Modèle créé",
         "deleteError": "Erreur lors de la suppression",
         "deleted": "Modèle supprimé"
-      }
+      },
+      "cancel": "Annuler"
     },
     "attendance": {
       "title": "Pointage horaire",
@@ -267,7 +268,8 @@
         "vehicleUpdated": "Véhicule mis à jour",
         "saveOwnerError": "Erreur lors de l'enregistrement du propriétaire",
         "ownerUpdated": "Propriétaire mis à jour"
-      }
+      },
+      "delete": "Supprimer"
     },
     "audit": {
       "title": "Journal d'audit",
