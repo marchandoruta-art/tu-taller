@@ -134,7 +134,8 @@
         "created": "Template created",
         "deleteError": "Error deleting",
         "deleted": "Template deleted"
-      }
+      },
+      "cancel": "Cancel"
     },
     "attendance": {
       "title": "Time Tracking",
@@ -267,7 +268,8 @@
         "vehicleUpdated": "Vehicle updated",
         "saveOwnerError": "Error saving owner",
         "ownerUpdated": "Owner updated"
-      }
+      },
+      "delete": "Delete"
     },
     "audit": {
       "title": "Audit Log",

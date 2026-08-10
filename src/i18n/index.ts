@@ -71,6 +71,40 @@ const resources = Object.fromEntries(
   })
 );
 
+function lookupPath(dict: Dict | undefined, path: string): string | undefined {
+  let cur: unknown = dict;
+  for (const part of path.split('.')) {
+    if (!cur || typeof cur !== 'object') return undefined;
+    cur = (cur as Dict)[part];
+  }
+  return typeof cur === 'string' ? cur : undefined;
+}
+
+// Safety net: if a key can't be resolved (wrong namespace prefix, key typo…),
+// try every language bundle before ever showing a raw key on screen.
+function resolveMissing(key: string): string {
+  const raw = key.includes(':') ? key.split(':').slice(1).join(':') : key;
+  const path = raw.replace(/^([A-Za-z0-9_]+)\./, (m, ns) => (namespaceKeys.has(ns) ? '' : m));
+  const langs: LanguageCode[] = [
+    (i18n.resolvedLanguage as LanguageCode) ?? 'es',
+    'es',
+    'en',
+  ];
+  for (const lang of langs) {
+    const dict = base[lang];
+    if (!dict) continue;
+    const direct = lookupPath(dict, path) ?? lookupPath(dict, raw);
+    if (direct) return direct;
+    for (const ns of namespaceKeys) {
+      const found = lookupPath(base[lang][ns] as Dict, path);
+      if (found) return found;
+    }
+  }
+  // Last resort: humanize the final segment instead of printing the key.
+  const last = path.split('.').pop() ?? path;
+  return last.replace(/[_-]/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (c) => c.toUpperCase());
+}
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -85,12 +119,14 @@ i18n
     nonExplicitSupportedLngs: true,
     load: 'languageOnly',
     interpolation: { escapeValue: false },
+    parseMissingKeyHandler: (key) => resolveMissing(key),
     detection: {
       order: ['localStorage', 'navigator'],
       lookupLocalStorage: 'app_language',
       caches: ['localStorage'],
     },
   });
+
 
 i18n.on('languageChanged', (lng) => {
   if (typeof document !== 'undefined') {
