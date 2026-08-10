@@ -51,13 +51,35 @@ for (const [path, dict] of Object.entries(modules)) {
   if (lang && base[lang]) deepMerge(base[lang], dict);
 }
 
+// Some screens reference keys with an explicit namespace prefix
+// (e.g. t('vehiclesUI:dashboard.title')), so every top-level group is also
+// registered as its own namespace in addition to the flat 'translation' one.
+const namespaceKeys = new Set<string>();
+for (const dict of Object.values(base)) {
+  for (const [key, value] of Object.entries(dict)) {
+    if (value && typeof value === 'object' && !Array.isArray(value)) namespaceKeys.add(key);
+  }
+}
+
+const resources = Object.fromEntries(
+  Object.entries(base).map(([lang, dict]) => {
+    const bundles: Record<string, unknown> = { translation: dict };
+    for (const ns of namespaceKeys) {
+      if (dict[ns]) bundles[ns] = dict[ns];
+    }
+    return [lang, bundles];
+  })
+);
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    resources: Object.fromEntries(
-      Object.entries(base).map(([lang, dict]) => [lang, { translation: dict }])
-    ),
+    resources,
+    ns: ['translation', ...namespaceKeys],
+    defaultNS: 'translation',
+    fallbackNS: 'translation',
+
     fallbackLng: 'es',
     supportedLngs: SUPPORTED_LANGUAGES.map((l) => l.code),
     nonExplicitSupportedLngs: true,
