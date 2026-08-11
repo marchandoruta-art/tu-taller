@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "reminders": "MOT reminders"
+  },
+  "reminders": {
+    "title": "MOT & service reminders",
+    "subtitle": "Automatic reminders to owners before the MOT and the yearly service",
+    "generateNow": "Generate reminders now",
+    "workshopFallback": "Workshop",
+    "clientFallback": "customer",
+    "empty": "No reminders in this list",
+    "openVehicle": "Open record",
+    "markSent": "Mark as sent",
+    "dismiss": "Dismiss",
+    "reopen": "Back to pending",
+    "dueOn": "Due on {{date}}",
+    "sentOn": "Sent on {{date}} ({{channel}})",
+    "inDays": "In {{days}} days",
+    "overdue": "Overdue by {{days}} days",
+    "types": { "all": "All", "itv": "MOT", "maintenance": "Service" },
+    "tabs": { "pending": "Pending", "sent": "Sent", "dismissed": "Dismissed" },
+    "settings": {
+      "title": "Reminder settings",
+      "leadDays": "Days in advance",
+      "save": "Save",
+      "hint": "The fleet is checked daily and reminders are created automatically."
+    },
+    "subject": { "itv": "MOT reminder for your vehicle", "maintenance": "Service reminder for your vehicle" },
+    "message": {
+      "itv": "Dear {{name}},\n\nThis is a reminder that the MOT for your {{vehicle}} (plate {{plate}}) is due on {{date}}.\n\nWe can take care of the pre-check and book the appointment for you.\n\nKind regards,\n{{workshop}}",
+      "maintenance": "Dear {{name}},\n\nAbout a year has passed since the last service of your {{vehicle}} (plate {{plate}}) on {{date}}.\n\nWe recommend booking the annual service to keep the vehicle in top condition.\n\nKind regards,\n{{workshop}}"
+    },
+    "toast": {
+      "loadError": "Could not load reminders",
+      "saveError": "Could not save",
+      "generated": "Reminders updated",
+      "generateError": "Could not generate reminders",
+      "leadSaved": "Lead time saved",
+      "invalidLead": "Enter a number between 1 and 365",
+      "noPhone": "This owner has no phone number",
+      "noEmail": "This owner has no email"
+    },
+    "vehicle": {
+      "title": "MOT & service",
+      "itvDate": "Next MOT",
+      "maintenanceDate": "Next service",
+      "save": "Save dates",
+      "hint": "If the service date is empty it is calculated 1 year after delivery.",
+      "saved": "Dates updated"
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "reminders": "Rappels CT"
+  },
+  "reminders": {
+    "title": "Rappels contrôle technique et entretien",
+    "subtitle": "Rappels automatiques aux propriétaires avant le contrôle technique et l'entretien annuel",
+    "generateNow": "Générer les rappels",
+    "workshopFallback": "Garage",
+    "clientFallback": "client",
+    "empty": "Aucun rappel dans cette liste",
+    "openVehicle": "Voir la fiche",
+    "markSent": "Marquer comme envoyé",
+    "dismiss": "Ignorer",
+    "reopen": "Remettre en attente",
+    "dueOn": "Échéance le {{date}}",
+    "sentOn": "Envoyé le {{date}} ({{channel}})",
+    "inDays": "Dans {{days}} jours",
+    "overdue": "En retard de {{days}} jours",
+    "types": { "all": "Tous", "itv": "Contrôle technique", "maintenance": "Entretien" },
+    "tabs": { "pending": "En attente", "sent": "Envoyés", "dismissed": "Ignorés" },
+    "settings": {
+      "title": "Réglages des rappels",
+      "leadDays": "Jours d'anticipation",
+      "save": "Enregistrer",
+      "hint": "Le parc est vérifié chaque jour et les rappels sont créés automatiquement."
+    },
+    "subject": { "itv": "Rappel de contrôle technique de votre véhicule", "maintenance": "Rappel d'entretien de votre véhicule" },
+    "message": {
+      "itv": "Bonjour {{name}},\n\nNous vous rappelons que le contrôle technique de votre {{vehicle}} (immatriculation {{plate}}) expire le {{date}}.\n\nNous pouvons réaliser la pré-visite et prendre le rendez-vous pour vous.\n\nCordialement,\n{{workshop}}",
+      "maintenance": "Bonjour {{name}},\n\nEnviron un an s'est écoulé depuis le dernier entretien de votre {{vehicle}} (immatriculation {{plate}}) le {{date}}.\n\nNous vous recommandons de programmer la révision annuelle.\n\nCordialement,\n{{workshop}}"
+    },
+    "toast": {
+      "loadError": "Impossible de charger les rappels",
+      "saveError": "Enregistrement impossible",
+      "generated": "Rappels mis à jour",
+      "generateError": "Impossible de générer les rappels",
+      "leadSaved": "Anticipation enregistrée",
+      "invalidLead": "Saisissez un nombre entre 1 et 365",
+      "noPhone": "Ce propriétaire n'a pas de téléphone",
+      "noEmail": "Ce propriétaire n'a pas d'e-mail"
+    },
+    "vehicle": {
+      "title": "Contrôle technique et entretien",
+      "itvDate": "Prochain contrôle technique",
+      "maintenanceDate": "Prochain entretien",
+      "save": "Enregistrer les dates",
+      "hint": "Si la date d'entretien est vide, elle est calculée 1 an après la livraison.",
+      "saved": "Dates mises à jour"
+    }
+  }
+}

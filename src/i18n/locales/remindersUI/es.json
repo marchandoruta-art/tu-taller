@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "reminders": "Recordatorios ITV"
+  },
+  "reminders": {
+    "title": "Recordatorios ITV y mantenimiento",
+    "subtitle": "Avisos automáticos a los propietarios antes de la ITV y del mantenimiento anual",
+    "generateNow": "Generar avisos ahora",
+    "workshopFallback": "Taller",
+    "clientFallback": "cliente",
+    "empty": "No hay avisos en esta lista",
+    "openVehicle": "Ver ficha",
+    "markSent": "Marcar enviado",
+    "dismiss": "Descartar",
+    "reopen": "Volver a pendiente",
+    "dueOn": "Vence el {{date}}",
+    "sentOn": "Enviado el {{date}} ({{channel}})",
+    "inDays": "En {{days}} días",
+    "overdue": "Vencido hace {{days}} días",
+    "types": { "all": "Todos", "itv": "ITV", "maintenance": "Mantenimiento" },
+    "tabs": { "pending": "Pendientes", "sent": "Enviados", "dismissed": "Descartados" },
+    "settings": {
+      "title": "Configuración de avisos",
+      "leadDays": "Días de antelación",
+      "save": "Guardar",
+      "hint": "Cada día se revisa la flota y se crean los avisos automáticamente."
+    },
+    "subject": { "itv": "Recordatorio de ITV de su vehículo", "maintenance": "Recordatorio de mantenimiento de su vehículo" },
+    "message": {
+      "itv": "Estimado/a {{name}},\n\nLe recordamos que la ITV de su vehículo {{vehicle}} con matrícula {{plate}} vence el {{date}}.\n\nSi lo desea, podemos encargarnos de la revisión previa y de gestionar la cita.\n\nUn cordial saludo,\n{{workshop}}",
+      "maintenance": "Estimado/a {{name}},\n\nHa pasado aproximadamente un año desde el último mantenimiento de su vehículo {{vehicle}} con matrícula {{plate}} ({{date}}).\n\nLe recomendamos programar la revisión anual para mantener el vehículo en óptimas condiciones.\n\nUn cordial saludo,\n{{workshop}}"
+    },
+    "toast": {
+      "loadError": "Error al cargar los recordatorios",
+      "saveError": "No se pudo guardar",
+      "generated": "Avisos actualizados",
+      "generateError": "No se pudieron generar los avisos",
+      "leadSaved": "Antelación guardada",
+      "invalidLead": "Introduce un número entre 1 y 365",
+      "noPhone": "Este propietario no tiene teléfono",
+      "noEmail": "Este propietario no tiene email"
+    },
+    "vehicle": {
+      "title": "ITV y mantenimiento",
+      "itvDate": "Próxima ITV",
+      "maintenanceDate": "Próximo mantenimiento",
+      "save": "Guardar fechas",
+      "hint": "Si dejas el mantenimiento vacío se calcula 1 año después de la entrega.",
+      "saved": "Fechas actualizadas"
+    }
+  }
+}
