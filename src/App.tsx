@@ -47,6 +47,7 @@ import AdminAudit from "./pages/AdminAudit";
 import OAuthConsent from "./pages/OAuthConsent";
 import ActiveWork from "./pages/ActiveWork";
 import DataImport from "./pages/DataImport";
+import Reminders from "./pages/Reminders";
 
 const queryClient = new QueryClient();
 
@@ -92,6 +93,7 @@ const App = () => (
                 <Route path="/admin/alerts" element={<Alerts />} />
                 <Route path="/admin/data" element={<AdminData />} />
                 <Route path="/admin/import" element={<DataImport />} />
+                <Route path="/reminders" element={<Reminders />} />
                 <Route path="/users" element={<UserManagement />} />
                 <Route path="/install" element={<InstallApp />} />
                 <Route path="/settings" element={<Settings />} />

@@ -18,6 +18,7 @@ import { AIRepairEstimateButton } from '@/components/vehicles/AIRepairEstimateBu
 import { AIDiagnosticDialog } from '@/components/vehicles/AIDiagnosticDialog';
 import { ClientApprovalsPanel } from '@/components/vehicles/ClientApprovalsPanel';
 import { ScanVinButton } from '@/components/vehicles/ScanVinButton';
+import { VehicleDatesCard } from '@/components/vehicles/VehicleDatesCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -708,6 +709,9 @@ export default function VehicleDetail() {
 
 
             <VehiclePhotos vehicleId={vehicle.id} />
+
+            {/* ITV y mantenimiento */}
+            <VehicleDatesCard vehicleId={vehicle.id} />
 
             {/* Kilometraje — visible justo encima de piezas */}
             <Card className={vehicle.mileage ? '' : 'border-amber-500/40'}>

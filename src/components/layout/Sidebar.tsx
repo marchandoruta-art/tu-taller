@@ -60,6 +60,7 @@ const adminNavigation = [
   { key: 'nav.alerts', href: '/admin/alerts', icon: AlertTriangle },
   { key: 'nav.dataManagement', href: '/admin/data', icon: Database },
   { key: 'nav.importData', href: '/admin/import', icon: FileSpreadsheet },
+  { key: 'nav.reminders', href: '/reminders', icon: BellRing },
   { key: 'nav.auditLog', href: '/admin/audit', icon: ShieldCheck },
   { key: 'nav.legal', href: '/legal', icon: Scale },
   { key: 'nav.taskTemplates', href: '/settings/templates', icon: ClipboardList },
