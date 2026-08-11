@@ -305,6 +305,94 @@ export type Database = {
           },
         ]
       }
+      client_reminders: {
+        Row: {
+          brand: string | null
+          channel: string | null
+          created_at: string
+          due_date: string
+          id: string
+          model: string | null
+          notes: string | null
+          organization_id: string
+          owner_email: string | null
+          owner_id: string | null
+          owner_name: string | null
+          owner_phone: string | null
+          plate: string
+          reminder_type: string
+          sent_at: string | null
+          sent_by: string | null
+          status: string
+          updated_at: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          brand?: string | null
+          channel?: string | null
+          created_at?: string
+          due_date: string
+          id?: string
+          model?: string | null
+          notes?: string | null
+          organization_id: string
+          owner_email?: string | null
+          owner_id?: string | null
+          owner_name?: string | null
+          owner_phone?: string | null
+          plate: string
+          reminder_type: string
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: string
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          brand?: string | null
+          channel?: string | null
+          created_at?: string
+          due_date?: string
+          id?: string
+          model?: string | null
+          notes?: string | null
+          organization_id?: string
+          owner_email?: string | null
+          owner_id?: string | null
+          owner_name?: string | null
+          owner_phone?: string | null
+          plate?: string
+          reminder_type?: string
+          sent_at?: string | null
+          sent_by?: string | null
+          status?: string
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_reminders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_reminders_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "owners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_reminders_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -1066,9 +1154,11 @@ export type Database = {
           fuel_level: number | null
           id: string
           interior_check: Json | null
+          itv_date: string | null
           maintenance_checklist: Json
           mileage: number | null
           model: string
+          next_maintenance_date: string | null
           organization_id: string | null
           owner_id: string | null
           plate: string
@@ -1100,9 +1190,11 @@ export type Database = {
           fuel_level?: number | null
           id?: string
           interior_check?: Json | null
+          itv_date?: string | null
           maintenance_checklist?: Json
           mileage?: number | null
           model: string
+          next_maintenance_date?: string | null
           organization_id?: string | null
           owner_id?: string | null
           plate: string
@@ -1134,9 +1226,11 @@ export type Database = {
           fuel_level?: number | null
           id?: string
           interior_check?: Json | null
+          itv_date?: string | null
           maintenance_checklist?: Json
           mileage?: number | null
           model?: string
+          next_maintenance_date?: string | null
           organization_id?: string | null
           owner_id?: string | null
           plate?: string
@@ -1180,6 +1274,7 @@ export type Database = {
       convert_today_appointments: { Args: never; Returns: number }
       cron_auto_clock_in: { Args: never; Returns: number }
       cron_auto_clock_out: { Args: never; Returns: number }
+      generate_client_reminders: { Args: never; Returns: number }
       get_user_organization_id: { Args: { _user_id?: string }; Returns: string }
       get_user_role: {
         Args: { _user_id: string }
