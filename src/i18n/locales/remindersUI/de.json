@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "reminders": "TÜV-Erinnerungen"
+  },
+  "reminders": {
+    "title": "TÜV- und Wartungserinnerungen",
+    "subtitle": "Automatische Hinweise an die Halter vor TÜV und Jahreswartung",
+    "generateNow": "Erinnerungen erzeugen",
+    "workshopFallback": "Werkstatt",
+    "clientFallback": "Kunde",
+    "empty": "Keine Erinnerungen in dieser Liste",
+    "openVehicle": "Fahrzeug öffnen",
+    "markSent": "Als gesendet markieren",
+    "dismiss": "Verwerfen",
+    "reopen": "Wieder offen",
+    "dueOn": "Fällig am {{date}}",
+    "sentOn": "Gesendet am {{date}} ({{channel}})",
+    "inDays": "In {{days}} Tagen",
+    "overdue": "Seit {{days}} Tagen fällig",
+    "types": { "all": "Alle", "itv": "TÜV", "maintenance": "Wartung" },
+    "tabs": { "pending": "Offen", "sent": "Gesendet", "dismissed": "Verworfen" },
+    "settings": {
+      "title": "Einstellungen",
+      "leadDays": "Tage im Voraus",
+      "save": "Speichern",
+      "hint": "Die Flotte wird täglich geprüft und Erinnerungen werden automatisch erstellt."
+    },
+    "subject": { "itv": "TÜV-Erinnerung für Ihr Fahrzeug", "maintenance": "Wartungserinnerung für Ihr Fahrzeug" },
+    "message": {
+      "itv": "Guten Tag {{name}},\n\nder TÜV Ihres {{vehicle}} (Kennzeichen {{plate}}) läuft am {{date}} ab.\n\nGern übernehmen wir die Vorabprüfung und die Terminvereinbarung.\n\nFreundliche Grüße,\n{{workshop}}",
+      "maintenance": "Guten Tag {{name}},\n\nseit der letzten Wartung Ihres {{vehicle}} (Kennzeichen {{plate}}) am {{date}} ist etwa ein Jahr vergangen.\n\nWir empfehlen die Jahreswartung.\n\nFreundliche Grüße,\n{{workshop}}"
+    },
+    "toast": {
+      "loadError": "Erinnerungen konnten nicht geladen werden",
+      "saveError": "Speichern fehlgeschlagen",
+      "generated": "Erinnerungen aktualisiert",
+      "generateError": "Erinnerungen konnten nicht erzeugt werden",
+      "leadSaved": "Vorlaufzeit gespeichert",
+      "invalidLead": "Bitte eine Zahl zwischen 1 und 365 eingeben",
+      "noPhone": "Dieser Halter hat keine Telefonnummer",
+      "noEmail": "Dieser Halter hat keine E-Mail"
+    },
+    "vehicle": {
+      "title": "TÜV und Wartung",
+      "itvDate": "Nächster TÜV",
+      "maintenanceDate": "Nächste Wartung",
+      "save": "Daten speichern",
+      "hint": "Bleibt das Wartungsdatum leer, wird es 1 Jahr nach Übergabe berechnet.",
+      "saved": "Daten aktualisiert"
+    }
+  }
+}

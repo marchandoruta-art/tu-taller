@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "reminders": "Lembretes IPO"
+  },
+  "reminders": {
+    "title": "Lembretes de inspeção e manutenção",
+    "subtitle": "Avisos automáticos aos proprietários antes da inspeção e da manutenção anual",
+    "generateNow": "Gerar avisos agora",
+    "workshopFallback": "Oficina",
+    "clientFallback": "cliente",
+    "empty": "Não há avisos nesta lista",
+    "openVehicle": "Ver ficha",
+    "markSent": "Marcar como enviado",
+    "dismiss": "Descartar",
+    "reopen": "Voltar a pendente",
+    "dueOn": "Vence em {{date}}",
+    "sentOn": "Enviado em {{date}} ({{channel}})",
+    "inDays": "Em {{days}} dias",
+    "overdue": "Atrasado {{days}} dias",
+    "types": { "all": "Todos", "itv": "Inspeção", "maintenance": "Manutenção" },
+    "tabs": { "pending": "Pendentes", "sent": "Enviados", "dismissed": "Descartados" },
+    "settings": {
+      "title": "Configuração dos avisos",
+      "leadDays": "Dias de antecedência",
+      "save": "Guardar",
+      "hint": "A frota é verificada todos os dias e os avisos são criados automaticamente."
+    },
+    "subject": { "itv": "Lembrete de inspeção do seu veículo", "maintenance": "Lembrete de manutenção do seu veículo" },
+    "message": {
+      "itv": "Estimado/a {{name}},\n\nLembramos que a inspeção do seu {{vehicle}} (matrícula {{plate}}) vence em {{date}}.\n\nPodemos fazer a pré-inspeção e marcar a data por si.\n\nCom os melhores cumprimentos,\n{{workshop}}",
+      "maintenance": "Estimado/a {{name}},\n\nPassou cerca de um ano desde a última manutenção do seu {{vehicle}} (matrícula {{plate}}) em {{date}}.\n\nRecomendamos agendar a revisão anual.\n\nCom os melhores cumprimentos,\n{{workshop}}"
+    },
+    "toast": {
+      "loadError": "Erro ao carregar os lembretes",
+      "saveError": "Não foi possível guardar",
+      "generated": "Avisos atualizados",
+      "generateError": "Não foi possível gerar os avisos",
+      "leadSaved": "Antecedência guardada",
+      "invalidLead": "Introduza um número entre 1 e 365",
+      "noPhone": "Este proprietário não tem telefone",
+      "noEmail": "Este proprietário não tem email"
+    },
+    "vehicle": {
+      "title": "Inspeção e manutenção",
+      "itvDate": "Próxima inspeção",
+      "maintenanceDate": "Próxima manutenção",
+      "save": "Guardar datas",
+      "hint": "Se a data de manutenção ficar vazia é calculada 1 ano após a entrega.",
+      "saved": "Datas atualizadas"
+    }
+  }
+}
