@@ -194,9 +194,9 @@
       "exitTypeToast": "{{label}} registrada",
       "exitFallback": "Saída",
       "eightHourTitle": "⏰ Jornada de 8 horas concluída!",
-      "eightHourDescription": "Sua saída foi registrada automaticamente.",
+      "eightHourDescription": "Lembre-se de registrar sua saída quando terminar.",
       "eightHourNotifTitle": "⏰ Jornada concluída",
-      "eightHourNotifBody": "Você completou 8 horas! Sua saída foi registrada automaticamente.",
+      "eightHourNotifBody": "Você completou 8 horas! Registre sua saída ao terminar.",
       "reminderTitle": "🕗 Lembre-se de registrar sua entrada",
       "reminderDescription": "São 7:55, comece sua jornada!",
       "exitTypes": {

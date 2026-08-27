@@ -194,9 +194,9 @@
       "exitTypeToast": "{{label}} registered",
       "exitFallback": "Clock out",
       "eightHourTitle": "⏰ 8-hour shift completed!",
-      "eightHourDescription": "Your clock-out has been registered automatically.",
+      "eightHourDescription": "Remember to clock out when you finish.",
       "eightHourNotifTitle": "⏰ Shift completed",
-      "eightHourNotifBody": "You've completed 8 hours! Your clock-out was registered automatically.",
+      "eightHourNotifBody": "You've completed 8 hours! Remember to clock out when you finish.",
       "reminderTitle": "🕗 Remember to clock in",
       "reminderDescription": "It's 7:55, start your shift!",
       "exitTypes": {

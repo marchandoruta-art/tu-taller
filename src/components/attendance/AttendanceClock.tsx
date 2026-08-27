@@ -62,7 +62,6 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
   }, [user]);
 
   const [eightHourAlertShown, setEightHourAlertShown] = useState(false);
-  const [autoStoppedAt8h, setAutoStoppedAt8h] = useState(false);
 
   // Update elapsed time for active session
   useEffect(() => {
@@ -86,7 +85,9 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
     };
   }, [activeSession]);
 
-  // 8-hour alarm: check total accumulated today + active session, auto clock-out
+  // Aviso al llegar a 8 horas. Solo avisa: la salida la registra la persona.
+  // Cerrar desde aqui escribia una hora de salida que nadie habia hecho, y el
+  // art. 34.9 ET exige que el registro recoja la hora real.
   useEffect(() => {
     if (eightHourAlertShown) return;
     try {
@@ -108,16 +109,11 @@ export const AttendanceClock = forwardRef<HTMLDivElement>(function AttendanceClo
         } catch (e) {
           console.warn('Browser notification failed:', e);
         }
-        // Auto clock-out
-        if (activeSession && !autoStoppedAt8h) {
-          setAutoStoppedAt8h(true);
-          clockOut('normal');
-        }
       }
     } catch (e) {
       console.error('Error in 8h check:', e);
     }
-  }, [elapsed, todayLogs, eightHourAlertShown, activeSession, autoStoppedAt8h]);
+  }, [elapsed, todayLogs, eightHourAlertShown]);
 
   // Reset 8h alert when session changes (new day)
   useEffect(() => {

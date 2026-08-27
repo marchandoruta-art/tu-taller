@@ -194,9 +194,9 @@
       "exitTypeToast": "{{label}} enregistrée",
       "exitFallback": "Sortie",
       "eightHourTitle": "⏰ Journée de 8 heures terminée !",
-      "eightHourDescription": "Votre sortie a été enregistrée automatiquement.",
+      "eightHourDescription": "N'oubliez pas de pointer votre sortie en fin de journée.",
       "eightHourNotifTitle": "⏰ Journée terminée",
-      "eightHourNotifBody": "Vous avez complété 8 heures ! Votre sortie a été enregistrée automatiquement.",
+      "eightHourNotifBody": "Vous avez complété 8 heures ! N'oubliez pas de pointer votre sortie.",
       "reminderTitle": "🕗 N'oubliez pas de pointer votre entrée",
       "reminderDescription": "Il est 7h55, commencez votre journée !",
       "exitTypes": {

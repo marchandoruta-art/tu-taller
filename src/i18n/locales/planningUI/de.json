@@ -194,9 +194,9 @@
       "exitTypeToast": "{{label}} registriert",
       "exitFallback": "Ausstempeln",
       "eightHourTitle": "⏰ 8-Stunden-Schicht abgeschlossen!",
-      "eightHourDescription": "Ihr Ausstempeln wurde automatisch registriert.",
+      "eightHourDescription": "Denken Sie daran, sich beim Feierabend auszustempeln.",
       "eightHourNotifTitle": "⏰ Schicht abgeschlossen",
-      "eightHourNotifBody": "Sie haben 8 Stunden erreicht! Ihr Ausstempeln wurde automatisch registriert.",
+      "eightHourNotifBody": "Sie haben 8 Stunden erreicht! Stempeln Sie sich beim Feierabend aus.",
       "reminderTitle": "🕗 Denken Sie ans Einstempeln",
       "reminderDescription": "Es ist 7:55 Uhr, beginnen Sie Ihre Schicht!",
       "exitTypes": {

@@ -58,21 +58,40 @@ export default function Onboarding() {
 
       if (orgError) throw orgError;
 
-      // Update profile with organization_id
+      // La ficha puede no existir en cuentas antiguas. Con `update` eso no daria
+      // error: afectaria a cero filas en silencio y el usuario se quedaria aqui
+      // atascado sin saber por que. Con `upsert` se crea si falta.
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ organization_id: org.id })
-        .eq('user_id', user.id);
+        .upsert(
+          {
+            user_id: user.id,
+            organization_id: org.id,
+            full_name: profile?.full_name || user.email || orgName.trim(),
+          },
+          { onConflict: 'user_id' },
+        )
+        .select()
+        .single();
 
       if (profileError) throw profileError;
 
-      // Update user_roles with organization_id and make user admin
-      const { error: roleError } = await supabase
+      // Mismo motivo: si no hay fila de rol, hay que crearla, no actualizarla.
+      const { data: rolesTocados, error: roleError } = await supabase
         .from('user_roles')
         .update({ organization_id: org.id, role: 'admin' })
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .select();
 
       if (roleError) throw roleError;
+
+      if (!rolesTocados || rolesTocados.length === 0) {
+        const { error: roleInsertError } = await supabase
+          .from('user_roles')
+          .insert({ user_id: user.id, organization_id: org.id, role: 'admin' });
+
+        if (roleInsertError) throw roleInsertError;
+      }
 
       await refetch();
       toast.success(t('authUI.onboarding.createSuccess'));
@@ -115,26 +134,48 @@ export default function Onboarding() {
 
       const org = orgs[0];
 
-      // Update profile with organization_id
+      // La ficha puede no existir en cuentas antiguas. Con `update` eso no daria
+      // error: afectaria a cero filas en silencio y el usuario se quedaria aqui
+      // atascado sin saber por que. Con `upsert` se crea si falta.
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ organization_id: org.id })
-        .eq('user_id', user.id);
+        .upsert(
+          {
+            user_id: user.id,
+            organization_id: org.id,
+            full_name: profile?.full_name || user.email || org.name,
+          },
+          { onConflict: 'user_id' },
+        )
+        .select()
+        .single();
 
       if (profileError) {
         console.error('Error updating profile:', profileError);
         throw profileError;
       }
 
-      // Update user_roles with organization_id
-      const { error: roleError } = await supabase
+      // Mismo motivo: si no hay fila de rol, hay que crearla, no actualizarla.
+      const { data: rolesTocados, error: roleError } = await supabase
         .from('user_roles')
         .update({ organization_id: org.id })
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .select();
 
       if (roleError) {
         console.error('Error updating role:', roleError);
         throw roleError;
+      }
+
+      if (!rolesTocados || rolesTocados.length === 0) {
+        const { error: roleInsertError } = await supabase
+          .from('user_roles')
+          .insert({ user_id: user.id, organization_id: org.id, role: 'mecanico' });
+
+        if (roleInsertError) {
+          console.error('Error creating role:', roleInsertError);
+          throw roleInsertError;
+        }
       }
 
       await refetch();
