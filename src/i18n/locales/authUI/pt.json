@@ -17,7 +17,23 @@
       "signInSuccess": "Bem-vindo!",
       "signUpErrorTitle": "Erro ao registar",
       "signUpSuccessTitle": "Conta criada!",
-      "signUpSuccessDescription": "Já pode aceder ao sistema."
+      "signUpSuccessDescription": "Já pode aceder ao sistema.",
+      "errors": {
+        "captchaFallido": "Não foi possível verificar que não és um robô. Recarrega a página e tenta outra vez.",
+        "contrasenaDebil": "Essa palavra-passe não é segura: ou é demasiado curta ou aparece em listas de palavras-passe divulgadas. Escolhe outra mais longa e diferente.",
+        "contrasenaRepetida": "A nova palavra-passe é igual à anterior. Escolhe outra.",
+        "correoNoValido": "Esse e-mail não tem um formato válido.",
+        "correoSinConfirmar": "Ainda não confirmaste o teu e-mail. Procura a mensagem de registo na tua caixa de entrada e vê também no spam.",
+        "credencialesInvalidas": "O e-mail ou a palavra-passe não estão corretos. Verifica se o e-mail está escrito tal e qual, sem acrescentar nada no fim.",
+        "cuentaDesactivada": "Esta conta está desativada. Fala com a direção da oficina.",
+        "cuentaYaExiste": "Já existe uma conta com esse e-mail. Entra com ela ou pede uma nova palavra-passe em \"Esqueceste-te da palavra-passe?\".",
+        "datosNoValidos": "Faltam dados ou algum não é válido. Verifica o formulário.",
+        "demasiadosCorreos": "Foram enviados demasiados e-mails seguidos. Espera uns minutos antes de pedir outro.",
+        "demasiadosIntentos": "Demasiadas tentativas seguidas. Espera uns minutos e tenta de novo.",
+        "enlaceCaducado": "A ligação expirou ou já foi utilizada. Pede uma nova.",
+        "registroCerrado": "O registo de novas contas está fechado. Pede à direção da oficina que te crie a conta.",
+        "sinConexion": "Sem ligação ao servidor. Verifica a tua ligação à internet."
+      }
     },
     "onboarding": {
       "welcome": "Bem-vindo, {{name}}!",

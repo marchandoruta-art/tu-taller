@@ -17,7 +17,23 @@
       "signInSuccess": "Willkommen!",
       "signUpErrorTitle": "Fehler bei der Registrierung",
       "signUpSuccessTitle": "Konto erstellt!",
-      "signUpSuccessDescription": "Sie können jetzt auf das System zugreifen."
+      "signUpSuccessDescription": "Sie können jetzt auf das System zugreifen.",
+      "errors": {
+        "captchaFallido": "Wir konnten nicht überprüfen, dass du kein Roboter bist. Lade die Seite neu und versuche es erneut.",
+        "contrasenaDebil": "Dieses Passwort ist nicht sicher: Es ist entweder zu kurz oder es steht in bekannten Listen geleakter Passwörter. Wähle ein anderes, längeres.",
+        "contrasenaRepetida": "Das neue Passwort ist dasselbe wie das alte. Wähle ein anderes.",
+        "correoNoValido": "Diese E-Mail-Adresse ist ungültig.",
+        "correoSinConfirmar": "Du hast deine E-Mail noch nicht bestätigt. Suche die Anmeldemail in deinem Postfach und schau auch im Spam-Ordner nach.",
+        "credencialesInvalidas": "E-Mail oder Passwort ist nicht korrekt. Prüfe, ob die E-Mail genau so geschrieben ist, ohne Zusatz am Ende.",
+        "cuentaDesactivada": "Dieses Konto ist deaktiviert. Wende dich an die Werkstattleitung.",
+        "cuentaYaExiste": "Es gibt bereits ein Konto mit dieser E-Mail. Melde dich damit an oder fordere über „Passwort vergessen?\" ein neues Passwort an.",
+        "datosNoValidos": "Es fehlen Daten oder etwas ist ungültig. Bitte prüfe das Formular.",
+        "demasiadosCorreos": "Es wurden zu viele E-Mails hintereinander gesendet. Warte ein paar Minuten, bevor du eine weitere anforderst.",
+        "demasiadosIntentos": "Zu viele Versuche hintereinander. Warte ein paar Minuten und versuche es erneut.",
+        "enlaceCaducado": "Der Link ist abgelaufen oder wurde bereits verwendet. Fordere einen neuen an.",
+        "registroCerrado": "Die Registrierung neuer Konten ist geschlossen. Bitte die Werkstattleitung, dich anzulegen.",
+        "sinConexion": "Keine Verbindung zum Server. Prüfe deine Internetverbindung."
+      }
     },
     "onboarding": {
       "welcome": "Willkommen, {{name}}!",

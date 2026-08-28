@@ -17,7 +17,23 @@
       "signInSuccess": "Welcome!",
       "signUpErrorTitle": "Sign up error",
       "signUpSuccessTitle": "Account created!",
-      "signUpSuccessDescription": "You can now access the system."
+      "signUpSuccessDescription": "You can now access the system.",
+      "errors": {
+        "captchaFallido": "We could not verify that you are not a robot. Reload the page and try again.",
+        "contrasenaDebil": "That password is not safe: it is either too short or it appears in known leaked-password lists. Choose a different, longer one.",
+        "contrasenaRepetida": "The new password is the same as the old one. Choose a different one.",
+        "correoNoValido": "That email address is not valid.",
+        "correoSinConfirmar": "You have not confirmed your email yet. Look for the sign-up message in your inbox, and check your spam folder too.",
+        "credencialesInvalidas": "The email or password is not correct. Check that the email is typed exactly, with nothing added at the end.",
+        "cuentaDesactivada": "This account is disabled. Talk to the workshop management.",
+        "cuentaYaExiste": "An account with that email already exists. Sign in with it, or request a new password from \"Forgot your password?\".",
+        "datosNoValidos": "Some data is missing or invalid. Please check the form.",
+        "demasiadosCorreos": "Too many emails have been sent in a row. Wait a few minutes before requesting another.",
+        "demasiadosIntentos": "Too many attempts in a row. Wait a few minutes and try again.",
+        "enlaceCaducado": "The link has expired or has already been used. Request a new one.",
+        "registroCerrado": "New account sign-up is closed. Ask the workshop management to create your account.",
+        "sinConexion": "No connection to the server. Check your internet connection."
+      }
     },
     "onboarding": {
       "welcome": "Welcome, {{name}}!",

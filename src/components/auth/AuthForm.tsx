@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Wrench, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { LanguageSelector } from '@/components/settings/LanguageSelector';
+import { traducirErrorAuth } from '@/lib/authErrors';
 
 export function AuthForm() {
   const { t } = useTranslation();
@@ -24,7 +25,7 @@ export function AuthForm() {
 
     const { error } = await signIn(email, password);
     if (error) {
-      toast.error(t('authUI.auth.signInErrorTitle'), { description: error.message });
+      toast.error(t('authUI.auth.signInErrorTitle'), { description: traducirErrorAuth(error, t) });
     } else {
       toast.success(t('authUI.auth.signInSuccess'));
     }
@@ -41,7 +42,7 @@ export function AuthForm() {
 
     const { error } = await signUp(email, password, fullName);
     if (error) {
-      toast.error(t('authUI.auth.signUpErrorTitle'), { description: error.message });
+      toast.error(t('authUI.auth.signUpErrorTitle'), { description: traducirErrorAuth(error, t) });
     } else {
       toast.success(t('authUI.auth.signUpSuccessTitle'), { description: t('authUI.auth.signUpSuccessDescription') });
     }

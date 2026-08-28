@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Wrench, Loader2, Lock } from 'lucide-react';
 import { toast } from 'sonner';
+import { traducirErrorAuth } from '@/lib/authErrors';
 
 export default function ResetPassword() {
   const { t } = useTranslation();
@@ -129,7 +130,7 @@ export default function ResetPassword() {
     const { error } = await supabase.auth.updateUser({ password });
 
     if (error) {
-      toast.error(t('authUI.resetPassword.updateErrorTitle'), { description: error.message });
+      toast.error(t('authUI.resetPassword.updateErrorTitle'), { description: traducirErrorAuth(error, t) });
     } else {
       toast.success(t('authUI.resetPassword.updateSuccess'));
       await supabase.auth.signOut();

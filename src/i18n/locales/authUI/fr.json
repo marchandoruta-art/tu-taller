@@ -17,7 +17,23 @@
       "signInSuccess": "Bienvenue !",
       "signUpErrorTitle": "Erreur d'inscription",
       "signUpSuccessTitle": "Compte créé !",
-      "signUpSuccessDescription": "Vous pouvez maintenant accéder au système."
+      "signUpSuccessDescription": "Vous pouvez maintenant accéder au système.",
+      "errors": {
+        "captchaFallido": "Nous n'avons pas pu vérifier que tu n'es pas un robot. Recharge la page et réessaie.",
+        "contrasenaDebil": "Ce mot de passe n'est pas sûr : il est trop court ou il figure dans des listes de mots de passe divulgués. Choisis-en un autre, plus long.",
+        "contrasenaRepetida": "Le nouveau mot de passe est identique à l'ancien. Choisis-en un autre.",
+        "correoNoValido": "Cette adresse e-mail n'est pas valide.",
+        "correoSinConfirmar": "Tu n'as pas encore confirmé ton e-mail. Cherche le message d'inscription dans ta boîte de réception, et regarde aussi dans les spams.",
+        "credencialesInvalidas": "L'e-mail ou le mot de passe n'est pas correct. Vérifie que l'e-mail est écrit tel quel, sans rien ajouter à la fin.",
+        "cuentaDesactivada": "Ce compte est désactivé. Adresse-toi à la direction du garage.",
+        "cuentaYaExiste": "Un compte existe déjà avec cet e-mail. Connecte-toi avec, ou demande un nouveau mot de passe via « Mot de passe oublié ? ».",
+        "datosNoValidos": "Des données manquent ou sont invalides. Vérifie le formulaire.",
+        "demasiadosCorreos": "Trop d'e-mails ont été envoyés d'affilée. Attends quelques minutes avant d'en demander un autre.",
+        "demasiadosIntentos": "Trop de tentatives d'affilée. Attends quelques minutes et réessaie.",
+        "enlaceCaducado": "Le lien a expiré ou a déjà été utilisé. Demandes-en un nouveau.",
+        "registroCerrado": "La création de nouveaux comptes est fermée. Demande à la direction du garage de t'inscrire.",
+        "sinConexion": "Pas de connexion au serveur. Vérifie ta connexion internet."
+      }
     },
     "onboarding": {
       "welcome": "Bienvenue, {{name}} !",

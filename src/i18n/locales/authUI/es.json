@@ -17,7 +17,23 @@
       "signInSuccess": "¡Bienvenido!",
       "signUpErrorTitle": "Error al registrarse",
       "signUpSuccessTitle": "¡Cuenta creada!",
-      "signUpSuccessDescription": "Ya puedes acceder al sistema."
+      "signUpSuccessDescription": "Ya puedes acceder al sistema.",
+      "errors": {
+        "captchaFallido": "No se ha podido verificar que no eres un robot. Recarga la página e inténtalo otra vez.",
+        "contrasenaDebil": "Esa contraseña no es segura: o es demasiado corta o aparece en listas de contraseñas filtradas. Elige otra más larga y distinta.",
+        "contrasenaRepetida": "La contraseña nueva es la misma que la anterior. Elige una distinta.",
+        "correoNoValido": "Ese correo no tiene un formato válido.",
+        "correoSinConfirmar": "Todavía no has confirmado tu correo. Busca el mensaje de alta en tu bandeja de entrada y mira también en spam.",
+        "credencialesInvalidas": "El correo o la contraseña no son correctos. Revisa que el correo esté escrito tal cual, sin añadir nada al final.",
+        "cuentaDesactivada": "Esta cuenta está desactivada. Habla con la dirección del taller.",
+        "cuentaYaExiste": "Ya existe una cuenta con ese correo. Entra con ella, o pide una contraseña nueva desde \"¿Olvidaste tu contraseña?\".",
+        "datosNoValidos": "Faltan datos o alguno no es válido. Revisa el formulario.",
+        "demasiadosCorreos": "Se han enviado demasiados correos seguidos. Espera unos minutos antes de pedir otro.",
+        "demasiadosIntentos": "Demasiados intentos seguidos. Espera unos minutos y vuelve a probar.",
+        "enlaceCaducado": "El enlace ha caducado o ya se ha usado. Pide uno nuevo.",
+        "registroCerrado": "El registro de cuentas nuevas está cerrado. Pide a la dirección del taller que te dé de alta.",
+        "sinConexion": "No hay conexión con el servidor. Comprueba tu conexión a internet."
+      }
     },
     "onboarding": {
       "welcome": "¡Bienvenido, {{name}}!",
