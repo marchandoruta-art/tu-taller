@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { puedeGestionar } from '@/lib/permisos';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useLabels } from '@/hooks/useLabels';
 import { useTranslation } from 'react-i18next';
@@ -51,12 +52,14 @@ const navigation = [
   { key: 'nav.installApp', href: '/install', icon: Download },
 ];
 
+// Reparto acordado con el cliente: la oficina gestiona el taller, pero los
+// ajustes, las cuentas de la gente y el fichaje de la plantilla son de admin.
 const adminNavigation = [
   { key: 'nav.activeWork', href: '/admin/active-work', icon: Timer, badgeKey: 'active' as const },
-  { key: 'nav.users', href: '/users', icon: Users },
-  { key: 'nav.myWorkshop', href: '/organization', icon: Building2 },
+  { key: 'nav.users', href: '/users', icon: Users, soloAdmin: true },
+  { key: 'nav.myWorkshop', href: '/organization', icon: Building2, soloAdmin: true },
   { key: 'nav.workload', href: '/admin/workload', icon: Users },
-  { key: 'nav.attendance', href: '/admin/attendance', icon: CalendarClock },
+  { key: 'nav.attendance', href: '/admin/attendance', icon: CalendarClock, soloAdmin: true },
   { key: 'nav.productivity', href: '/admin/productivity', icon: BarChart3 },
   { key: 'nav.alerts', href: '/admin/alerts', icon: AlertTriangle },
   { key: 'nav.dataManagement', href: '/admin/data', icon: Database },
@@ -65,7 +68,7 @@ const adminNavigation = [
   { key: 'nav.auditLog', href: '/admin/audit', icon: ShieldCheck },
   { key: 'nav.legal', href: '/legal', icon: Scale },
   { key: 'nav.taskTemplates', href: '/settings/templates', icon: ClipboardList },
-  { key: 'nav.settings', href: '/settings', icon: Settings },
+  { key: 'nav.settings', href: '/settings', icon: Settings, soloAdmin: true },
 ];
 
 interface SidebarProps {
@@ -173,7 +176,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             })}
           </div>
 
-          {role === 'admin' && (
+          {puedeGestionar(role) && (
             <div className="pt-4">
               {!collapsed && (
                 <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
@@ -181,7 +184,9 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 </p>
               )}
               <div className="space-y-1">
-                {adminNavigation.map((item) => {
+                {adminNavigation
+                  .filter((item) => role === 'admin' || !(item as any).soloAdmin)
+                  .map((item) => {
                   const badge =
                     (item as any).badgeKey === 'active' && activeTimersCount > 0
                       ? activeTimersCount
@@ -226,24 +231,6 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             </div>
           )}
 
-          {role === 'oficina' && (
-            <div className="pt-4 space-y-1">
-              <NavLink
-                to="/settings/templates"
-                className={({ isActive }) =>
-                  cn(
-                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                    isActive ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                    collapsed && 'justify-center px-2'
-                  )
-                }
-                title={collapsed ? t('nav.templates') : undefined}
-              >
-                <ClipboardList className="h-5 w-5 flex-shrink-0" />
-                {!collapsed && <span>{t('nav.taskTemplates')}</span>}
-              </NavLink>
-            </div>
-          )}
         </nav>
 
         {/* User */}

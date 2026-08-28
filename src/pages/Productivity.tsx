@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useTranslation } from 'react-i18next';
+import { puedeGestionar } from '@/lib/permisos';
 
 interface UserProductivity {
   user_id: string;
@@ -55,7 +56,7 @@ export default function Productivity() {
   const [periodType, setPeriodType] = useState<'week' | 'month'>('week');
 
   useEffect(() => {
-    if (role === 'admin' && organizationId) {
+    if (puedeGestionar(role) && organizationId) {
       fetchProductivityData();
     }
   }, [role, organizationId, currentPeriod, periodType]);
@@ -219,7 +220,7 @@ export default function Productivity() {
     );
   }
 
-  if (role !== 'admin') {
+  if (!puedeGestionar(role)) {
     return <Navigate to="/" replace />;
   }
 

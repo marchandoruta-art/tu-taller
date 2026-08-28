@@ -33,6 +33,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { parseCsv, normalizeHeader, parseFlexibleDate, parseFlexibleNumber } from '@/lib/parseCsv';
+import { puedeGestionar } from '@/lib/permisos';
 
 type ImportMode = 'vehicles' | 'history';
 
@@ -92,7 +93,7 @@ export default function DataImport() {
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<ImportResult | null>(null);
 
-  if (role !== 'admin') {
+  if (!puedeGestionar(role)) {
     navigate('/');
     return null;
   }

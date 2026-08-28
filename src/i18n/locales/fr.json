@@ -9,7 +9,7 @@
   },
   "nav": {
     "management": "Gestion",
-    "admin": "Admin",
+    "admin": "Gestion",
     "dashboard": "Tableau de bord",
     "vehicles": "Véhicules",
     "plateSearch": "Recherche plaque",

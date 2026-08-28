@@ -23,6 +23,7 @@ import { toast } from 'sonner';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import { downloadCsv, formatMinutes } from '@/lib/exportCsv';
 import { useActiveVehicleTimers } from '@/hooks/useActiveVehicleTimers';
+import { puedeGestionar } from '@/lib/permisos';
 
 const statusOrder: VehicleStatus[] = ['recibido', 'en_reparacion', 'presupuestar', 'presupuestado', 'pendiente_piezas', 'terminado', 'facturado', 'entregado'];
 type ViewMode = 'kanban' | 'charts' | 'list';
@@ -245,7 +246,7 @@ export default function Dashboard() {
   };
 
 
-  const isAdmin = role === 'admin';
+  const isAdmin = puedeGestionar(role);
 
   if (loading) {
     return (

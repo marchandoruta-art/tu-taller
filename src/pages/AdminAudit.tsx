@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { downloadCsv } from '@/lib/exportCsv';
 import { Profile } from '@/lib/types';
 import { useTranslation } from 'react-i18next';
+import { puedeGestionar } from '@/lib/permisos';
 
 interface AuditEntry {
   id: string;
@@ -45,7 +46,7 @@ export default function AdminAudit() {
   const [to, setTo] = useState('');
 
   useEffect(() => {
-    if (role !== 'admin') { navigate('/'); return; }
+    if (!puedeGestionar(role)) { navigate('/'); return; }
     if (!organizationId) return;
     fetch();
   }, [role, organizationId]);

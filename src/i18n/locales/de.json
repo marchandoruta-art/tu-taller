@@ -9,7 +9,7 @@
   },
   "nav": {
     "management": "Verwaltung",
-    "admin": "Admin",
+    "admin": "Verwaltung",
     "dashboard": "Dashboard",
     "vehicles": "Fahrzeuge",
     "plateSearch": "Kennzeichensuche",

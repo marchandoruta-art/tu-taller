@@ -25,6 +25,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { deleteVehiclePermanently } from '@/lib/deleteVehicle';
 import { downloadCsv, formatMinutes } from '@/lib/exportCsv';
+import { puedeGestionar } from '@/lib/permisos';
 
 interface ArchivedVehicle extends VehicleWithOwner {
   parts_list?: { id: string; name: string; quantity: number; reference?: string | null; notes?: string | null }[];
@@ -45,7 +46,7 @@ export default function RepairHistory() {
   const [yearFilter, setYearFilter] = useState<string>('all');
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
-  const isAdmin = role === 'admin';
+  const isAdmin = puedeGestionar(role);
 
   useEffect(() => {
     fetchArchivedVehicles();

@@ -27,6 +27,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { deleteVehiclePermanently } from '@/lib/deleteVehicle';
+import { puedeGestionar } from '@/lib/permisos';
 
 interface VehicleCardProps {
   vehicle: VehicleWithOwner;
@@ -51,7 +52,7 @@ export function VehicleCard({ vehicle, totalTime = 0, activeTimer, showNextActio
   const [confirmPlate, setConfirmPlate] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [now, setNow] = useState(() => Date.now());
-  const isAdmin = role === 'admin';
+  const isAdmin = puedeGestionar(role);
 
   useEffect(() => {
     if (!activeTimer) return;

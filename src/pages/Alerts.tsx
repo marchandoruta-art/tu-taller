@@ -19,6 +19,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { differenceInDays, differenceInHours } from 'date-fns';
+import { puedeGestionar } from '@/lib/permisos';
 
 interface StalledVehicle extends VehicleWithOwner {
   daysStalled: number;
@@ -43,7 +44,7 @@ export default function Alerts() {
   const [pendingPartsVehicles, setPendingPartsVehicles] = useState<StalledVehicle[]>([]);
 
   useEffect(() => {
-    if (role !== 'admin') {
+    if (!puedeGestionar(role)) {
       navigate('/');
       return;
     }

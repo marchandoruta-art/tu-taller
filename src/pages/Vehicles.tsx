@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { QuickPlateDialog } from '@/components/vehicles/QuickPlateDialog';
 import { useActiveVehicleTimers } from '@/hooks/useActiveVehicleTimers';
+import { puedeGestionar } from '@/lib/permisos';
 
 export default function Vehicles() {
   const { t } = useTranslation();
@@ -27,7 +28,7 @@ export default function Vehicles() {
   const [includeArchived, setIncludeArchived] = useState(false);
   const [assignedFilter, setAssignedFilter] = useState<string>('all');
   const [operators, setOperators] = useState<{ user_id: string; full_name: string; count: number }[]>([]);
-  const isAdmin = role === 'admin';
+  const isAdmin = puedeGestionar(role);
   const { timers: activeTimers } = useActiveVehicleTimers();
 
 

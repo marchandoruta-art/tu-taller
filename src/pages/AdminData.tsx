@@ -26,6 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { puedeGestionar } from '@/lib/permisos';
 
 export default function AdminData() {
   const { t } = useTranslation();
@@ -44,7 +45,7 @@ export default function AdminData() {
   const [historyVehiclePlate, setHistoryVehiclePlate] = useState<string>('');
 
   useEffect(() => {
-    if (role === 'admin') {
+    if (puedeGestionar(role)) {
       fetchData();
     } else {
       setLoading(false);
@@ -130,7 +131,7 @@ export default function AdminData() {
     (o.dni && o.dni.toLowerCase().includes(searchOwners.toLowerCase()))
   );
 
-  if (role !== 'admin') {
+  if (!puedeGestionar(role)) {
     return (
       <MainLayout>
         <div className="flex flex-col items-center justify-center h-[60vh] text-center">
