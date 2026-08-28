@@ -1,0 +1,61 @@
+{
+  "jornadaUI": {
+    "periodo": {
+      "semana": "Semana",
+      "mes": "Mes",
+      "anio": "Año"
+    },
+    "origen": {
+      "trabajador": "Fichado por la persona",
+      "correccion": "Corregido",
+      "automatico": "Generado automáticamente",
+      "abierta": "Sin cerrar"
+    },
+    "tabla": {
+      "dia": "Día",
+      "entrada": "Entrada",
+      "salida": "Salida",
+      "total": "Total",
+      "procedencia": "Procedencia",
+      "sinCerrar": "Sin cerrar"
+    },
+    "mio": {
+      "titulo": "Mi registro de jornada",
+      "descargar": "Descargar",
+      "anterior": "Periodo anterior",
+      "siguiente": "Periodo siguiente",
+      "totalHoras": "Horas del periodo",
+      "jornadas": "Jornadas",
+      "sinCerrar": "Sin cerrar",
+      "sinRegistros": "No hay jornadas registradas en este periodo.",
+      "avisoFabricado": "{{count}} de estas jornadas las generó el sistema automáticamente antes de agosto de 2026, no las fichó nadie. Están señaladas para que se distingan de las reales."
+    },
+    "corregir": {
+      "titulo": "Corregir jornada",
+      "subtitulo": "{{nombre}}, jornada del {{dia}}",
+      "motivo": "Motivo de la corrección",
+      "motivoEjemplo": "Ej.: olvidó fichar la salida al terminar el turno",
+      "motivoAyuda": "Queda guardado junto a la corrección, con tu nombre y la fecha. Es lo que justifica el cambio ante una inspección.",
+      "totalResultante": "Total que quedará registrado:",
+      "horasInvertidas": "La salida tiene que ser posterior a la entrada.",
+      "guardar": "Guardar corrección",
+      "cancelar": "Cancelar",
+      "hecho": "Jornada corregida",
+      "errorTitulo": "No se ha podido corregir",
+      "accion": "Corregir"
+    },
+    "documento": {
+      "titulo": "Registro de jornada laboral",
+      "amparo": "Documento expedido conforme al artículo 34.9 del Estatuto de los Trabajadores.",
+      "taller": "Empresa",
+      "trabajador": "Trabajador",
+      "periodo": "Periodo",
+      "expedido": "Expedido el",
+      "totalPeriodo": "Total del periodo",
+      "sinRegistros": "No hay jornadas registradas en este periodo.",
+      "avisoFabricado": "{{count}} jornadas de este periodo fueron generadas automáticamente por el sistema y no corresponden a un fichaje real de la persona.",
+      "avisoCorregido": "{{count}} jornadas han sido corregidas por la dirección. El motivo de cada corrección figura junto a la jornada.",
+      "conservacion": "Este registro se conserva durante cuatro años y está a disposición del trabajador, de sus representantes legales y de la Inspección de Trabajo y Seguridad Social."
+    }
+  }
+}

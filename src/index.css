@@ -251,3 +251,54 @@
   }
 }
 
+
+/* ---------------------------------------------------------------------------
+   Registro de jornada imprimible.
+
+   El art. 34.9 ET obliga a tener el registro a disposicion del trabajador, asi
+   que tiene que poder llevarselo en papel o en PDF. Se resuelve con el dialogo
+   de impresion del navegador en vez de con una libreria de PDF: son 110 kB
+   comprimidos menos en una aplicacion que se abre desde el movil del taller.
+
+   En pantalla el documento no existe. Al imprimir se oculta todo lo demas y se
+   deja solo el, colocado desde el origen de la pagina.
+--------------------------------------------------------------------------- */
+.registro-imprimible {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .registro-imprimible,
+  .registro-imprimible * {
+    visibility: visible;
+  }
+
+  .registro-imprimible {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 0;
+    color: #000;
+    background: #fff;
+    font-size: 11pt;
+  }
+
+  /* Que no parta una jornada por la mitad entre dos hojas. */
+  .registro-imprimible tr {
+    break-inside: avoid;
+  }
+
+  .registro-imprimible thead {
+    display: table-header-group;
+  }
+
+  @page {
+    margin: 16mm;
+  }
+}

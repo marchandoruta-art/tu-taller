@@ -1,0 +1,61 @@
+{
+  "jornadaUI": {
+    "periodo": {
+      "semana": "Woche",
+      "mes": "Monat",
+      "anio": "Jahr"
+    },
+    "origen": {
+      "trabajador": "Von der Person gestempelt",
+      "correccion": "Korrigiert",
+      "automatico": "Automatisch erzeugt",
+      "abierta": "Nicht abgeschlossen"
+    },
+    "tabla": {
+      "dia": "Tag",
+      "entrada": "Kommen",
+      "salida": "Gehen",
+      "total": "Gesamt",
+      "procedencia": "Herkunft",
+      "sinCerrar": "Nicht abgeschlossen"
+    },
+    "mio": {
+      "titulo": "Meine Arbeitszeiterfassung",
+      "descargar": "Herunterladen",
+      "anterior": "Vorheriger Zeitraum",
+      "siguiente": "Nächster Zeitraum",
+      "totalHoras": "Stunden im Zeitraum",
+      "jornadas": "Schichten",
+      "sinCerrar": "Nicht abgeschlossen",
+      "sinRegistros": "In diesem Zeitraum wurden keine Schichten erfasst.",
+      "avisoFabricado": "{{count}} dieser Schichten wurden vor August 2026 automatisch vom System erzeugt und von niemandem gestempelt. Sie sind markiert, damit sie von den echten unterschieden werden können."
+    },
+    "corregir": {
+      "titulo": "Schicht korrigieren",
+      "subtitulo": "{{nombre}}, Schicht vom {{dia}}",
+      "motivo": "Grund der Korrektur",
+      "motivoEjemplo": "z. B. hat vergessen, am Schichtende auszustempeln",
+      "motivoAyuda": "Wird zusammen mit der Korrektur, deinem Namen und dem Datum gespeichert. Das rechtfertigt die Änderung gegenüber einer Arbeitsinspektion.",
+      "totalResultante": "Gesamtzeit, die erfasst wird:",
+      "horasInvertidas": "Das Gehen muss nach dem Kommen liegen.",
+      "guardar": "Korrektur speichern",
+      "cancelar": "Abbrechen",
+      "hecho": "Schicht korrigiert",
+      "errorTitulo": "Korrektur nicht möglich",
+      "accion": "Korrigieren"
+    },
+    "documento": {
+      "titulo": "Arbeitszeiterfassung",
+      "amparo": "Dokument ausgestellt gemäß Artikel 34.9 des spanischen Arbeitnehmerstatuts.",
+      "taller": "Unternehmen",
+      "trabajador": "Arbeitnehmer",
+      "periodo": "Zeitraum",
+      "expedido": "Ausgestellt am",
+      "totalPeriodo": "Gesamt im Zeitraum",
+      "sinRegistros": "In diesem Zeitraum wurden keine Schichten erfasst.",
+      "avisoFabricado": "{{count}} Schichten in diesem Zeitraum wurden automatisch vom System erzeugt und entsprechen keiner echten Stempelung der Person.",
+      "avisoCorregido": "{{count}} Schichten wurden von der Leitung korrigiert. Der Grund jeder Korrektur steht neben der Schicht.",
+      "conservacion": "Diese Aufzeichnung wird vier Jahre aufbewahrt und steht dem Arbeitnehmer, seinen gesetzlichen Vertretern sowie der Arbeits- und Sozialversicherungsinspektion zur Verfügung."
+    }
+  }
+}

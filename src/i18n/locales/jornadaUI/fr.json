@@ -1,0 +1,61 @@
+{
+  "jornadaUI": {
+    "periodo": {
+      "semana": "Semaine",
+      "mes": "Mois",
+      "anio": "Année"
+    },
+    "origen": {
+      "trabajador": "Pointé par la personne",
+      "correccion": "Corrigé",
+      "automatico": "Généré automatiquement",
+      "abierta": "Non clôturé"
+    },
+    "tabla": {
+      "dia": "Jour",
+      "entrada": "Entrée",
+      "salida": "Sortie",
+      "total": "Total",
+      "procedencia": "Provenance",
+      "sinCerrar": "Non clôturé"
+    },
+    "mio": {
+      "titulo": "Mon registre du temps de travail",
+      "descargar": "Télécharger",
+      "anterior": "Période précédente",
+      "siguiente": "Période suivante",
+      "totalHoras": "Heures de la période",
+      "jornadas": "Journées",
+      "sinCerrar": "Non clôturé",
+      "sinRegistros": "Aucune journée enregistrée sur cette période.",
+      "avisoFabricado": "{{count}} de ces journées ont été générées automatiquement par le système avant août 2026, personne ne les a pointées. Elles sont signalées pour les distinguer des vraies."
+    },
+    "corregir": {
+      "titulo": "Corriger la journée",
+      "subtitulo": "{{nombre}}, journée du {{dia}}",
+      "motivo": "Motif de la correction",
+      "motivoEjemplo": "ex. : a oublié de pointer la sortie en fin de poste",
+      "motivoAyuda": "Il est enregistré avec la correction, ton nom et la date. C'est ce qui justifie le changement devant une inspection du travail.",
+      "totalResultante": "Total qui sera enregistré :",
+      "horasInvertidas": "La sortie doit être postérieure à l'entrée.",
+      "guardar": "Enregistrer la correction",
+      "cancelar": "Annuler",
+      "hecho": "Journée corrigée",
+      "errorTitulo": "Correction impossible",
+      "accion": "Corriger"
+    },
+    "documento": {
+      "titulo": "Registre du temps de travail",
+      "amparo": "Document délivré conformément à l'article 34.9 du Statut des travailleurs espagnol.",
+      "taller": "Entreprise",
+      "trabajador": "Salarié",
+      "periodo": "Période",
+      "expedido": "Délivré le",
+      "totalPeriodo": "Total de la période",
+      "sinRegistros": "Aucune journée enregistrée sur cette période.",
+      "avisoFabricado": "{{count}} journées de cette période ont été générées automatiquement par le système et ne correspondent pas à un pointage réel de la personne.",
+      "avisoCorregido": "{{count}} journées ont été corrigées par la direction. Le motif de chaque correction figure à côté de la journée.",
+      "conservacion": "Ce registre est conservé pendant quatre ans et est à la disposition du salarié, de ses représentants légaux et de l'Inspection du travail et de la Sécurité sociale."
+    }
+  }
+}

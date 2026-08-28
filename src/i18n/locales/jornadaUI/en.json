@@ -1,0 +1,61 @@
+{
+  "jornadaUI": {
+    "periodo": {
+      "semana": "Week",
+      "mes": "Month",
+      "anio": "Year"
+    },
+    "origen": {
+      "trabajador": "Clocked by the person",
+      "correccion": "Corrected",
+      "automatico": "Automatically generated",
+      "abierta": "Not closed"
+    },
+    "tabla": {
+      "dia": "Day",
+      "entrada": "Clock in",
+      "salida": "Clock out",
+      "total": "Total",
+      "procedencia": "Source",
+      "sinCerrar": "Not closed"
+    },
+    "mio": {
+      "titulo": "My working time record",
+      "descargar": "Download",
+      "anterior": "Previous period",
+      "siguiente": "Next period",
+      "totalHoras": "Hours this period",
+      "jornadas": "Shifts",
+      "sinCerrar": "Not closed",
+      "sinRegistros": "No shifts recorded in this period.",
+      "avisoFabricado": "{{count}} of these shifts were generated automatically by the system before August 2026; nobody clocked them. They are marked so they can be told apart from the real ones."
+    },
+    "corregir": {
+      "titulo": "Correct shift",
+      "subtitulo": "{{nombre}}, shift of {{dia}}",
+      "motivo": "Reason for the correction",
+      "motivoEjemplo": "e.g. forgot to clock out at the end of the shift",
+      "motivoAyuda": "It is stored with the correction, along with your name and the date. It is what justifies the change to a labour inspection.",
+      "totalResultante": "Total that will be recorded:",
+      "horasInvertidas": "Clock out must be later than clock in.",
+      "guardar": "Save correction",
+      "cancelar": "Cancel",
+      "hecho": "Shift corrected",
+      "errorTitulo": "Could not correct",
+      "accion": "Correct"
+    },
+    "documento": {
+      "titulo": "Working time record",
+      "amparo": "Document issued under article 34.9 of the Spanish Workers’ Statute.",
+      "taller": "Company",
+      "trabajador": "Worker",
+      "periodo": "Period",
+      "expedido": "Issued on",
+      "totalPeriodo": "Period total",
+      "sinRegistros": "No shifts recorded in this period.",
+      "avisoFabricado": "{{count}} shifts in this period were generated automatically by the system and do not correspond to a real clock-in by the person.",
+      "avisoCorregido": "{{count}} shifts were corrected by management. The reason for each correction is shown next to the shift.",
+      "conservacion": "This record is kept for four years and is available to the worker, their legal representatives and the Labour and Social Security Inspectorate."
+    }
+  }
+}

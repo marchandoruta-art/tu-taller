@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { CorregirJornadaDialog } from '@/components/attendance/CorregirJornadaDialog';
+import { RegistroJornada } from '@/lib/jornada';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -6,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Calendar, Clock, Search, ChevronLeft, ChevronRight, Download, Stethoscope, Coffee, UtensilsCrossed, LogOut } from 'lucide-react';
+import { Calendar, Clock, Search, ChevronLeft, ChevronRight, Download, Stethoscope, Coffee, UtensilsCrossed, LogOut, Pencil } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks, startOfMonth, endOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Navigate } from 'react-router-dom';
@@ -63,6 +65,7 @@ export default function AdminAttendance() {
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [search, setSearch] = useState('');
   const [exportPeriod, setExportPeriod] = useState<'week' | 'month' | 'all'>('month');
+  const [corrigiendo, setCorrigiendo] = useState<AttendanceWithUser | null>(null);
 
   useEffect(() => {
     if (role === 'admin') {
@@ -448,6 +451,14 @@ export default function AdminAttendance() {
                               </p>
                             )}
                           </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setCorrigiendo(log)}
+                            title={t('jornadaUI.corregir.accion')}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
                     ))}
@@ -458,6 +469,13 @@ export default function AdminAttendance() {
           </>
         )}
       </div>
+
+      <CorregirJornadaDialog
+        registro={corrigiendo as unknown as RegistroJornada | null}
+        nombreTrabajador={corrigiendo?.profile?.full_name ?? ''}
+        onClose={() => setCorrigiendo(null)}
+        onCorregido={fetchAttendanceLogs}
+      />
     </MainLayout>
   );
 }

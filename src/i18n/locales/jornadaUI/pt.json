@@ -1,0 +1,61 @@
+{
+  "jornadaUI": {
+    "periodo": {
+      "semana": "Semana",
+      "mes": "Mês",
+      "anio": "Ano"
+    },
+    "origen": {
+      "trabajador": "Picado pela pessoa",
+      "correccion": "Corrigido",
+      "automatico": "Gerado automaticamente",
+      "abierta": "Por fechar"
+    },
+    "tabla": {
+      "dia": "Dia",
+      "entrada": "Entrada",
+      "salida": "Saída",
+      "total": "Total",
+      "procedencia": "Proveniência",
+      "sinCerrar": "Por fechar"
+    },
+    "mio": {
+      "titulo": "O meu registo de jornada",
+      "descargar": "Descarregar",
+      "anterior": "Período anterior",
+      "siguiente": "Período seguinte",
+      "totalHoras": "Horas do período",
+      "jornadas": "Jornadas",
+      "sinCerrar": "Por fechar",
+      "sinRegistros": "Não há jornadas registadas neste período.",
+      "avisoFabricado": "{{count}} destas jornadas foram geradas automaticamente pelo sistema antes de agosto de 2026, ninguém as picou. Estão assinaladas para se distinguirem das reais."
+    },
+    "corregir": {
+      "titulo": "Corrigir jornada",
+      "subtitulo": "{{nombre}}, jornada de {{dia}}",
+      "motivo": "Motivo da correção",
+      "motivoEjemplo": "ex.: esqueceu-se de picar a saída no fim do turno",
+      "motivoAyuda": "Fica guardado junto com a correção, com o teu nome e a data. É o que justifica a alteração perante uma inspeção do trabalho.",
+      "totalResultante": "Total que ficará registado:",
+      "horasInvertidas": "A saída tem de ser posterior à entrada.",
+      "guardar": "Guardar correção",
+      "cancelar": "Cancelar",
+      "hecho": "Jornada corrigida",
+      "errorTitulo": "Não foi possível corrigir",
+      "accion": "Corrigir"
+    },
+    "documento": {
+      "titulo": "Registo de jornada de trabalho",
+      "amparo": "Documento emitido nos termos do artigo 34.9 do Estatuto dos Trabalhadores espanhol.",
+      "taller": "Empresa",
+      "trabajador": "Trabalhador",
+      "periodo": "Período",
+      "expedido": "Emitido a",
+      "totalPeriodo": "Total do período",
+      "sinRegistros": "Não há jornadas registadas neste período.",
+      "avisoFabricado": "{{count}} jornadas deste período foram geradas automaticamente pelo sistema e não correspondem a uma picagem real da pessoa.",
+      "avisoCorregido": "{{count}} jornadas foram corrigidas pela direção. O motivo de cada correção consta junto da jornada.",
+      "conservacion": "Este registo é conservado durante quatro anos e está à disposição do trabalhador, dos seus representantes legais e da Inspeção do Trabalho e Segurança Social."
+    }
+  }
+}
