@@ -1,0 +1,39 @@
+{
+  "plataformaUI": {
+    "titulo": "Panel de Propietario",
+    "subtitulo": "Todos los talleres que usan la aplicación",
+    "buscar": "Buscar por taller o correo…",
+    "sinResultados": "No hay talleres que coincidan.",
+    "requiereAtencion": "Requiere atención",
+    "vence": "Renueva el {{fecha}}",
+    "vencio": "Venció el {{fecha}}",
+    "alta": "Alta {{fecha}}",
+    "personas": "Personas",
+    "vehiculos": "Vehículos",
+    "resumen": {
+      "total": "Talleres",
+      "suscritos": "Suscritos",
+      "enPrueba": "En prueba",
+      "caducados": "Prueba acabada",
+      "incidencias": "Con incidencias",
+      "bajas": "Dados de baja"
+    },
+    "filtros": {
+      "todos": "Todos",
+      "activa": "Activos",
+      "prueba": "En prueba",
+      "pagoPendiente": "Sin pagar",
+      "cancelada": "De baja"
+    },
+    "estados": {
+      "activa": "Activa",
+      "prueba": "Prueba",
+      "pagoPendiente": "Pago pendiente",
+      "cancelada": "Cancelada"
+    },
+    "avisos": {
+      "sinPagar": "tiene un pago pendiente",
+      "pruebaAcabada": "se le ha acabado la prueba y no ha contratado"
+    }
+  }
+}

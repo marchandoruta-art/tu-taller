@@ -29,6 +29,7 @@ import ClientHistory from "./pages/ClientHistory";
 import Appointments from "./pages/Appointments";
 import Workload from "./pages/Workload";
 import Onboarding from "./pages/Onboarding";
+import PanelPropietario from "./pages/PanelPropietario";
 import OrganizationSettings from "./pages/OrganizationSettings";
 import NotFound from "./pages/NotFound";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -89,6 +90,7 @@ const App = () => (
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/admin/attendance" element={<AdminAttendance />} />
+                <Route path="/propietario" element={<PanelPropietario />} />
                 <Route path="/admin/productivity" element={<Productivity />} />
                 <Route path="/admin/alerts" element={<Alerts />} />
                 <Route path="/admin/data" element={<AdminData />} />

@@ -1,6 +1,7 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { puedeGestionar } from '@/lib/permisos';
+import { usePropietarioPlataforma } from '@/hooks/usePropietarioPlataforma';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useLabels } from '@/hooks/useLabels';
 import { useTranslation } from 'react-i18next';
@@ -33,6 +34,7 @@ import {
   ShieldCheck,
   Timer,
   FileSpreadsheet,
+  Crown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -79,6 +81,7 @@ interface SidebarProps {
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { profile, role, signOut } = useAuth();
   const { organization } = useOrganization();
+  const { esPropietario } = usePropietarioPlataforma();
   const location = useLocation();
   const pendingCount = usePendingAssignedCount();
   const activeTimersCount = useActiveTimersCount();
@@ -175,6 +178,30 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               );
             })}
           </div>
+
+          {esPropietario && (
+            <div className="pt-4">
+              {!collapsed && (
+                <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                  {t('plataformaUI.titulo')}
+                </p>
+              )}
+              <NavLink
+                to="/propietario"
+                className={({ isActive }) =>
+                  cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                    isActive ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                    collapsed && 'justify-center px-2'
+                  )
+                }
+                title={collapsed ? t('plataformaUI.titulo') : undefined}
+              >
+                <Crown className="h-5 w-5 flex-shrink-0" />
+                {!collapsed && <span>{t('plataformaUI.subtitulo')}</span>}
+              </NavLink>
+            </div>
+          )}
 
           {puedeGestionar(role) && (
             <div className="pt-4">

@@ -1,0 +1,39 @@
+{
+  "plataformaUI": {
+    "titulo": "Owner Panel",
+    "subtitulo": "Every workshop using the application",
+    "buscar": "Search by workshop or email…",
+    "sinResultados": "No workshops match.",
+    "requiereAtencion": "Needs attention",
+    "vence": "Renews on {{fecha}}",
+    "vencio": "Expired on {{fecha}}",
+    "alta": "Joined {{fecha}}",
+    "personas": "People",
+    "vehiculos": "Vehicles",
+    "resumen": {
+      "total": "Workshops",
+      "suscritos": "Subscribed",
+      "enPrueba": "On trial",
+      "caducados": "Trial ended",
+      "incidencias": "With issues",
+      "bajas": "Cancelled"
+    },
+    "filtros": {
+      "todos": "All",
+      "activa": "Active",
+      "prueba": "On trial",
+      "pagoPendiente": "Unpaid",
+      "cancelada": "Cancelled"
+    },
+    "estados": {
+      "activa": "Active",
+      "prueba": "Trial",
+      "pagoPendiente": "Payment due",
+      "cancelada": "Cancelled"
+    },
+    "avisos": {
+      "sinPagar": "has a payment outstanding",
+      "pruebaAcabada": "trial ended and did not subscribe"
+    }
+  }
+}

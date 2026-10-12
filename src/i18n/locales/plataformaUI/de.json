@@ -1,0 +1,39 @@
+{
+  "plataformaUI": {
+    "titulo": "Eigentümer-Panel",
+    "subtitulo": "Alle Werkstätten, die die Anwendung nutzen",
+    "buscar": "Nach Werkstatt oder E-Mail suchen…",
+    "sinResultados": "Keine passenden Werkstätten.",
+    "requiereAtencion": "Erfordert Aufmerksamkeit",
+    "vence": "Verlängert am {{fecha}}",
+    "vencio": "Abgelaufen am {{fecha}}",
+    "alta": "Dabei seit {{fecha}}",
+    "personas": "Personen",
+    "vehiculos": "Fahrzeuge",
+    "resumen": {
+      "total": "Werkstätten",
+      "suscritos": "Abonniert",
+      "enPrueba": "Testphase",
+      "caducados": "Test beendet",
+      "incidencias": "Mit Problemen",
+      "bajas": "Gekündigt"
+    },
+    "filtros": {
+      "todos": "Alle",
+      "activa": "Aktiv",
+      "prueba": "Testphase",
+      "pagoPendiente": "Unbezahlt",
+      "cancelada": "Gekündigt"
+    },
+    "estados": {
+      "activa": "Aktiv",
+      "prueba": "Testphase",
+      "pagoPendiente": "Zahlung offen",
+      "cancelada": "Gekündigt"
+    },
+    "avisos": {
+      "sinPagar": "hat eine offene Zahlung",
+      "pruebaAcabada": "Testphase beendet, kein Abo abgeschlossen"
+    }
+  }
+}

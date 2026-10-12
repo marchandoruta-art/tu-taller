@@ -1,0 +1,39 @@
+{
+  "plataformaUI": {
+    "titulo": "Panneau du propriétaire",
+    "subtitulo": "Tous les garages qui utilisent l’application",
+    "buscar": "Chercher par garage ou e-mail…",
+    "sinResultados": "Aucun garage ne correspond.",
+    "requiereAtencion": "Requiert votre attention",
+    "vence": "Renouvelle le {{fecha}}",
+    "vencio": "Expiré le {{fecha}}",
+    "alta": "Inscrit le {{fecha}}",
+    "personas": "Personnes",
+    "vehiculos": "Véhicules",
+    "resumen": {
+      "total": "Garages",
+      "suscritos": "Abonnés",
+      "enPrueba": "En essai",
+      "caducados": "Essai terminé",
+      "incidencias": "Avec incidents",
+      "bajas": "Résiliés"
+    },
+    "filtros": {
+      "todos": "Tous",
+      "activa": "Actifs",
+      "prueba": "En essai",
+      "pagoPendiente": "Impayés",
+      "cancelada": "Résiliés"
+    },
+    "estados": {
+      "activa": "Active",
+      "prueba": "Essai",
+      "pagoPendiente": "Paiement en attente",
+      "cancelada": "Résiliée"
+    },
+    "avisos": {
+      "sinPagar": "a un paiement en attente",
+      "pruebaAcabada": "essai terminé sans abonnement"
+    }
+  }
+}

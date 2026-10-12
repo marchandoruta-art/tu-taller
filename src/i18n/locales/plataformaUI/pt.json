@@ -1,0 +1,39 @@
+{
+  "plataformaUI": {
+    "titulo": "Painel do Proprietário",
+    "subtitulo": "Todas as oficinas que usam a aplicação",
+    "buscar": "Procurar por oficina ou e-mail…",
+    "sinResultados": "Não há oficinas correspondentes.",
+    "requiereAtencion": "Requer atenção",
+    "vence": "Renova a {{fecha}}",
+    "vencio": "Expirou a {{fecha}}",
+    "alta": "Desde {{fecha}}",
+    "personas": "Pessoas",
+    "vehiculos": "Veículos",
+    "resumen": {
+      "total": "Oficinas",
+      "suscritos": "Subscritas",
+      "enPrueba": "Em teste",
+      "caducados": "Teste terminado",
+      "incidencias": "Com incidências",
+      "bajas": "Canceladas"
+    },
+    "filtros": {
+      "todos": "Todas",
+      "activa": "Ativas",
+      "prueba": "Em teste",
+      "pagoPendiente": "Por pagar",
+      "cancelada": "Canceladas"
+    },
+    "estados": {
+      "activa": "Ativa",
+      "prueba": "Teste",
+      "pagoPendiente": "Pagamento pendente",
+      "cancelada": "Cancelada"
+    },
+    "avisos": {
+      "sinPagar": "tem um pagamento pendente",
+      "pruebaAcabada": "o teste terminou e não subscreveu"
+    }
+  }
+}
