@@ -30,6 +30,7 @@ import Appointments from "./pages/Appointments";
 import Workload from "./pages/Workload";
 import Onboarding from "./pages/Onboarding";
 import PanelPropietario from "./pages/PanelPropietario";
+import CitaPublica from "./pages/CitaPublica";
 import OrganizationSettings from "./pages/OrganizationSettings";
 import NotFound from "./pages/NotFound";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -79,6 +80,8 @@ const App = () => (
               <ScrollToTop />
               <AuthCallback />
               <Routes>
+                {/* Publica: sin sesion. El taller pasa este enlace al cliente. */}
+                <Route path="/cita/:slug" element={<CitaPublica />} />
                 <Route path="/" element={<Index />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
