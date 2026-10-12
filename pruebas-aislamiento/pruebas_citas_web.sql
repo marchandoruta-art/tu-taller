@@ -136,4 +136,25 @@ BEGIN
   PERFORM pg_temp.comprobar('corta al cuarto intento con los mismos datos', _falla);
 END $$;
 
+-- 4. Una cita a deshora tiene que ocupar su franja igualmente.
+DO $$
+DECLARE
+  _martes date := (date_trunc('week', CURRENT_DATE) + interval '8 days')::date;
+  _n integer;
+BEGIN
+  SELECT count(*) INTO _n FROM public.cita_publica_huecos('taller-prueba', _martes, 1);
+  PERFORM pg_temp.comprobar('el martes empieza con 4 huecos', _n = 4, 'huecos=' || _n);
+
+  -- El taller apunta una por telefono a las 08:15, fuera de la rejilla.
+  INSERT INTO public.appointments
+    (organization_id, appointment_date, appointment_time, client_name, origen)
+  VALUES ('11111111-1111-1111-1111-111111111111', _martes, '08:15', 'Cliente de telefono', 'taller');
+
+  SELECT count(*) INTO _n FROM public.cita_publica_huecos('taller-prueba', _martes, 1);
+  PERFORM pg_temp.comprobar('una cita a las 08:15 ocupa la franja de las 08:00', _n = 3, 'quedan=' || _n);
+
+  PERFORM pg_temp.comprobar('y la de las 08:30 sigue libre',
+    EXISTS (SELECT 1 FROM public.cita_publica_huecos('taller-prueba', _martes, 1) WHERE hora = '08:30'));
+END $$;
+
 ROLLBACK;

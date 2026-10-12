@@ -115,6 +115,10 @@ BEGIN
            make_interval(mins => _org.citas_duracion_min)
          ) AS h
   )
+  -- Se cuenta todo lo que CAE DENTRO de la franja, no solo lo que coincide al
+  -- minuto. El taller sigue apuntando citas por telefono a cualquier hora: una
+  -- de las 08:15 tiene que ocupar la franja de las 08:00, o acabarian dos
+  -- coches a la vez.
   SELECT f.dia,
          f.hora,
          (_org.citas_por_franja - count(a.id))::integer
@@ -122,7 +126,8 @@ BEGIN
   LEFT JOIN public.appointments a
          ON a.organization_id  = _org.id
         AND a.appointment_date = f.dia
-        AND a.appointment_time = f.hora
+        AND a.appointment_time >= f.hora
+        AND a.appointment_time <  (f.hora + make_interval(mins => _org.citas_duracion_min))
         AND a.confirmation_status <> 'cancelada'
   GROUP BY f.dia, f.hora
   HAVING (_org.citas_por_franja - count(a.id)) > 0
