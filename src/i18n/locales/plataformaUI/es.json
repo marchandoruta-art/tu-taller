@@ -34,6 +34,36 @@
     "avisos": {
       "sinPagar": "tiene un pago pendiente",
       "pruebaAcabada": "se le ha acabado la prueba y no ha contratado"
+    },
+    "detalle": {
+      "clienteDesde": "Cliente desde {{fecha}}",
+      "contacto": "Contacto",
+      "uso": "Uso de la aplicación",
+      "suscripcion": "Suscripción",
+      "acciones": "Acciones",
+      "estado": "Estado",
+      "renueva": "Renueva el",
+      "pruebaHasta": "Prueba hasta",
+      "plan": "Plan",
+      "sinPlan": "Sin plan asignado",
+      "vehiculosActivos": "Vehículos en taller",
+      "citas": "Citas",
+      "ultimoAcceso": "Último acceso",
+      "sinContenido": "Solo se muestran métricas de uso. Los vehículos, clientes y datos de este taller no son accesibles desde aquí.",
+      "pagoMes": "Pagado · 1 mes",
+      "pagoAnio": "Pagado · 1 año",
+      "alargarPrueba": "Alargar prueba 7 días",
+      "marcarImpago": "Marcar impago",
+      "darDeBaja": "Dar de baja",
+      "avisoBaja": "Dar de baja no borra nada: el taller conserva sus datos y se puede reactivar.",
+      "guardado": "Cambio guardado",
+      "errorCargar": "No se ha podido cargar el taller",
+      "errorGuardar": "No se ha podido guardar"
+    },
+    "planes": {
+      "basico": "Básico",
+      "profesional": "Profesional",
+      "pro": "Pro"
     }
   }
 }

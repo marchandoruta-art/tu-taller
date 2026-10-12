@@ -34,6 +34,36 @@
     "avisos": {
       "sinPagar": "a un paiement en attente",
       "pruebaAcabada": "essai terminé sans abonnement"
+    },
+    "detalle": {
+      "clienteDesde": "Client depuis le {{fecha}}",
+      "contacto": "Contact",
+      "uso": "Utilisation de l’application",
+      "suscripcion": "Abonnement",
+      "acciones": "Actions",
+      "estado": "Statut",
+      "renueva": "Renouvelle le",
+      "pruebaHasta": "Essai jusqu’au",
+      "plan": "Formule",
+      "sinPlan": "Aucune formule",
+      "vehiculosActivos": "Véhicules au garage",
+      "citas": "Rendez-vous",
+      "ultimoAcceso": "Dernier accès",
+      "sinContenido": "Seules les métriques d’utilisation sont affichées. Les véhicules, clients et données de ce garage ne sont pas accessibles d’ici.",
+      "pagoMes": "Payé · 1 mois",
+      "pagoAnio": "Payé · 1 an",
+      "alargarPrueba": "Prolonger l’essai de 7 jours",
+      "marcarImpago": "Marquer impayé",
+      "darDeBaja": "Résilier",
+      "avisoBaja": "Résilier n’efface rien : le garage conserve ses données et peut être réactivé.",
+      "guardado": "Modification enregistrée",
+      "errorCargar": "Impossible de charger le garage",
+      "errorGuardar": "Impossible d’enregistrer"
+    },
+    "planes": {
+      "basico": "Basique",
+      "profesional": "Professionnel",
+      "pro": "Pro"
     }
   }
 }

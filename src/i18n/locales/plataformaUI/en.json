@@ -34,6 +34,36 @@
     "avisos": {
       "sinPagar": "has a payment outstanding",
       "pruebaAcabada": "trial ended and did not subscribe"
+    },
+    "detalle": {
+      "clienteDesde": "Customer since {{fecha}}",
+      "contacto": "Contact",
+      "uso": "Application usage",
+      "suscripcion": "Subscription",
+      "acciones": "Actions",
+      "estado": "Status",
+      "renueva": "Renews on",
+      "pruebaHasta": "Trial until",
+      "plan": "Plan",
+      "sinPlan": "No plan assigned",
+      "vehiculosActivos": "Vehicles in workshop",
+      "citas": "Appointments",
+      "ultimoAcceso": "Last access",
+      "sinContenido": "Only usage metrics are shown. This workshop’s vehicles, customers and data are not accessible from here.",
+      "pagoMes": "Paid · 1 month",
+      "pagoAnio": "Paid · 1 year",
+      "alargarPrueba": "Extend trial 7 days",
+      "marcarImpago": "Mark unpaid",
+      "darDeBaja": "Cancel",
+      "avisoBaja": "Cancelling deletes nothing: the workshop keeps its data and can be reactivated.",
+      "guardado": "Change saved",
+      "errorCargar": "Could not load the workshop",
+      "errorGuardar": "Could not save"
+    },
+    "planes": {
+      "basico": "Basic",
+      "profesional": "Professional",
+      "pro": "Pro"
     }
   }
 }

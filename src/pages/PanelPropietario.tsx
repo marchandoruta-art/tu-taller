@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { usePropietarioPlataforma } from '@/hooks/usePropietarioPlataforma';
+import { DetalleTaller } from '@/components/plataforma/DetalleTaller';
 import {
   Building2, CheckCircle2, Clock, AlertTriangle, XCircle, ShieldAlert,
   Search, Loader2, Users, Car,
@@ -55,6 +56,7 @@ export default function PanelPropietario() {
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState('');
   const [filtro, setFiltro] = useState<string>('todos');
+  const [abierto, setAbierto] = useState<string | null>(null);
 
   useEffect(() => {
     if (!comprobandoPermiso && !esPropietario) navigate('/');
@@ -182,7 +184,11 @@ export default function PanelPropietario() {
                   const dias = diasPara(vence);
 
                   return (
-                    <div key={x.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 p-4">
+                    <button
+                      key={x.id}
+                      onClick={() => setAbierto(x.id)}
+                      className="w-full text-left flex flex-wrap items-center gap-x-4 gap-y-2 p-4 hover:bg-muted/50 transition-colors"
+                    >
                       <div className="min-w-[180px] flex-1">
                         <p className="font-medium">{x.nombre}</p>
                         <p className="text-xs text-muted-foreground">
@@ -218,7 +224,7 @@ export default function PanelPropietario() {
                           fecha: format(new Date(x.alta_en), 'd MMM yyyy', { locale: es }),
                         })}
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -226,6 +232,12 @@ export default function PanelPropietario() {
           </CardContent>
         </Card>
       </div>
+
+      <DetalleTaller
+        tallerId={abierto}
+        onCerrar={() => setAbierto(null)}
+        onCambio={cargar}
+      />
     </MainLayout>
   );
 }

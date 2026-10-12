@@ -34,6 +34,36 @@
     "avisos": {
       "sinPagar": "hat eine offene Zahlung",
       "pruebaAcabada": "Testphase beendet, kein Abo abgeschlossen"
+    },
+    "detalle": {
+      "clienteDesde": "Kunde seit {{fecha}}",
+      "contacto": "Kontakt",
+      "uso": "Nutzung der Anwendung",
+      "suscripcion": "Abonnement",
+      "acciones": "Aktionen",
+      "estado": "Status",
+      "renueva": "Verlängert am",
+      "pruebaHasta": "Testphase bis",
+      "plan": "Tarif",
+      "sinPlan": "Kein Tarif zugewiesen",
+      "vehiculosActivos": "Fahrzeuge in der Werkstatt",
+      "citas": "Termine",
+      "ultimoAcceso": "Letzter Zugriff",
+      "sinContenido": "Es werden nur Nutzungskennzahlen angezeigt. Fahrzeuge, Kunden und Daten dieser Werkstatt sind von hier aus nicht zugänglich.",
+      "pagoMes": "Bezahlt · 1 Monat",
+      "pagoAnio": "Bezahlt · 1 Jahr",
+      "alargarPrueba": "Testphase 7 Tage verlängern",
+      "marcarImpago": "Als unbezahlt markieren",
+      "darDeBaja": "Kündigen",
+      "avisoBaja": "Kündigen löscht nichts: die Werkstatt behält ihre Daten und kann reaktiviert werden.",
+      "guardado": "Änderung gespeichert",
+      "errorCargar": "Werkstatt konnte nicht geladen werden",
+      "errorGuardar": "Konnte nicht gespeichert werden"
+    },
+    "planes": {
+      "basico": "Basis",
+      "profesional": "Professionell",
+      "pro": "Pro"
     }
   }
 }

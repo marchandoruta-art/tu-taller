@@ -62,7 +62,14 @@ create table if not exists auth.users (
   raw_user_meta_data jsonb default '{}'::jsonb,
   raw_app_meta_data jsonb default '{}'::jsonb,
   created_at timestamptz default now(),
-  updated_at timestamptz default now()
+  updated_at timestamptz default now(),
+  -- Las pone GoTrue en produccion. Sin ellas, lo que se prueba aqui no se
+  -- parece a lo que va a pasar alli: una funcion que las use compila igual y
+  -- revienta en caliente.
+  last_sign_in_at timestamptz,
+  email_confirmed_at timestamptz,
+  confirmation_sent_at timestamptz,
+  banned_until timestamptz
 );
 
 -- El contexto de peticion se simula con GUCs, igual que hace PostgREST.

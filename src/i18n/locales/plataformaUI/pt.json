@@ -34,6 +34,36 @@
     "avisos": {
       "sinPagar": "tem um pagamento pendente",
       "pruebaAcabada": "o teste terminou e não subscreveu"
+    },
+    "detalle": {
+      "clienteDesde": "Cliente desde {{fecha}}",
+      "contacto": "Contacto",
+      "uso": "Utilização da aplicação",
+      "suscripcion": "Subscrição",
+      "acciones": "Ações",
+      "estado": "Estado",
+      "renueva": "Renova a",
+      "pruebaHasta": "Teste até",
+      "plan": "Plano",
+      "sinPlan": "Sem plano atribuído",
+      "vehiculosActivos": "Veículos na oficina",
+      "citas": "Marcações",
+      "ultimoAcceso": "Último acesso",
+      "sinContenido": "Só se mostram métricas de utilização. Os veículos, clientes e dados desta oficina não são acessíveis a partir daqui.",
+      "pagoMes": "Pago · 1 mês",
+      "pagoAnio": "Pago · 1 ano",
+      "alargarPrueba": "Prolongar teste 7 dias",
+      "marcarImpago": "Marcar por pagar",
+      "darDeBaja": "Cancelar",
+      "avisoBaja": "Cancelar não apaga nada: a oficina mantém os seus dados e pode ser reativada.",
+      "guardado": "Alteração guardada",
+      "errorCargar": "Não foi possível carregar a oficina",
+      "errorGuardar": "Não foi possível guardar"
+    },
+    "planes": {
+      "basico": "Básico",
+      "profesional": "Profissional",
+      "pro": "Pro"
     }
   }
 }
