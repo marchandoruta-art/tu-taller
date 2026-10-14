@@ -113,7 +113,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           {!collapsed && (
             <div className="min-w-0">
               <h1 className="font-bold text-sm leading-tight truncate">
-                {organization?.name || 'TallerPro'}
+                {organization?.name || 'ControlBox'}
               </h1>
               <p className="text-xs text-muted-foreground">{t('nav.management')}</p>
             </div>

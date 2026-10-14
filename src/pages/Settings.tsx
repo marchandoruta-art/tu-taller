@@ -93,7 +93,7 @@ export default function Settings() {
         return acc;
       }, {});
 
-      setAppName(settings?.app_name || 'Gestión Autos Formentera');
+      setAppName(settings?.app_name || 'ControlBox');
       setArchiveHours(settings?.archive_hours || '24');
       setAutoArchive(settings?.auto_archive !== 'false');
       setWhatsappMessage(settings?.whatsapp_message || DEFAULT_WHATSAPP_MESSAGE);

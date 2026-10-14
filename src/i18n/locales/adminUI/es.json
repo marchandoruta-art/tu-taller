@@ -63,6 +63,18 @@
         "updateError": "Error al actualizar el taller",
         "codeCopied": "Código copiado al portapapeles",
         "copyError": "Error al copiar el código"
+      },
+      "fiscal": {
+        "titulo": "Datos para los documentos",
+        "ayuda": "Aparecen en el recibo de depósito y demás documentos que entregas al cliente.",
+        "razonSocial": "Razón social",
+        "nif": "NIF / CIF",
+        "direccion": "Dirección",
+        "codigoPostal": "Código postal",
+        "poblacion": "Población",
+        "provincia": "Provincia",
+        "telefono": "Teléfono",
+        "email": "Email"
       }
     },
     "settingsPage": {

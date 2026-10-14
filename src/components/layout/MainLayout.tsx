@@ -8,12 +8,14 @@ import { ActiveTimerBanner } from '@/components/timer/ActiveTimerBanner';
 import { CommandPalette } from '@/components/ui/CommandPalette';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useTranslation } from 'react-i18next';
+import { useOrganization } from '@/hooks/useOrganization';
 
 interface MainLayoutProps {
   children: ReactNode;
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
+  const { organization } = useOrganization();
   const { t } = useTranslation();
   const { signOut } = useAuth();
   const [collapsed, setCollapsed] = useState(() => {
@@ -91,7 +93,7 @@ export function MainLayout({ children }: MainLayoutProps) {
               >
                 <PanelLeft className="h-5 w-5" />
               </Button>
-              <span className="font-semibold">{t('mainLayout.companyName')}</span>
+              <span className="font-semibold">{organization?.name || t('mainLayout.companyName')}</span>
             </div>
             <div className="flex items-center gap-1">
               <Button

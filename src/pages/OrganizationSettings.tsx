@@ -26,12 +26,30 @@ export default function OrganizationSettings() {
   const [tallerHorario, setTallerHorario] = useState('');
   const [loadingSettings, setLoadingSettings] = useState(true);
 
+  // Datos identificativos. Van en los documentos que se entregan al cliente,
+  // no en pantalla, asi que se guardan en la propia tabla del taller.
+  const [fiscal, setFiscal] = useState({
+    razon_social: '', nif: '', direccion: '',
+    codigo_postal: '', poblacion: '', provincia: '',
+    telefono: '', email: '',
+  });
+
   const isOwner = organization?.owner_id === user?.id;
   const isAdmin = role === 'admin';
 
   useEffect(() => {
     if (organization) {
       setOrgName(organization.name);
+      setFiscal({
+        razon_social: organization.razon_social ?? '',
+        nif: organization.nif ?? '',
+        direccion: organization.direccion ?? '',
+        codigo_postal: organization.codigo_postal ?? '',
+        poblacion: organization.poblacion ?? '',
+        provincia: organization.provincia ?? '',
+        telefono: organization.telefono ?? '',
+        email: organization.email ?? '',
+      });
       fetchContactSettings();
     }
   }, [organization]);
@@ -62,7 +80,11 @@ export default function OrganizationSettings() {
       // Update org name
       const { error } = await supabase
         .from('organizations')
-        .update({ name: orgName.trim() })
+        .update({
+          name: orgName.trim(),
+          ...Object.fromEntries(
+            Object.entries(fiscal).map(([k, v]) => [k, v.trim() || null])),
+        })
         .eq('id', organization.id);
       if (error) throw error;
 
@@ -150,6 +172,38 @@ export default function OrganizationSettings() {
                   disabled={!isAdmin}
                 />
               </div>
+
+              <div className="pt-2 border-t">
+                <p className="text-sm font-medium">{t('adminUI.orgSettings.fiscal.titulo')}</p>
+                <p className="text-xs text-muted-foreground mb-3">
+                  {t('adminUI.orgSettings.fiscal.ayuda')}
+                </p>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {([
+                    ['razon_social', 'razonSocial', 'sm:col-span-2'],
+                    ['nif', 'nif', ''],
+                    ['telefono', 'telefono', ''],
+                    ['direccion', 'direccion', 'sm:col-span-2'],
+                    ['codigo_postal', 'codigoPostal', ''],
+                    ['poblacion', 'poblacion', ''],
+                    ['provincia', 'provincia', ''],
+                    ['email', 'email', ''],
+                  ] as const).map(([campo, clave, clase]) => (
+                    <div key={campo} className={`space-y-1.5 ${clase}`}>
+                      <Label htmlFor={`fiscal-${campo}`}>
+                        {t(`adminUI.orgSettings.fiscal.${clave}`)}
+                      </Label>
+                      <Input
+                        id={`fiscal-${campo}`}
+                        value={fiscal[campo]}
+                        disabled={!isAdmin}
+                        onChange={(e) => setFiscal((x) => ({ ...x, [campo]: e.target.value }))}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {isAdmin && (
                 <Button type="submit" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

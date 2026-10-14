@@ -1,6 +1,6 @@
 {
   "authUI": {
-    "brand": "TallerPro",
+    "brand": "ControlBox",
     "tagline": "Workshop Management System",
     "auth": {
       "signInTab": "Sign In",

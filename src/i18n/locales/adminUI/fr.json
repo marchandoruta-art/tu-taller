@@ -63,6 +63,18 @@
         "updateError": "Erreur lors de la mise à jour de l'atelier",
         "codeCopied": "Code copié dans le presse-papiers",
         "copyError": "Erreur lors de la copie du code"
+      },
+      "fiscal": {
+        "titulo": "Informations pour les documents",
+        "ayuda": "Elles figurent sur le reçu de dépôt du véhicule et les autres documents remis au client.",
+        "razonSocial": "Raison sociale",
+        "nif": "N° fiscal",
+        "direccion": "Adresse",
+        "codigoPostal": "Code postal",
+        "poblacion": "Ville",
+        "provincia": "Province",
+        "telefono": "Téléphone",
+        "email": "E-mail"
       }
     },
     "settingsPage": {

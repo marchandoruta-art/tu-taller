@@ -10,6 +10,15 @@ export interface Organization {
   owner_id: string;
   created_at: string;
   updated_at: string;
+  // Datos identificativos, para los documentos que se entregan al cliente.
+  razon_social?: string | null;
+  nif?: string | null;
+  direccion?: string | null;
+  codigo_postal?: string | null;
+  poblacion?: string | null;
+  provincia?: string | null;
+  telefono?: string | null;
+  email?: string | null;
 }
 
 interface OrganizationContextType {

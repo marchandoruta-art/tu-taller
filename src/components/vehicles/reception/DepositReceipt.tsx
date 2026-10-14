@@ -5,6 +5,8 @@ import { es } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 import type { ExteriorDamage } from './VehicleDiagram';
 import type { InteriorCheckData } from './InteriorChecklist';
+import { useOrganization } from '@/hooks/useOrganization';
+import { cabeceraTallerHTML, ESTILO_CABECERA_TALLER } from '@/lib/cabeceraTaller';
 
 interface DepositReceiptProps {
   ownerData: {
@@ -73,6 +75,7 @@ const INTERIOR_LABELS: Record<string, string> = {
 };
 
 export function DepositReceipt({ ownerData, vehicleData, inspectionData }: DepositReceiptProps) {
+  const { organization } = useOrganization();
   const { t } = useTranslation();
   const generateReceiptHTML = () => {
     const now = new Date();
@@ -100,6 +103,7 @@ export function DepositReceipt({ ownerData, vehicleData, inspectionData }: Depos
     h2 { font-size: 14px; background: #f0f0f0; padding: 5px 10px; margin: 15px 0 10px; }
     .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 15px; }
     .company { font-weight: bold; font-size: 16px; }
+    ${ESTILO_CABECERA_TALLER}
     .date { margin-top: 5px; }
     .section { margin-bottom: 15px; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -121,7 +125,7 @@ export function DepositReceipt({ ownerData, vehicleData, inspectionData }: Depos
 </head>
 <body>
   <div class="header">
-    <div class="company">TALLER AUTOS FORMENTERA ES BROLLS S.L.</div>
+    ${cabeceraTallerHTML(organization)}
     <h1>RECIBO DE DEPÓSITO DE VEHÍCULO</h1>
     <div class="date">${formattedDate} - ${formattedTime}</div>
   </div>

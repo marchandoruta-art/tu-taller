@@ -63,6 +63,18 @@
         "updateError": "Erro ao atualizar a oficina",
         "codeCopied": "Código copiado para a área de transferência",
         "copyError": "Erro ao copiar o código"
+      },
+      "fiscal": {
+        "titulo": "Dados para os documentos",
+        "ayuda": "Aparecem no recibo de depósito do veículo e noutros documentos que entregas ao cliente.",
+        "razonSocial": "Denominação social",
+        "nif": "NIF",
+        "direccion": "Morada",
+        "codigoPostal": "Código postal",
+        "poblacion": "Localidade",
+        "provincia": "Distrito",
+        "telefono": "Telefone",
+        "email": "E-mail"
       }
     },
     "settingsPage": {

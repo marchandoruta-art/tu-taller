@@ -1,6 +1,6 @@
 {
-  "name": "Gestión Autos Formentera",
-  "short_name": "Autos Formentera",
+  "name": "ControlBox",
+  "short_name": "ControlBox",
   "description": "Sistema de gestión de taller de vehículos",
   "start_url": "/",
   "display": "standalone",

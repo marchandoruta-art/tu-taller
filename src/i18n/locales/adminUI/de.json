@@ -63,6 +63,18 @@
         "updateError": "Fehler beim Aktualisieren der Werkstatt",
         "codeCopied": "Code in die Zwischenablage kopiert",
         "copyError": "Fehler beim Kopieren des Codes"
+      },
+      "fiscal": {
+        "titulo": "Angaben für Dokumente",
+        "ayuda": "Erscheinen auf dem Fahrzeug-Annahmebeleg und weiteren Dokumenten für den Kunden.",
+        "razonSocial": "Firmenname",
+        "nif": "Steuernummer",
+        "direccion": "Adresse",
+        "codigoPostal": "PLZ",
+        "poblacion": "Ort",
+        "provincia": "Provinz",
+        "telefono": "Telefon",
+        "email": "E-Mail"
       }
     },
     "settingsPage": {

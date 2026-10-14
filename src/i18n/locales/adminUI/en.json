@@ -63,6 +63,18 @@
         "updateError": "Error updating workshop",
         "codeCopied": "Code copied to clipboard",
         "copyError": "Error copying code"
+      },
+      "fiscal": {
+        "titulo": "Details for documents",
+        "ayuda": "These appear on the vehicle deposit receipt and other documents you hand to the customer.",
+        "razonSocial": "Legal name",
+        "nif": "Tax ID",
+        "direccion": "Address",
+        "codigoPostal": "Post code",
+        "poblacion": "Town",
+        "provincia": "Province",
+        "telefono": "Phone",
+        "email": "Email"
       }
     },
     "settingsPage": {
