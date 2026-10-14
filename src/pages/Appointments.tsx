@@ -14,6 +14,8 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { Profile } from '@/lib/types';
 import {
   CalendarCheck,
+  Globe,
+  Check,
   Plus,
   Phone,
   Clock,
@@ -60,6 +62,14 @@ interface Appointment {
   confirmation_status: 'pendiente' | 'confirmada' | 'cancelada';
   confirmation_token: string | null;
   confirmed_at: string | null;
+  // Lo que trae una solicitud hecha desde la web y una cita del taller no tiene.
+  origen?: string | null;
+  client_email?: string | null;
+  documento_tipo?: string | null;
+  documento_numero?: string | null;
+  vehicle_year?: number | null;
+  servicios?: string[] | null;
+  firma?: string | null;
 }
 
 
@@ -114,6 +124,31 @@ export default function AppointmentsPage() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [confirmationFilter, setConfirmationFilter] = useState<'todas' | 'pendiente' | 'confirmada' | 'cancelada'>('todas');
+
+  // Las solicitudes de internet pueden ser para cualquier dia, y esta pantalla
+  // solo ensena el dia elegido. Sin este aviso, una peticion para la semana que
+  // viene se quedaria sin responder hasta que alguien navegase hasta ese dia.
+  const solicitudesWeb = appointments.filter(
+    (a) => a.origen === 'web' && a.confirmation_status === 'pendiente');
+
+  const responderSolicitud = async (apt: Appointment, aceptar: boolean) => {
+    const { error } = await supabase
+      .from('appointments')
+      .update({
+        confirmation_status: aceptar ? 'confirmada' : 'cancelada',
+        confirmed_at: aceptar ? new Date().toISOString() : null,
+      })
+      .eq('id', apt.id);
+
+    if (error) {
+      toast.error(t('planningUI.appointments.web.errorResponder'), { description: error.message });
+      return;
+    }
+    toast.success(t(aceptar
+      ? 'planningUI.appointments.web.aceptada'
+      : 'planningUI.appointments.web.rechazada'));
+    fetchData();
+  };
 
   useEffect(() => {
     fetchData();
@@ -326,6 +361,57 @@ export default function AppointmentsPage() {
           </Button>
         </div>
 
+        {solicitudesWeb.length > 0 && (
+          <Card className="border-primary/40 bg-primary/5">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Globe className="h-4 w-4 text-primary" />
+                {t('planningUI.appointments.web.pendientes', { count: solicitudesWeb.length })}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {solicitudesWeb.map((apt) => (
+                <div key={apt.id} className="rounded-lg border bg-background p-3 space-y-2">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm">{apt.client_name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(apt.appointment_date), "EEEE d 'de' MMMM", { locale: es })}
+                        {apt.appointment_time ? ` · ${apt.appointment_time.slice(0, 5)}` : ''}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={() => responderSolicitud(apt, true)}>
+                        <Check className="h-3.5 w-3.5 mr-1" />
+                        {t('planningUI.appointments.web.aceptar')}
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => responderSolicitud(apt, false)}>
+                        {t('planningUI.appointments.web.rechazar')}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-muted-foreground space-y-0.5">
+                    <p>
+                      {[apt.vehicle_brand, apt.vehicle_model, apt.vehicle_year].filter(Boolean).join(' ')}
+                      {apt.vehicle_plate ? ` · ${apt.vehicle_plate}` : ''}
+                    </p>
+                    <p>
+                      {apt.client_phone}
+                      {apt.client_email ? ` · ${apt.client_email}` : ''}
+                      {apt.documento_numero ? ` · ${apt.documento_tipo} ${apt.documento_numero}` : ''}
+                    </p>
+                    {apt.servicios && apt.servicios.length > 0 && (
+                      <p className="text-foreground">{apt.servicios.join(', ')}</p>
+                    )}
+                    {apt.issue_description && <p className="italic">{apt.issue_description}</p>}
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Legend */}
         <div className="flex flex-wrap gap-4">
           <div className="flex items-center gap-2">
@@ -442,6 +528,10 @@ export default function AppointmentsPage() {
                           <div className="flex items-center gap-2 min-w-0">
                             <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${colors.dot}`} />
                             <span className="font-semibold text-sm truncate">{apt.client_name}</span>
+                            {apt.origen === 'web' && (
+                              <Globe className="h-3.5 w-3.5 text-primary flex-shrink-0"
+                                     aria-label={t('planningUI.appointments.web.porInternet')} />
+                            )}
                           </div>
                           <div className="flex gap-1 flex-shrink-0">
                             <Button

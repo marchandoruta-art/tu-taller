@@ -65,7 +65,17 @@
         "linkError": "Erreur lors de la génération du lien"
       },
       "whatsappMessage": "Bonjour {{name}}, nous confirmons votre rendez-vous le {{date}}{{time}} pour votre véhicule {{plate}}. Veuillez confirmer ou annuler ici : {{url}}",
-      "whatsappTimeSuffix": " à {{time}}"
+      "whatsappTimeSuffix": " à {{time}}",
+      "web": {
+        "pendientes_one": "{{count}} demande de rendez-vous en ligne sans réponse",
+        "pendientes_other": "{{count}} demandes de rendez-vous en ligne sans réponse",
+        "aceptar": "Accepter",
+        "rechazar": "Refuser",
+        "aceptada": "Rendez-vous accepté",
+        "rechazada": "Demande refusée",
+        "errorResponder": "Impossible de répondre à la demande",
+        "porInternet": "Demandé en ligne"
+      }
     },
     "calendar": {
       "title": "Calendrier des Livraisons",

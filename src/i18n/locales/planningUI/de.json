@@ -65,7 +65,17 @@
         "linkError": "Fehler beim Erstellen des Links"
       },
       "whatsappMessage": "Hallo {{name}}, wir bestätigen Ihren Termin am {{date}}{{time}} für Ihr Fahrzeug {{plate}}. Bitte bestätigen oder stornieren Sie hier: {{url}}",
-      "whatsappTimeSuffix": " um {{time}}"
+      "whatsappTimeSuffix": " um {{time}}",
+      "web": {
+        "pendientes_one": "{{count}} Online-Terminanfrage unbeantwortet",
+        "pendientes_other": "{{count}} Online-Terminanfragen unbeantwortet",
+        "aceptar": "Annehmen",
+        "rechazar": "Ablehnen",
+        "aceptada": "Termin angenommen",
+        "rechazada": "Anfrage abgelehnt",
+        "errorResponder": "Die Anfrage konnte nicht beantwortet werden",
+        "porInternet": "Online angefragt"
+      }
     },
     "calendar": {
       "title": "Lieferkalender",

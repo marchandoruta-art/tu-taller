@@ -65,7 +65,17 @@
         "linkError": "Erro ao gerar link"
       },
       "whatsappMessage": "Olá {{name}}, confirmamos o seu agendamento em {{date}}{{time}} para o seu veículo {{plate}}. Por favor, confirme ou cancele aqui: {{url}}",
-      "whatsappTimeSuffix": " às {{time}}"
+      "whatsappTimeSuffix": " às {{time}}",
+      "web": {
+        "pendientes_one": "{{count}} pedido de marcação pela internet por responder",
+        "pendientes_other": "{{count}} pedidos de marcação pela internet por responder",
+        "aceptar": "Aceitar",
+        "rechazar": "Recusar",
+        "aceptada": "Marcação aceite",
+        "rechazada": "Pedido recusado",
+        "errorResponder": "Não foi possível responder ao pedido",
+        "porInternet": "Pedido pela internet"
+      }
     },
     "calendar": {
       "title": "Calendário de Entregas",

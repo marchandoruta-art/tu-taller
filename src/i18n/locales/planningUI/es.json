@@ -65,7 +65,17 @@
         "linkError": "Error al generar enlace"
       },
       "whatsappMessage": "Hola {{name}}, le confirmamos su cita el {{date}}{{time}} para su vehículo {{plate}}. Por favor confirme o cancele aquí: {{url}}",
-      "whatsappTimeSuffix": " a las {{time}}"
+      "whatsappTimeSuffix": " a las {{time}}",
+      "web": {
+        "pendientes_one": "{{count}} solicitud de cita por internet sin responder",
+        "pendientes_other": "{{count}} solicitudes de cita por internet sin responder",
+        "aceptar": "Aceptar",
+        "rechazar": "Rechazar",
+        "aceptada": "Cita aceptada",
+        "rechazada": "Solicitud rechazada",
+        "errorResponder": "No se ha podido responder a la solicitud",
+        "porInternet": "Pedida por internet"
+      }
     },
     "calendar": {
       "title": "Calendario de Entregas",

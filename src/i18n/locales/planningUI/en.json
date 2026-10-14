@@ -65,7 +65,17 @@
         "linkError": "Error generating link"
       },
       "whatsappMessage": "Hello {{name}}, we confirm your appointment on {{date}}{{time}} for your vehicle {{plate}}. Please confirm or cancel here: {{url}}",
-      "whatsappTimeSuffix": " at {{time}}"
+      "whatsappTimeSuffix": " at {{time}}",
+      "web": {
+        "pendientes_one": "{{count}} online appointment request awaiting reply",
+        "pendientes_other": "{{count}} online appointment requests awaiting reply",
+        "aceptar": "Accept",
+        "rechazar": "Reject",
+        "aceptada": "Appointment accepted",
+        "rechazada": "Request rejected",
+        "errorResponder": "Could not reply to the request",
+        "porInternet": "Requested online"
+      }
     },
     "calendar": {
       "title": "Delivery Calendar",
