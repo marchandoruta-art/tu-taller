@@ -93,30 +93,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
-      // Pause any active timers before signing out
-      if (user) {
-        try {
-          const { data: activeTimers } = await supabase
-            .from('time_logs')
-            .select('id, started_at')
-            .eq('user_id', user.id)
-            .is('ended_at', null);
-
-          if (activeTimers && activeTimers.length > 0) {
-            for (const timer of activeTimers) {
-              const startedAt = new Date(timer.started_at);
-              const now = new Date();
-              const totalMinutes = Math.floor((now.getTime() - startedAt.getTime()) / 60000);
-              await supabase
-                .from('time_logs')
-                .update({ ended_at: now.toISOString(), total_minutes: totalMinutes })
-                .eq('id', timer.id);
-            }
-          }
-        } catch (timerError) {
-          console.error('Error closing timers:', timerError);
-        }
-      }
+      // Antes, cerrar sesion paraba los cronometros abiertos y escribia una
+      // hora de fin que nadie habia marcado. El cronometro lo empieza y lo
+      // termina la persona: salir de la aplicacion no es terminar el trabajo.
 
       setUser(null);
       setSession(null);
