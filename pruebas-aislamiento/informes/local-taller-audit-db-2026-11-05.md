@@ -4,9 +4,9 @@ Fecha: 2026-11-05  ·  Columna de tenant: `organization_id`
 
 ## Resumen
 
-- Tablas analizadas: **27**
+- Tablas analizadas: **28**
 - Tablas sin RLS activado: **0**
-- Tablas sin columna de tenant: **3**
+- Tablas sin columna de tenant: **4**
 - Politicas totales: **96**
 - Politicas que aislan por usuario (`auth.uid()`): **13**
 - Politicas sin ningun filtro de aislamiento: **1**
@@ -49,6 +49,7 @@ Sin politica, Postgres deniega por defecto. No es una fuga: es funcionalidad blo
 
 Deben aislarse por join con su tabla padre. Verificar una a una.
 
+- `ajustes_plataforma`
 - `organizations`
 - `planes`
 - `propietarios_plataforma`
