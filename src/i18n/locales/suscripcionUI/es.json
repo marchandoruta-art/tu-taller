@@ -1,0 +1,22 @@
+{
+  "suscripcionUI": {
+    "cortado": {
+      "impago": {
+        "titulo": "Suscripción pendiente de pago",
+        "texto": "La suscripción de {{taller}} venció el {{fecha}} y han pasado los días de cortesía. En cuanto se regularice el pago, volvéis a entrar con normalidad."
+      },
+      "pruebaAcabada": {
+        "titulo": "Se ha acabado el periodo de prueba",
+        "texto": "La prueba de {{taller}} terminó el {{fecha}}. Para seguir usando la aplicación hay que contratar un plan."
+      },
+      "baja": {
+        "titulo": "Esta cuenta está dada de baja",
+        "texto": "{{taller}} está dado de baja. Si ha sido un error o queréis volver, escribidnos."
+      },
+      "datosASalvo": "Vuestros datos siguen guardados y no se ha borrado nada. Al reactivar la cuenta estará todo como lo dejasteis.",
+      "contactar": "Escribirnos",
+      "salir": "Cerrar sesión",
+      "correoContacto": "marchandoruta@gmail.com"
+    }
+  }
+}

@@ -9,12 +9,15 @@ import { CommandPalette } from '@/components/ui/CommandPalette';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useTranslation } from 'react-i18next';
 import { useOrganization } from '@/hooks/useOrganization';
+import { useSuscripcion } from '@/hooks/useSuscripcion';
+import { AccesoCortado } from '@/components/suscripcion/AccesoCortado';
 
 interface MainLayoutProps {
   children: ReactNode;
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
+  const { suscripcion, cargando: comprobandoSuscripcion } = useSuscripcion();
   const { organization } = useOrganization();
   const { t } = useTranslation();
   const { signOut } = useAuth();
@@ -53,6 +56,13 @@ export function MainLayout({ children }: MainLayoutProps) {
       setCollapsed(!collapsed);
     }
   };
+
+  // El corte por impago ocurre en la base de datos: sin acceso no se lee ni
+  // el nombre del taller. Esta comprobacion solo sirve para explicarselo en
+  // vez de dejarle una pantalla vacia girando.
+  if (!comprobandoSuscripcion && suscripcion && !suscripcion.tiene_acceso) {
+    return <AccesoCortado suscripcion={suscripcion} />;
+  }
 
   return (
     <div className="min-h-screen">

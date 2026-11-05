@@ -1,0 +1,22 @@
+{
+  "suscripcionUI": {
+    "cortado": {
+      "impago": {
+        "titulo": "Abonnement en attente de paiement",
+        "texto": "L'abonnement de {{taller}} a expiré le {{fecha}} et le délai de courtoisie est écoulé. Dès que le paiement est régularisé, vous y avez accès de nouveau."
+      },
+      "pruebaAcabada": {
+        "titulo": "La période d'essai est terminée",
+        "texto": "L'essai de {{taller}} s'est terminé le {{fecha}}. Pour continuer, il faut choisir une formule."
+      },
+      "baja": {
+        "titulo": "Ce compte est résilié",
+        "texto": "{{taller}} a été résilié. Si c’est une erreur ou si vous voulez revenir, écrivez-nous."
+      },
+      "datosASalvo": "Vos données sont toujours là et rien n’a été supprimé. À la réactivation, tout sera comme vous l’avez laissé.",
+      "contactar": "Nous écrire",
+      "salir": "Se déconnecter",
+      "correoContacto": "marchandoruta@gmail.com"
+    }
+  }
+}

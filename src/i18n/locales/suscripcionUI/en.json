@@ -1,0 +1,22 @@
+{
+  "suscripcionUI": {
+    "cortado": {
+      "impago": {
+        "titulo": "Subscription payment pending",
+        "texto": "The subscription for {{taller}} expired on {{fecha}} and the grace period has ended. As soon as the payment goes through, you are back in."
+      },
+      "pruebaAcabada": {
+        "titulo": "Your trial has ended",
+        "texto": "The trial for {{taller}} ended on {{fecha}}. To keep using the app you need to choose a plan."
+      },
+      "baja": {
+        "titulo": "This account is cancelled",
+        "texto": "{{taller}} has been cancelled. If this is a mistake or you want to come back, get in touch."
+      },
+      "datosASalvo": "Your data is still stored and nothing has been deleted. When the account is reactivated, everything will be as you left it.",
+      "contactar": "Get in touch",
+      "salir": "Sign out",
+      "correoContacto": "marchandoruta@gmail.com"
+    }
+  }
+}

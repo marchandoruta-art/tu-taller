@@ -1,0 +1,22 @@
+{
+  "suscripcionUI": {
+    "cortado": {
+      "impago": {
+        "titulo": "Subscrição por pagar",
+        "texto": "A subscrição de {{taller}} expirou a {{fecha}} e já passaram os dias de cortesia. Assim que o pagamento ficar regularizado, voltam a entrar normalmente."
+      },
+      "pruebaAcabada": {
+        "titulo": "O período de teste terminou",
+        "texto": "O teste de {{taller}} terminou a {{fecha}}. Para continuar a usar a aplicação é preciso escolher um plano."
+      },
+      "baja": {
+        "titulo": "Esta conta está cancelada",
+        "texto": "{{taller}} foi cancelada. Se for um engano ou quiserem voltar, escrevam-nos."
+      },
+      "datosASalvo": "Os vossos dados continuam guardados e não se apagou nada. Ao reativar, estará tudo como deixaram.",
+      "contactar": "Escrever-nos",
+      "salir": "Terminar sessão",
+      "correoContacto": "marchandoruta@gmail.com"
+    }
+  }
+}

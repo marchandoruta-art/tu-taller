@@ -1,0 +1,22 @@
+{
+  "suscripcionUI": {
+    "cortado": {
+      "impago": {
+        "titulo": "Zahlung ausstehend",
+        "texto": "Das Abonnement von {{taller}} lief am {{fecha}} ab und die Kulanzfrist ist vorbei. Sobald die Zahlung eingeht, geht es normal weiter."
+      },
+      "pruebaAcabada": {
+        "titulo": "Die Testphase ist beendet",
+        "texto": "Die Testphase von {{taller}} endete am {{fecha}}. Um weiterzumachen, muss ein Tarif gewählt werden."
+      },
+      "baja": {
+        "titulo": "Dieses Konto ist gekündigt",
+        "texto": "{{taller}} wurde gekündigt. Wenn das ein Irrtum ist oder ihr zurückkommen wollt, meldet euch."
+      },
+      "datosASalvo": "Eure Daten sind weiterhin gespeichert, es wurde nichts gelöscht. Nach der Reaktivierung ist alles wie zuvor.",
+      "contactar": "Kontakt aufnehmen",
+      "salir": "Abmelden",
+      "correoContacto": "marchandoruta@gmail.com"
+    }
+  }
+}
