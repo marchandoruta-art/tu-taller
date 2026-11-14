@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      ajustes_plataforma: {
+        Row: {
+          clave: string
+          nota: string | null
+          valor: string
+        }
+        Insert: {
+          clave: string
+          nota?: string | null
+          valor: string
+        }
+        Update: {
+          clave?: string
+          nota?: string | null
+          valor?: string
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           created_at: string
@@ -55,6 +73,8 @@ export type Database = {
           appointment_time: string | null
           appointment_type: Database["public"]["Enums"]["appointment_type"]
           assigned_to: string | null
+          avisos_aceptados_en: string | null
+          client_email: string | null
           client_name: string
           client_phone: string | null
           confirmation_status: Database["public"]["Enums"]["appointment_confirmation_status"]
@@ -62,21 +82,29 @@ export type Database = {
           confirmed_at: string | null
           created_at: string
           created_by: string | null
+          documento_numero: string | null
+          documento_tipo: string | null
+          firma: string | null
           id: string
           issue_description: string | null
           notes: string | null
           organization_id: string | null
+          origen: string
+          servicios: string[]
           updated_at: string
           vehicle_brand: string | null
           vehicle_id: string | null
           vehicle_model: string | null
           vehicle_plate: string | null
+          vehicle_year: number | null
         }
         Insert: {
           appointment_date: string
           appointment_time?: string | null
           appointment_type?: Database["public"]["Enums"]["appointment_type"]
           assigned_to?: string | null
+          avisos_aceptados_en?: string | null
+          client_email?: string | null
           client_name: string
           client_phone?: string | null
           confirmation_status?: Database["public"]["Enums"]["appointment_confirmation_status"]
@@ -84,21 +112,29 @@ export type Database = {
           confirmed_at?: string | null
           created_at?: string
           created_by?: string | null
+          documento_numero?: string | null
+          documento_tipo?: string | null
+          firma?: string | null
           id?: string
           issue_description?: string | null
           notes?: string | null
           organization_id?: string | null
+          origen?: string
+          servicios?: string[]
           updated_at?: string
           vehicle_brand?: string | null
           vehicle_id?: string | null
           vehicle_model?: string | null
           vehicle_plate?: string | null
+          vehicle_year?: number | null
         }
         Update: {
           appointment_date?: string
           appointment_time?: string | null
           appointment_type?: Database["public"]["Enums"]["appointment_type"]
           assigned_to?: string | null
+          avisos_aceptados_en?: string | null
+          client_email?: string | null
           client_name?: string
           client_phone?: string | null
           confirmation_status?: Database["public"]["Enums"]["appointment_confirmation_status"]
@@ -106,15 +142,21 @@ export type Database = {
           confirmed_at?: string | null
           created_at?: string
           created_by?: string | null
+          documento_numero?: string | null
+          documento_tipo?: string | null
+          firma?: string | null
           id?: string
           issue_description?: string | null
           notes?: string | null
           organization_id?: string | null
+          origen?: string
+          servicios?: string[]
           updated_at?: string
           vehicle_brand?: string | null
           vehicle_id?: string | null
           vehicle_model?: string | null
           vehicle_plate?: string | null
+          vehicle_year?: number | null
         }
         Relationships: [
           {
@@ -135,32 +177,47 @@ export type Database = {
       }
       attendance_logs: {
         Row: {
+          aviso_enviado_en: string | null
           clock_in: string
           clock_out: string | null
+          corregido_en: string | null
+          corregido_por: string | null
           created_at: string
           exit_type: string | null
           id: string
+          motivo: string | null
           organization_id: string | null
+          origen: string
           total_minutes: number | null
           user_id: string
         }
         Insert: {
+          aviso_enviado_en?: string | null
           clock_in?: string
           clock_out?: string | null
+          corregido_en?: string | null
+          corregido_por?: string | null
           created_at?: string
           exit_type?: string | null
           id?: string
+          motivo?: string | null
           organization_id?: string | null
+          origen?: string
           total_minutes?: number | null
           user_id: string
         }
         Update: {
+          aviso_enviado_en?: string | null
           clock_in?: string
           clock_out?: string | null
+          corregido_en?: string | null
+          corregido_por?: string | null
           created_at?: string
           exit_type?: string | null
           id?: string
+          motivo?: string | null
           organization_id?: string | null
+          origen?: string
           total_minutes?: number | null
           user_id?: string
         }
@@ -478,33 +535,110 @@ export type Database = {
       }
       organizations: {
         Row: {
+          attendance_end: string
+          citas_avisos: string[]
+          citas_desde: string
+          citas_dias: number[]
+          citas_duracion_min: number
+          citas_hasta: string
+          citas_por_franja: number
+          citas_servicios: string[]
+          citas_web_activas: boolean
+          codigo_postal: string | null
           created_at: string
+          dado_de_baja_en: string | null
+          direccion: string | null
+          email: string | null
+          estado_suscripcion: Database["public"]["Enums"]["estado_suscripcion"]
           id: string
           logo_url: string | null
           name: string
+          nif: string | null
           owner_id: string
+          plan: string | null
+          poblacion: string | null
+          provincia: string | null
+          prueba_termina_en: string | null
+          razon_social: string | null
           slug: string
+          suscripcion_termina_en: string | null
+          telefono: string | null
+          time_zone: string
           updated_at: string
         }
         Insert: {
+          attendance_end?: string
+          citas_avisos?: string[]
+          citas_desde?: string
+          citas_dias?: number[]
+          citas_duracion_min?: number
+          citas_hasta?: string
+          citas_por_franja?: number
+          citas_servicios?: string[]
+          citas_web_activas?: boolean
+          codigo_postal?: string | null
           created_at?: string
+          dado_de_baja_en?: string | null
+          direccion?: string | null
+          email?: string | null
+          estado_suscripcion?: Database["public"]["Enums"]["estado_suscripcion"]
           id?: string
           logo_url?: string | null
           name: string
+          nif?: string | null
           owner_id: string
+          plan?: string | null
+          poblacion?: string | null
+          provincia?: string | null
+          prueba_termina_en?: string | null
+          razon_social?: string | null
           slug: string
+          suscripcion_termina_en?: string | null
+          telefono?: string | null
+          time_zone?: string
           updated_at?: string
         }
         Update: {
+          attendance_end?: string
+          citas_avisos?: string[]
+          citas_desde?: string
+          citas_dias?: number[]
+          citas_duracion_min?: number
+          citas_hasta?: string
+          citas_por_franja?: number
+          citas_servicios?: string[]
+          citas_web_activas?: boolean
+          codigo_postal?: string | null
           created_at?: string
+          dado_de_baja_en?: string | null
+          direccion?: string | null
+          email?: string | null
+          estado_suscripcion?: Database["public"]["Enums"]["estado_suscripcion"]
           id?: string
           logo_url?: string | null
           name?: string
+          nif?: string | null
           owner_id?: string
+          plan?: string | null
+          poblacion?: string | null
+          provincia?: string | null
+          prueba_termina_en?: string | null
+          razon_social?: string | null
           slug?: string
+          suscripcion_termina_en?: string | null
+          telefono?: string | null
+          time_zone?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "organizations_plan_valido"
+            columns: ["plan"]
+            isOneToOne: false
+            referencedRelation: "planes"
+            referencedColumns: ["codigo"]
+          },
+        ]
       }
       owners: {
         Row: {
@@ -604,6 +738,66 @@ export type Database = {
           },
         ]
       }
+      planes: {
+        Row: {
+          actualizado_en: string
+          avisos_itv: boolean
+          citas_web: boolean
+          codigo: string
+          creado_en: string
+          documentos_con_logo: boolean
+          estadisticas: boolean
+          max_usuarios: number | null
+          max_vehiculos_activos: number | null
+          meses_historial: number | null
+          nombre: string
+          orden: number
+          portal_cliente: boolean
+          precio_mensual: number | null
+          productividad: boolean
+          registro_jornada: boolean
+          usos_ia_mes: number | null
+        }
+        Insert: {
+          actualizado_en?: string
+          avisos_itv?: boolean
+          citas_web?: boolean
+          codigo: string
+          creado_en?: string
+          documentos_con_logo?: boolean
+          estadisticas?: boolean
+          max_usuarios?: number | null
+          max_vehiculos_activos?: number | null
+          meses_historial?: number | null
+          nombre: string
+          orden: number
+          portal_cliente?: boolean
+          precio_mensual?: number | null
+          productividad?: boolean
+          registro_jornada?: boolean
+          usos_ia_mes?: number | null
+        }
+        Update: {
+          actualizado_en?: string
+          avisos_itv?: boolean
+          citas_web?: boolean
+          codigo?: string
+          creado_en?: string
+          documentos_con_logo?: boolean
+          estadisticas?: boolean
+          max_usuarios?: number | null
+          max_vehiculos_activos?: number | null
+          meses_historial?: number | null
+          nombre?: string
+          orden?: number
+          portal_cliente?: boolean
+          precio_mensual?: number | null
+          productividad?: boolean
+          registro_jornada?: boolean
+          usos_ia_mes?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -641,6 +835,21 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      propietarios_plataforma: {
+        Row: {
+          creado_en: string
+          user_id: string
+        }
+        Insert: {
+          creado_en?: string
+          user_id: string
+        }
+        Update: {
+          creado_en?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       push_subscriptions: {
         Row: {
@@ -1270,10 +1479,90 @@ export type Database = {
         Args: { _org_id: string; _target_user_id: string }
         Returns: undefined
       }
-      auto_stop_vehicle_timers: { Args: never; Returns: number }
+      cerrar_pruebas_caducadas: { Args: never; Returns: number }
+      cita_publica_config: {
+        Args: { _slug: string }
+        Returns: {
+          avisos: string[]
+          duracion_min: number
+          logo_url: string
+          nombre: string
+          servicios: string[]
+        }[]
+      }
+      cita_publica_huecos: {
+        Args: { _desde?: string; _dias?: number; _slug: string }
+        Returns: {
+          dia: string
+          hora: string
+          libres: number
+        }[]
+      }
+      cita_publica_solicitar: {
+        Args: {
+          _anio: number
+          _apellidos: string
+          _detalle: string
+          _dia: string
+          _doc_numero: string
+          _doc_tipo: string
+          _email: string
+          _firma: string
+          _hora: string
+          _marca: string
+          _matricula: string
+          _modelo: string
+          _nombre: string
+          _servicios: string[]
+          _slug: string
+          _telefono: string
+        }
+        Returns: {
+          dia: string
+          hora: string
+          id: string
+          taller: string
+          token: string
+        }[]
+      }
       convert_today_appointments: { Args: never; Returns: number }
-      cron_auto_clock_in: { Args: never; Returns: number }
-      cron_auto_clock_out: { Args: never; Returns: number }
+      corregir_jornada: {
+        Args: {
+          _clock_in: string
+          _clock_out: string
+          _id: string
+          _motivo: string
+        }
+        Returns: {
+          aviso_enviado_en: string | null
+          clock_in: string
+          clock_out: string | null
+          corregido_en: string | null
+          corregido_por: string | null
+          created_at: string
+          exit_type: string | null
+          id: string
+          motivo: string | null
+          organization_id: string | null
+          origen: string
+          total_minutes: number | null
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "attendance_logs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      cron_avisar_jornadas_abiertas: {
+        Args: { _instante?: string }
+        Returns: number
+      }
+      es_propietario_plataforma: {
+        Args: { _user_id?: string }
+        Returns: boolean
+      }
       generate_client_reminders: { Args: never; Returns: number }
       get_user_organization_id: { Args: { _user_id?: string }; Returns: string }
       get_user_role: {
@@ -1311,6 +1600,108 @@ export type Database = {
           slug: string
         }[]
       }
+      mi_suscripcion: {
+        Args: never
+        Returns: {
+          dado_de_baja_en: string
+          dias_de_cortesia: number
+          estado: string
+          plan: string
+          plan_nombre: string
+          prueba_termina_en: string
+          suscripcion_termina_en: string
+          taller: string
+          tiene_acceso: boolean
+        }[]
+      }
+      panel_propietario_cambiar_estado: {
+        Args: {
+          _estado: Database["public"]["Enums"]["estado_suscripcion"]
+          _hasta?: string
+          _taller: string
+        }
+        Returns: undefined
+      }
+      panel_propietario_cambiar_plan: {
+        Args: { _plan: string; _taller: string }
+        Returns: undefined
+      }
+      panel_propietario_detalle: {
+        Args: { _taller: string }
+        Returns: {
+          alta_en: string
+          citas_total: number
+          contacto_correo: string
+          contacto_nombre: string
+          dado_de_baja_en: string
+          estado_suscripcion: string
+          nombre: string
+          personas_por_rol: Json
+          personas_total: number
+          plan: string
+          prueba_termina_en: string
+          slug: string
+          suscripcion_termina_en: string
+          ultimo_acceso: string
+          vehiculos_activos: number
+          vehiculos_total: number
+        }[]
+      }
+      panel_propietario_talleres: {
+        Args: never
+        Returns: {
+          alta_en: string
+          correo_propietario: string
+          dado_de_baja_en: string
+          estado_suscripcion: string
+          id: string
+          nombre: string
+          nombre_propietario: string
+          personas: number
+          plan: string
+          prueba_termina_en: string
+          slug: string
+          suscripcion_termina_en: string
+          vehiculos: number
+        }[]
+      }
+      plan_del_taller: {
+        Args: { _org?: string }
+        Returns: {
+          actualizado_en: string
+          avisos_itv: boolean
+          citas_web: boolean
+          codigo: string
+          creado_en: string
+          documentos_con_logo: boolean
+          estadisticas: boolean
+          max_usuarios: number | null
+          max_vehiculos_activos: number | null
+          meses_historial: number | null
+          nombre: string
+          orden: number
+          portal_cliente: boolean
+          precio_mensual: number | null
+          productividad: boolean
+          registro_jornada: boolean
+          usos_ia_mes: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "planes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      purgar_jornadas_caducadas: {
+        Args: { _instante?: string }
+        Returns: number
+      }
+      taller_puede: {
+        Args: { _funcion: string; _org?: string }
+        Returns: boolean
+      }
+      taller_tiene_acceso: { Args: { _org: string }; Returns: boolean }
       trigger_pending_reminder: { Args: { _slot: string }; Returns: undefined }
       user_belongs_to_org: {
         Args: { _org_id: string; _user_id: string }
@@ -1321,6 +1712,7 @@ export type Database = {
       appointment_confirmation_status: "pendiente" | "confirmada" | "cancelada"
       appointment_type: "mecanica" | "chapa_pintura"
       client_approval_status: "pendiente" | "aprobado" | "rechazado"
+      estado_suscripcion: "prueba" | "activa" | "pago_pendiente" | "cancelada"
       user_role: "mecanico" | "chapista" | "oficina" | "admin"
       vehicle_priority: "baja" | "normal" | "alta" | "urgente"
       vehicle_status:
@@ -1347,12 +1739,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1376,11 +1768,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1401,11 +1793,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1426,11 +1818,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1443,11 +1835,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1462,6 +1854,7 @@ export const Constants = {
       appointment_confirmation_status: ["pendiente", "confirmada", "cancelada"],
       appointment_type: ["mecanica", "chapa_pintura"],
       client_approval_status: ["pendiente", "aprobado", "rechazado"],
+      estado_suscripcion: ["prueba", "activa", "pago_pendiente", "cancelada"],
       user_role: ["mecanico", "chapista", "oficina", "admin"],
       vehicle_priority: ["baja", "normal", "alta", "urgente"],
       vehicle_status: [
