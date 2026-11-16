@@ -1,0 +1,28 @@
+{
+  "planesUI": {
+    "titulo": "Planes",
+    "subtitulo": "Elige el plan que le encaja a tu taller.",
+    "tuPlan": "Tu plan: {{plan}}",
+    "enPrueba": "En prueba",
+    "pruebaHasta": "La prueba termina el {{fecha}}",
+    "renuevaEl": "Renueva el {{fecha}}",
+    "sinRenovacion": "Sin fecha de renovación",
+    "gestionar": "Gestionar suscripción",
+    "mensual": "Mensual",
+    "anual": "Anual",
+    "dosMesesGratis": "2 meses gratis",
+    "alMes": "/mes",
+    "alAnio": "/año",
+    "actual": "Actual",
+    "esTuPlan": "Es tu plan",
+    "contratar": "Contratar",
+    "sinConfigurar": "Aún no disponible",
+    "gratisNota": "Es el plan al que se vuelve cuando termina una suscripción. No hay que contratarlo.",
+    "soloDireccion": "Solo la dirección del taller puede contratar o cambiar de plan.",
+    "pagoHecho": "Pago recibido",
+    "pagoHechoDetalle": "En unos segundos verás el plan actualizado.",
+    "pagoCancelado": "Has salido sin pagar. No se ha cobrado nada.",
+    "errorPago": "No se ha podido abrir la pasarela de pago",
+    "errorPortal": "No se ha podido abrir la gestión de la suscripción"
+  }
+}

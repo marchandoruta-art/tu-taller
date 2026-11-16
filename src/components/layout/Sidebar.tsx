@@ -35,6 +35,7 @@ import {
   Timer,
   FileSpreadsheet,
   Crown,
+  CreditCard,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -70,6 +71,7 @@ const adminNavigation = [
   { key: 'nav.auditLog', href: '/admin/audit', icon: ShieldCheck },
   { key: 'nav.legal', href: '/legal', icon: Scale },
   { key: 'nav.taskTemplates', href: '/settings/templates', icon: ClipboardList },
+  { key: 'nav.planes', href: '/planes', icon: CreditCard },
   { key: 'nav.settings', href: '/settings', icon: Settings, soloAdmin: true },
 ];
 

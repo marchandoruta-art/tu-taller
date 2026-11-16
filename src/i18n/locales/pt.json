@@ -35,7 +35,8 @@
     "pendingCount": "{{count}} pendentes",
     "activeCount": "{{count}} ativos",
     "signOut": "Sair",
-    "importData": "Importar dados"
+    "importData": "Importar dados",
+    "planes": "Planos e pagamento"
   },
   "status": {
     "recibido": "Recebido",

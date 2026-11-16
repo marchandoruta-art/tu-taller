@@ -35,7 +35,8 @@
     "pendingCount": "{{count}} pending",
     "activeCount": "{{count}} active",
     "signOut": "Sign out",
-    "importData": "Import data"
+    "importData": "Import data",
+    "planes": "Plans & billing"
   },
   "status": {
     "recibido": "Received",

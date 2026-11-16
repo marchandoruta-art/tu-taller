@@ -35,7 +35,8 @@
     "pendingCount": "{{count}} offen",
     "activeCount": "{{count}} aktiv",
     "signOut": "Abmelden",
-    "importData": "Daten importieren"
+    "importData": "Daten importieren",
+    "planes": "Tarife & Zahlung"
   },
   "status": {
     "recibido": "Angenommen",

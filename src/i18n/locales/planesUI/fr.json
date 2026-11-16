@@ -1,0 +1,28 @@
+{
+  "planesUI": {
+    "titulo": "Formules",
+    "subtitulo": "Choisis la formule qui convient à ton garage.",
+    "tuPlan": "Ta formule : {{plan}}",
+    "enPrueba": "En essai",
+    "pruebaHasta": "L'essai se termine le {{fecha}}",
+    "renuevaEl": "Renouvelle le {{fecha}}",
+    "sinRenovacion": "Pas de date de renouvellement",
+    "gestionar": "Gérer l'abonnement",
+    "mensual": "Mensuel",
+    "anual": "Annuel",
+    "dosMesesGratis": "2 mois offerts",
+    "alMes": "/mois",
+    "alAnio": "/an",
+    "actual": "Actuelle",
+    "esTuPlan": "Ta formule actuelle",
+    "contratar": "S'abonner",
+    "sinConfigurar": "Pas encore disponible",
+    "gratisNota": "C'est la formule vers laquelle on revient quand un abonnement se termine. Pas besoin de la souscrire.",
+    "soloDireccion": "Seule la direction du garage peut s'abonner ou changer de formule.",
+    "pagoHecho": "Paiement reçu",
+    "pagoHechoDetalle": "Ta formule sera mise à jour dans quelques secondes.",
+    "pagoCancelado": "Tu es parti sans payer. Rien n'a été débité.",
+    "errorPago": "Impossible d'ouvrir la page de paiement",
+    "errorPortal": "Impossible d'ouvrir la gestion de l'abonnement"
+  }
+}

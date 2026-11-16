@@ -1,0 +1,28 @@
+{
+  "planesUI": {
+    "titulo": "Planos",
+    "subtitulo": "Escolhe o plano que encaixa na tua oficina.",
+    "tuPlan": "O teu plano: {{plan}}",
+    "enPrueba": "Em teste",
+    "pruebaHasta": "O teste termina a {{fecha}}",
+    "renuevaEl": "Renova a {{fecha}}",
+    "sinRenovacion": "Sem data de renovação",
+    "gestionar": "Gerir subscrição",
+    "mensual": "Mensal",
+    "anual": "Anual",
+    "dosMesesGratis": "2 meses grátis",
+    "alMes": "/mês",
+    "alAnio": "/ano",
+    "actual": "Atual",
+    "esTuPlan": "É o teu plano",
+    "contratar": "Subscrever",
+    "sinConfigurar": "Ainda não disponível",
+    "gratisNota": "É o plano para onde se volta quando acaba uma subscrição. Não é preciso subscrevê-lo.",
+    "soloDireccion": "Só a direção da oficina pode subscrever ou mudar de plano.",
+    "pagoHecho": "Pagamento recebido",
+    "pagoHechoDetalle": "Em segundos verás o plano atualizado.",
+    "pagoCancelado": "Saíste sem pagar. Não se cobrou nada.",
+    "errorPago": "Não foi possível abrir a página de pagamento",
+    "errorPortal": "Não foi possível abrir a gestão da subscrição"
+  }
+}

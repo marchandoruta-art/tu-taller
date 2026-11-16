@@ -31,6 +31,7 @@ import Workload from "./pages/Workload";
 import Onboarding from "./pages/Onboarding";
 import PanelPropietario from "./pages/PanelPropietario";
 import CitaPublica from "./pages/CitaPublica";
+import Planes from "./pages/Planes";
 import OrganizationSettings from "./pages/OrganizationSettings";
 import NotFound from "./pages/NotFound";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -94,6 +95,7 @@ const App = () => (
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/admin/attendance" element={<AdminAttendance />} />
                 <Route path="/propietario" element={<PanelPropietario />} />
+                <Route path="/planes" element={<Planes />} />
                 <Route path="/admin/productivity" element={<Productivity />} />
                 <Route path="/admin/alerts" element={<Alerts />} />
                 <Route path="/admin/data" element={<AdminData />} />

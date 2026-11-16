@@ -1,0 +1,28 @@
+{
+  "planesUI": {
+    "titulo": "Plans",
+    "subtitulo": "Choose the plan that fits your workshop.",
+    "tuPlan": "Your plan: {{plan}}",
+    "enPrueba": "On trial",
+    "pruebaHasta": "Trial ends on {{fecha}}",
+    "renuevaEl": "Renews on {{fecha}}",
+    "sinRenovacion": "No renewal date",
+    "gestionar": "Manage subscription",
+    "mensual": "Monthly",
+    "anual": "Yearly",
+    "dosMesesGratis": "2 months free",
+    "alMes": "/month",
+    "alAnio": "/year",
+    "actual": "Current",
+    "esTuPlan": "Your current plan",
+    "contratar": "Subscribe",
+    "sinConfigurar": "Not available yet",
+    "gratisNota": "This is the plan you return to when a subscription ends. No need to subscribe.",
+    "soloDireccion": "Only the workshop management can subscribe or change plan.",
+    "pagoHecho": "Payment received",
+    "pagoHechoDetalle": "Your plan will update in a few seconds.",
+    "pagoCancelado": "You left without paying. Nothing was charged.",
+    "errorPago": "Could not open the payment page",
+    "errorPortal": "Could not open subscription management"
+  }
+}

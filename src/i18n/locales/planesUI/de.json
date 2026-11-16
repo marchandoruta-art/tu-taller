@@ -1,0 +1,28 @@
+{
+  "planesUI": {
+    "titulo": "Tarife",
+    "subtitulo": "Wähle den Tarif, der zu deiner Werkstatt passt.",
+    "tuPlan": "Dein Tarif: {{plan}}",
+    "enPrueba": "Testphase",
+    "pruebaHasta": "Testphase endet am {{fecha}}",
+    "renuevaEl": "Verlängert am {{fecha}}",
+    "sinRenovacion": "Kein Verlängerungsdatum",
+    "gestionar": "Abo verwalten",
+    "mensual": "Monatlich",
+    "anual": "Jährlich",
+    "dosMesesGratis": "2 Monate gratis",
+    "alMes": "/Monat",
+    "alAnio": "/Jahr",
+    "actual": "Aktuell",
+    "esTuPlan": "Dein aktueller Tarif",
+    "contratar": "Abonnieren",
+    "sinConfigurar": "Noch nicht verfügbar",
+    "gratisNota": "Auf diesen Tarif fällt man zurück, wenn ein Abo endet. Man muss ihn nicht abschließen.",
+    "soloDireccion": "Nur die Werkstattleitung kann abonnieren oder den Tarif wechseln.",
+    "pagoHecho": "Zahlung erhalten",
+    "pagoHechoDetalle": "Dein Tarif wird in wenigen Sekunden aktualisiert.",
+    "pagoCancelado": "Du hast ohne Zahlung abgebrochen. Es wurde nichts berechnet.",
+    "errorPago": "Die Zahlungsseite konnte nicht geöffnet werden",
+    "errorPortal": "Die Aboverwaltung konnte nicht geöffnet werden"
+  }
+}
