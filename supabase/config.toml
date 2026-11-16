@@ -2,3 +2,9 @@ project_id = "vzinqlkktnzgciigtycx"
 
 [functions.get-portal-vehicle]
 verify_jwt = false
+
+# Stripe no manda un token de Supabase: sus avisos llegan firmados por el, y la
+# firma se comprueba dentro de la funcion. Si se exigiera token aqui, el
+# webhook devolveria 401 y Stripe lo reintentaria en vano durante dias.
+[functions.pago-webhook]
+verify_jwt = false
