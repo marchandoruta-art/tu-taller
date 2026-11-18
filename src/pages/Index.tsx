@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
-import { AuthForm } from '@/components/auth/AuthForm';
 import Dashboard from './Dashboard';
 import Onboarding from './Onboarding';
+import Landing from './Landing';
 import { Loader2 } from 'lucide-react';
 
 const Index = () => {
@@ -28,8 +29,14 @@ const Index = () => {
     );
   }
 
+  // Sin sesión, la raíz es la página pública. Si venía con ?next= (por
+  // ejemplo desde el consentimiento OAuth) es que quería entrar: va al login
+  // con el mismo destino.
   if (!user) {
-    return <AuthForm />;
+    if (window.location.search.includes('next=')) {
+      return <Navigate to={`/entrar${window.location.search}`} replace />;
+    }
+    return <Landing />;
   }
 
   // User is authenticated but doesn't have an organization yet

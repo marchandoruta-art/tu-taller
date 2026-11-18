@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Memoria de diseño local (Hallmark)
+.hallmark/

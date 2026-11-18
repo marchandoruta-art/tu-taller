@@ -11,7 +11,12 @@ import { toast } from 'sonner';
 import { LanguageSelector } from '@/components/settings/LanguageSelector';
 import { traducirErrorAuth } from '@/lib/authErrors';
 
-export function AuthForm() {
+interface AuthFormProps {
+  /** Pestaña que se abre al cargar. Desde la landing se entra directo a registrarse. */
+  pestanaInicial?: 'signin' | 'signup';
+}
+
+export function AuthForm({ pestanaInicial = 'signin' }: AuthFormProps) {
   const { t } = useTranslation();
   const { signIn, signUp } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -65,7 +70,7 @@ export function AuthForm() {
           </div>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
+          <Tabs defaultValue={pestanaInicial} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="signin">{t('authUI.auth.signInTab')}</TabsTrigger>
               <TabsTrigger value="signup">{t('authUI.auth.signUpTab')}</TabsTrigger>

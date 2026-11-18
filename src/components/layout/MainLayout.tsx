@@ -1,4 +1,5 @@
 import { ReactNode, useState, useEffect } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
 import { PanelLeft, LogOut, Search } from 'lucide-react';
@@ -20,7 +21,8 @@ export function MainLayout({ children }: MainLayoutProps) {
   const { suscripcion, cargando: comprobandoSuscripcion } = useSuscripcion();
   const { organization } = useOrganization();
   const { t } = useTranslation();
-  const { signOut } = useAuth();
+  const { signOut, user, loading: cargandoSesion } = useAuth();
+  const ubicacion = useLocation();
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('sidebar-collapsed');
@@ -56,6 +58,12 @@ export function MainLayout({ children }: MainLayoutProps) {
       setCollapsed(!collapsed);
     }
   };
+
+  // Sin sesión no hay nada que enseñar aquí: al login, recordando a dónde iba.
+  if (!cargandoSesion && !user) {
+    const destino = encodeURIComponent(ubicacion.pathname + ubicacion.search);
+    return <Navigate to={`/entrar?next=${destino}`} replace />;
+  }
 
   // El corte por impago ocurre en la base de datos: sin acceso no se lee ni
   // el nombre del taller. Esta comprobacion solo sirve para explicarselo en

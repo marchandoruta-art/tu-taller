@@ -11,6 +11,7 @@ import { OnlineStatusProvider } from "@/hooks/useOnlineStatus";
 import { RealtimeNotificationListener } from "@/components/notifications/RealtimeNotificationListener";
 import { AuthCallback } from "@/components/auth/AuthCallback";
 import Index from "./pages/Index";
+import Entrar from "./pages/Entrar";
 import Vehicles from "./pages/Vehicles";
 import VehicleDetail from "./pages/VehicleDetail";
 import TimeLogs from "./pages/TimeLogs";
@@ -84,6 +85,7 @@ const App = () => (
                 {/* Publica: sin sesion. El taller pasa este enlace al cliente. */}
                 <Route path="/cita/:slug" element={<CitaPublica />} />
                 <Route path="/" element={<Index />} />
+                <Route path="/entrar" element={<Entrar />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/onboarding" element={<Onboarding />} />

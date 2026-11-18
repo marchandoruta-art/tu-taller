@@ -1,0 +1,176 @@
+{
+  "landingUI": {
+    "nav": {
+      "entrar": "Sign in",
+      "empezar": "Start free",
+      "irAlContenido": "Skip to content"
+    },
+    "hero": {
+      "titulo": "Which car is in the workshop, and who is on it.",
+      "lede": "ControlBox is the workshop board on your phone: intake, time per car, bookings and working-hours records. For workshops of one to ten people.",
+      "cta": "Start 14 days free",
+      "ctaSecundaria": "See the plans",
+      "sinTarjeta": "No card. The workshop starts on the Complete plan and decides after 14 days.",
+      "origen": "Born at Taller Autos Formentera, with real cars coming through the door."
+    },
+    "tablon": {
+      "descripcion": "Example of the workshop board: four status columns with today’s cars and a running timer.",
+      "titulo": "Today’s board",
+      "ejemplo": "example",
+      "columnas": {
+        "recibido": "Received",
+        "en_reparacion": "In repair",
+        "pendiente_piezas": "Waiting for parts",
+        "terminado": "Finished"
+      },
+      "sinAsignar": "Unassigned",
+      "enMarcha": "running"
+    },
+    "fases": {
+      "titulo": "A day in the workshop, with ControlBox",
+      "lista": [
+        {
+          "titulo": "The car comes in",
+          "texto": "Plate, customer, what is wrong and a photo. If it has been here before, its history shows up on its own. The deposit receipt prints with your workshop’s details.",
+          "visual": "Intake card with the plate, the Received status and the deposit receipt ready to print."
+        },
+        {
+          "titulo": "Work gets done",
+          "texto": "Each mechanic presses Start on the car they pick up and Finish when they are done. The time stays on that car, with no handwritten job sheets. If a part is missing, the car moves to Waiting for parts and the office sees it.",
+          "visual": "Running timer on a car with the Pause and Finish buttons."
+        },
+        {
+          "titulo": "The car goes out",
+          "texto": "The car moves to Finished and then Delivered. Everything done stays in that plate’s history for next time. If you want, the customer gets a reminder when the inspection or the next service is due.",
+          "visual": "Status change from Finished to Delivered and an inspection reminder scheduled for the customer."
+        },
+        {
+          "titulo": "The day closes",
+          "texto": "Everyone clocks in, pauses and clocks out from their phone. The working-hours record required by Spanish law, article 34.9 of the Workers’ Statute, comes out as a PDF with no signature sheets.",
+          "visual": "One day’s working-hours row with clock-in, pause, clock-out and total, plus the PDF button."
+        }
+      ],
+      "mock": {
+        "cliente": "Customer",
+        "motivo": "Reason",
+        "motivoEjemplo": "Noise when braking",
+        "resguardo": "Deposit receipt",
+        "pdf": "PDF",
+        "empezar": "Start",
+        "pausar": "Pause",
+        "finalizar": "Finish",
+        "tiempoHoy": "Time on this car",
+        "avisoItv": "Inspection reminder",
+        "avisoItvCuando": "one month before",
+        "historial": "Plate history",
+        "historialNota": "every visit, with times and photos",
+        "entrada": "In",
+        "pausa": "Pause",
+        "salida": "Out",
+        "total": "Total"
+      }
+    },
+    "ademas": {
+      "titulo": "And everything around it",
+      "lista": [
+        {
+          "titulo": "Bookings from your website",
+          "texto": "Each workshop gets its own link. The customer picks a day and a slot, accepts your notices and the booking lands in your diary for you to confirm."
+        },
+        {
+          "titulo": "On everyone’s phone",
+          "texto": "Installs as an app on Android and iPhone. Everyone sees their own: the mechanic their cars, the office everything."
+        },
+        {
+          "titulo": "History by plate",
+          "texto": "Search a plate and see everything that car has had done at the workshop, with times and photos."
+        },
+        {
+          "titulo": "Bring what you already have",
+          "texto": "Import customers and vehicles from a spreadsheet. The app is available in Spanish, English, French, German and Portuguese."
+        },
+        {
+          "titulo": "Each workshop in its own place",
+          "texto": "Your data is seen by your workshop only. Nobody outside, not even us, gets to look at your customers or your cars."
+        }
+      ]
+    },
+    "planes": {
+      "titulo": "Plans",
+      "intro": "The first 14 days, everything. Then the plan that fits. The price is per workshop, not per person.",
+      "alMes": "per month, VAT not included",
+      "anual": "Pay the full year and get two months free.",
+      "gratis": { "nombre": "Free", "precio": "€0", "nota": "For a one-person workshop." },
+      "profesional": { "nombre": "Professional", "precio": "€29.99", "nota": "For workshops with a team." },
+      "completo": { "nombre": "Complete", "precio": "€39.99", "nota": "For web bookings and seeing the numbers." },
+      "filas": {
+        "usuarios": "People",
+        "vehiculos": "Cars in the workshop at once",
+        "historial": "History",
+        "jornada": "Working-hours record",
+        "documentos": "Receipts with your logo",
+        "portal": "Customer portal",
+        "itv": "Inspection and service reminders",
+        "citas": "Web bookings",
+        "productividad": "Team productivity",
+        "estadisticas": "Statistics"
+      },
+      "valores": {
+        "sinLimite": "Unlimited",
+        "tresMeses": "3 months",
+        "completo": "Full",
+        "incluido": "Included",
+        "noIncluido": "Not included"
+      },
+      "cta": "Start with 14 days of the Complete plan",
+      "aviso": "When the trial ends, if you do not subscribe, the workshop moves to Free. Nothing is deleted."
+    },
+    "faq": {
+      "titulo": "Questions we get asked",
+      "lista": [
+        {
+          "p": "Do I need a card to try it?",
+          "r": "No. Create the account, set up your workshop and you have 14 days with everything. If it convinces you, you subscribe from inside the app."
+        },
+        {
+          "p": "What happens after the 14 days?",
+          "r": "The workshop moves to the Free plan. Nothing is deleted, but that plan allows one person and five cars at once, so with more than that you will need to subscribe to keep adding cars."
+        },
+        {
+          "p": "Does it do invoices or quotes?",
+          "r": "No, on purpose. That stays in your invoicing software, which is the one that has to comply with the tax office. ControlBox handles what happens inside the workshop."
+        },
+        {
+          "p": "Is the working-hours record legally valid?",
+          "r": "It stores each person’s clock-in, pauses and clock-out every day, it can be printed or downloaded as a PDF and each worker can see their own. That is what article 34.9 of the Spanish Workers’ Statute requires."
+        },
+        {
+          "p": "How do mechanics log their time?",
+          "r": "On the car: they press Start when they pick it up and Finish when they are done. They can pause if they switch cars. There are no job sheets to fill in."
+        },
+        {
+          "p": "Who can see my data?",
+          "r": "Your workshop and nobody else. Each workshop is kept separate from the others in the database. We see how many workshops there are and which plan they are on, not their cars or their customers."
+        },
+        {
+          "p": "What if I want to stop?",
+          "r": "You cancel from inside the app, without calling anyone. You keep access until the end of the period you have paid for."
+        }
+      ]
+    },
+    "cierre": {
+      "titulo": "Set up your workshop.",
+      "texto": "Fourteen days with everything, no card. Then you decide.",
+      "cta": "Start 14 days free"
+    },
+    "pie": {
+      "frase": "The car comes in. Work gets done. The car goes out. It is all written down.",
+      "contacto": "admin@controlboxapp.com",
+      "avisoLegal": "Legal notice",
+      "privacidad": "Privacy",
+      "cookies": "Cookies",
+      "terminos": "Terms",
+      "copy": "© {{anio}} ControlBox"
+    }
+  }
+}

@@ -134,7 +134,7 @@ export default function ResetPassword() {
     } else {
       toast.success(t('authUI.resetPassword.updateSuccess'));
       await supabase.auth.signOut();
-      navigate('/');
+      navigate('/entrar');
     }
     setLoading(false);
   };

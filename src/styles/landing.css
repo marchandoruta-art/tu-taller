@@ -1,0 +1,137 @@
+/* Hallmark · genre: modern-minimal · macrostructure: Narrative Workflow · theme: project tokens (ControlBox: light paper · display-condensed Bebas Neue · warm amber accent) · enrichment: Tier-A CSS-built product fragments · nav: N9 edge-aligned minimal (+ sign-in link) · footer: Ft5 Statement · tone: utilitarian industrial · anchor hue: 38 (amber) */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V4 */
+
+/*
+  La landing vive dentro de la app y usa sus mismos tokens (index.css): papel,
+  tinta, ámbar, Bebas Neue para titulares, Barlow para texto y JetBrains Mono
+  solo para números (cronómetro y numeración de fases). Aquí solo va lo que
+  Tailwind no expresa bien: el ritmo de las fases, la regla gruesa numerada y
+  los límites de ancho en móvil.
+*/
+
+html,
+body {
+  overflow-x: clip;
+}
+
+.landing {
+  --landing-max: 72rem;
+  --landing-gutter: clamp(1rem, 4vw, 2.5rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-short: 220ms;
+  font-variant-numeric: tabular-nums;
+}
+
+.landing .landing-wrap {
+  max-width: var(--landing-max);
+  margin-inline: auto;
+  padding-inline: var(--landing-gutter);
+}
+
+/* Titulares: Bebas Neue es de caja alta, el interlineado no baja de 1.0. */
+.landing h1,
+.landing h2,
+.landing h3 {
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.landing .landing-display {
+  font-size: clamp(2.75rem, 5vw + 1rem, 5.25rem);
+  letter-spacing: 0.02em;
+}
+
+.landing .landing-h2 {
+  font-size: clamp(2rem, 2.5vw + 1rem, 3rem);
+}
+
+/* Afordancias de una sola línea: el padre se reordena, la etiqueta no parte. */
+.landing a.landing-link,
+.landing .landing-cta {
+  white-space: nowrap;
+}
+
+/* Fases: regla gruesa numerada entre una y otra. */
+.landing .fase {
+  border-top: 3px solid hsl(var(--foreground));
+  padding-block: clamp(2rem, 5vw, 4rem);
+}
+
+.landing .fase-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Fragmentos de producto: una sola capa de contención, sin tarjeta dentro de tarjeta. */
+.landing .fragmento {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+}
+
+.landing .fragmento-boton {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Tabla de planes: las columnas de valores no se encogen por debajo de lo legible. */
+.landing .planes-tabla th,
+.landing .planes-tabla td {
+  padding: 0.75rem 0.5rem;
+  border-top: 1px solid hsl(var(--border));
+  vertical-align: top;
+}
+
+.landing .planes-tabla th:first-child,
+.landing .planes-tabla td:first-child {
+  padding-left: 0;
+}
+
+.landing .planes-tabla td:not(:first-child),
+.landing .planes-tabla th:not(:first-child) {
+  text-align: center;
+  min-width: 5.5rem;
+}
+
+/* Enlaces con foco visible e instantáneo, sin animar el anillo. */
+.landing a:focus-visible,
+.landing summary:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.landing .landing-link {
+  transition: color var(--dur-short) var(--ease-out);
+}
+
+.landing details > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.landing details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.landing details > summary::after {
+  content: '+';
+  font-family: 'JetBrains Mono', monospace;
+  margin-left: auto;
+  padding-left: 1rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.landing details[open] > summary::after {
+  content: '–';
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing * {
+    transition-duration: 0.01ms !important;
+  }
+}

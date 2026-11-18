@@ -107,7 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('SignOut error:', error);
     } finally {
       // Always redirect, even if signOut throws
-      window.location.replace('/');
+      window.location.replace('/entrar');
     }
   };
 
