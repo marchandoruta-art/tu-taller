@@ -1,10 +1,10 @@
-/**
- * Capturas reales de la app para la landing.
- *
- * Se generan con `scratchpad/capturas/capturar-app.mjs` entrando en un taller
- * DEMO con datos ficticios. Mientras una captura no exista, la landing enseña
- * un bloque gris marcado como pendiente: nunca una imagen inventada.
- */
+// Capturas reales de la app con los datos personales pixelados
+// (hechas con la cuenta de administración sobre el taller real, 2026-11-18).
+import tablon from './tablon.webp';
+import vehiculo from './vehiculo.webp';
+import jornada from './jornada.webp';
+import cita from './cita.webp';
+
 export type ClaveCaptura = 'tablon' | 'vehiculo' | 'jornada' | 'cita';
 
-export const capturas: Partial<Record<ClaveCaptura, string>> = {};
+export const capturas: Partial<Record<ClaveCaptura, string>> = { tablon, vehiculo, jornada, cita };
