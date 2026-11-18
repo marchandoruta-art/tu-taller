@@ -1,12 +1,11 @@
-/* Hallmark · genre: modern-minimal · macrostructure: Narrative Workflow · theme: project tokens (ControlBox: light paper · display-condensed Bebas Neue · warm amber accent) · enrichment: Tier-A CSS-built product fragments · nav: N9 edge-aligned minimal (+ sign-in link) · footer: Ft5 Statement · tone: utilitarian industrial · anchor hue: 38 (amber) */
-/* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V4 */
+/* Hallmark · genre: modern-minimal · macrostructure: studied-DNA (source: url, referencia del cliente) · theme: project tokens (ControlBox: papel cálido · Barlow Condensed en frase · ámbar) · enrichment: capturas reales de la app · nav: N1b SaaS three-section · footer: Ft3 index columns (pedido por el cliente) · tone: SaaS claro y centrado · anchor hue: 38 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R3 V3 — estructura centrada y pie en columnas a petición expresa del cliente */
 
 /*
-  La landing vive dentro de la app y usa sus mismos tokens (index.css): papel,
-  tinta, ámbar, Bebas Neue para titulares, Barlow para texto y JetBrains Mono
-  solo para números (cronómetro y numeración de fases). Aquí solo va lo que
-  Tailwind no expresa bien: el ritmo de las fases, la regla gruesa numerada y
-  los límites de ancho en móvil.
+  La landing vive dentro de la app y usa sus tokens (index.css). Lo que cambia
+  respecto a la app: titulares en Barlow Condensed en frase (la app usa Bebas en
+  caja alta), botones redondos y tarjetas blancas con sombra suave, al estilo de
+  la referencia que nos pasó el cliente.
 */
 
 html,
@@ -15,100 +14,143 @@ body {
 }
 
 .landing {
-  --landing-max: 72rem;
-  --landing-gutter: clamp(1rem, 4vw, 2.5rem);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --dur-short: 220ms;
   font-variant-numeric: tabular-nums;
 }
 
 .landing .landing-wrap {
-  max-width: var(--landing-max);
+  max-width: 72rem;
   margin-inline: auto;
-  padding-inline: var(--landing-gutter);
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
 }
 
-/* Titulares: Bebas Neue es de caja alta, el interlineado no baja de 1.0. */
 .landing h1,
 .landing h2,
 .landing h3 {
-  line-height: 1.05;
+  font-family: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  line-height: 1.08;
   overflow-wrap: anywhere;
   min-width: 0;
 }
 
 .landing .landing-display {
-  font-size: clamp(2.75rem, 5vw + 1rem, 5.25rem);
-  letter-spacing: 0.02em;
+  font-size: clamp(2.5rem, 4.5vw + 1rem, 4.5rem);
+  line-height: 1.04;
 }
 
 .landing .landing-h2 {
-  font-size: clamp(2rem, 2.5vw + 1rem, 3rem);
+  font-size: clamp(1.9rem, 2vw + 1rem, 3rem);
+}
+
+.landing .landing-h3 {
+  font-size: 1.25rem;
 }
 
 /* Afordancias de una sola línea: el padre se reordena, la etiqueta no parte. */
-.landing a.landing-link,
+.landing .landing-link,
 .landing .landing-cta {
   white-space: nowrap;
 }
 
-/* Fases: regla gruesa numerada entre una y otra. */
-.landing .fase {
-  border-top: 3px solid hsl(var(--foreground));
-  padding-block: clamp(2rem, 5vw, 4rem);
+/* Botón redondo principal, como en la referencia. */
+.landing .landing-cta {
+  border-radius: 9999px;
 }
 
-.landing .fase-num {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.875rem;
-  letter-spacing: 0.08em;
-  color: hsl(var(--muted-foreground));
-}
-
-/* Fragmentos de producto: una sola capa de contención, sin tarjeta dentro de tarjeta. */
-.landing .fragmento {
+/* Tarjetas: una sola capa de contención. */
+.landing .tarjeta {
   background: hsl(var(--card));
+  border: 1px solid hsl(var(--border) / 0.7);
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px hsl(var(--foreground) / 0.04);
+}
+
+/* Marco de captura: borde fino y sombra; sin barra de navegador dibujada. */
+.landing .marco {
+  border-radius: 1rem;
   border: 1px solid hsl(var(--border));
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-md);
+  background: hsl(var(--card));
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
 }
 
-.landing .fragmento-boton {
-  pointer-events: none;
-  user-select: none;
+.landing .marco img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
-/* Tabla de planes: las columnas de valores no se encogen por debajo de lo legible. */
-.landing .planes-tabla th,
-.landing .planes-tabla td {
-  padding: 0.75rem 0.5rem;
-  border-top: 1px solid hsl(var(--border));
-  vertical-align: top;
+.landing .marco-movil {
+  border-radius: 2rem;
+  border: 6px solid hsl(var(--foreground));
+  background: hsl(var(--foreground));
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  max-width: 20rem;
+  margin-inline: auto;
 }
 
-.landing .planes-tabla th:first-child,
-.landing .planes-tabla td:first-child {
-  padding-left: 0;
+.landing .marco-movil img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 1.6rem;
 }
 
-.landing .planes-tabla td:not(:first-child),
-.landing .planes-tabla th:not(:first-child) {
-  text-align: center;
-  min-width: 5.5rem;
+/* Captura pendiente: bloque gris etiquetado, nunca una imagen inventada. */
+.landing .captura-pendiente {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 10;
+  background: repeating-linear-gradient(
+    135deg,
+    hsl(var(--muted)) 0 12px,
+    hsl(var(--muted) / 0.6) 12px 24px
+  );
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.landing .marco-movil .captura-pendiente {
+  aspect-ratio: 9 / 18;
+  border-radius: 1.6rem;
 }
 
 /* Enlaces con foco visible e instantáneo, sin animar el anillo. */
 .landing a:focus-visible,
-.landing summary:focus-visible {
+.landing summary:focus-visible,
+.landing button:focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 3px;
-  border-radius: 2px;
+  border-radius: 4px;
 }
 
 .landing .landing-link {
   transition: color var(--dur-short) var(--ease-out);
 }
 
+/* Cabecera que se vuelve opaca al bajar. */
+.landing .cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: hsl(var(--background) / 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--dur-short) var(--ease-out);
+}
+
+.landing .cabecera.con-sombra {
+  border-bottom-color: hsl(var(--border));
+}
+
+/* Preguntas: desplegables nativos. */
 .landing details > summary {
   list-style: none;
   cursor: pointer;
@@ -118,16 +160,15 @@ body {
   display: none;
 }
 
-.landing details > summary::after {
-  content: '+';
-  font-family: 'JetBrains Mono', monospace;
+.landing details > summary .signo {
   margin-left: auto;
   padding-left: 1rem;
   color: hsl(var(--muted-foreground));
+  transition: transform var(--dur-short) var(--ease-out);
 }
 
-.landing details[open] > summary::after {
-  content: '–';
+.landing details[open] > summary .signo {
+  transform: rotate(45deg);
 }
 
 @media (prefers-reduced-motion: reduce) {

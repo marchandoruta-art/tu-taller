@@ -1,176 +1,164 @@
 {
   "landingUI": {
     "nav": {
-      "entrar": "Entrar",
-      "empezar": "Empezar gratis",
-      "irAlContenido": "Ir al contenido"
+      "funciones": "Funciones",
+      "comoFunciona": "Cómo funciona",
+      "precios": "Precios",
+      "preguntas": "Preguntas",
+      "entrar": "Iniciar sesión",
+      "empezar": "Prueba gratis",
+      "irAlContenido": "Ir al contenido",
+      "menu": "Menú"
     },
     "hero": {
-      "titulo": "Qué coche está en el taller y quién está con él.",
-      "lede": "ControlBox es el tablón del taller en el móvil: entradas, tiempo por coche, citas y registro de jornada. Para talleres de una a diez personas.",
-      "cta": "Empezar 14 días gratis",
-      "ctaSecundaria": "Ver los planes",
-      "sinTarjeta": "Sin tarjeta. El taller empieza con el plan Completo y a los 14 días decide.",
-      "origen": "Nació en Taller Autos Formentera, con los coches entrando por la puerta."
+      "badge": "14 días gratis · Plan Completo",
+      "titulo1": "El taller en orden,",
+      "titulo2": "sin cuaderno ni WhatsApp.",
+      "lede": "ControlBox pone en el móvil de cada persona del taller qué coche hay, quién está con él y cuánto se ha tardado. Con citas desde tu web y el registro de jornada que pide la ley.",
+      "cta": "Empieza gratis 14 días",
+      "confianza": "Sin tarjeta · Todas las funciones · Taller dado de alta en 2 minutos",
+      "capturaAlt": "Tablón de ControlBox con los coches del taller por estado"
     },
-    "tablon": {
-      "descripcion": "Ejemplo del tablón del taller: cuatro columnas por estado con los coches de hoy y un cronómetro en marcha.",
-      "titulo": "Tablón de hoy",
-      "ejemplo": "ejemplo",
-      "columnas": {
-        "recibido": "Recibido",
-        "en_reparacion": "En reparación",
-        "pendiente_piezas": "Pendiente piezas",
-        "terminado": "Terminado"
-      },
-      "sinAsignar": "Sin asignar",
-      "enMarcha": "en marcha"
-    },
-    "fases": {
-      "titulo": "Un día en el taller, con ControlBox",
+    "dolores": {
+      "titulo": "¿Te suena esto?",
       "lista": [
         {
-          "titulo": "Entra el coche",
-          "texto": "Matrícula, cliente, qué le pasa y una foto. Si ya ha estado, su historial sale solo. El resguardo de depósito se imprime con los datos de tu taller.",
-          "visual": "Ficha de entrada con la matrícula, el estado Recibido y el resguardo de depósito listo para imprimir."
+          "titulo": "La agenda es un cuaderno",
+          "texto": "Las citas se apuntan a mano, las llamadas interrumpen y nadie sabe qué entra mañana hasta que entra."
         },
         {
-          "titulo": "Se trabaja",
-          "texto": "Cada mecánico pulsa Empezar en el coche que coge y Finalizar cuando acaba. El tiempo se queda apuntado en ese coche, sin partes de trabajo a mano. Si falta una pieza, el coche pasa a Pendiente piezas y se ve desde la oficina.",
-          "visual": "Cronómetro de un coche en marcha con los botones Pausar y Finalizar."
+          "titulo": "Nadie sabe cuánto se tardó",
+          "texto": "El tiempo de cada coche se calcula de memoria al final. Las horas que no se apuntan no se cobran."
         },
         {
-          "titulo": "Se entrega",
-          "texto": "El coche pasa a Terminado y a Entregado. Todo lo hecho queda en el historial de esa matrícula para la próxima vez. Si quieres, el cliente recibe un aviso cuando le toque la ITV o la siguiente revisión.",
-          "visual": "Cambio de estado de Terminado a Entregado y aviso de ITV programado para el cliente."
-        },
-        {
-          "titulo": "Se cierra el día",
-          "texto": "Cada persona ficha entrada, pausas y salida desde el móvil. El registro de jornada que pide la ley, el artículo 34.9 del Estatuto de los Trabajadores, sale en PDF sin hojas de firmas.",
-          "visual": "Fila del registro de jornada de un día con entrada, pausa, salida y total, y el botón de PDF."
+          "titulo": "El registro de jornada es una hoja",
+          "texto": "Firmas en papel, horas puestas a ojo y un susto cada vez que alguien pregunta por la inspección."
         }
       ],
-      "mock": {
-        "cliente": "Cliente",
-        "motivo": "Motivo",
-        "motivoEjemplo": "Ruido al frenar",
-        "resguardo": "Resguardo de depósito",
-        "pdf": "PDF",
-        "empezar": "Empezar",
-        "pausar": "Pausar",
-        "finalizar": "Finalizar",
-        "tiempoHoy": "Tiempo en este coche",
-        "avisoItv": "Aviso de ITV",
-        "avisoItvCuando": "un mes antes",
-        "historial": "Historial de la matrícula",
-        "historialNota": "cada visita, con tiempos y fotos",
-        "entrada": "Entrada",
-        "pausa": "Pausa",
-        "salida": "Salida",
-        "total": "Total"
-      }
+      "cita": "¿Y si el tablón del taller estuviera en el bolsillo de cada uno?"
     },
-    "ademas": {
-      "titulo": "Y lo que va alrededor",
+    "funciones": {
+      "titulo": "Todo lo que necesita un taller.",
+      "titulo2": "Nada que no.",
+      "subtitulo": "Diseñado con un taller de verdad, para talleres de una a diez personas.",
+      "lista": [
+        { "titulo": "Tablón de vehículos", "texto": "Cada coche en su columna: recibido, en reparación, pendiente de piezas, terminado, entregado. Se arrastra y listo." },
+        { "titulo": "Cronómetro por coche", "texto": "El mecánico pulsa Empezar y Finalizar. El tiempo queda en ese coche, sin partes de trabajo a mano." },
+        { "titulo": "Registro de jornada", "texto": "Entrada, pausas y salida desde el móvil. El registro del artículo 34.9 del Estatuto, en PDF." },
+        { "titulo": "Citas desde tu web", "texto": "Un enlace propio del taller. El cliente elige hueco, acepta tus avisos y la cita entra en tu agenda." },
+        { "titulo": "Historial por matrícula", "texto": "Buscas una matrícula y ves todo lo que ese coche ha pasado por el taller, con tiempos y fotos." },
+        { "titulo": "Avisos de ITV y revisiones", "texto": "El cliente recibe el aviso cuando le toca. Vuelve a tu taller, no al que le pille más cerca." }
+      ],
+      "mas": "Y además: resguardo de depósito con tu logo, portal del cliente, importación desde hoja de cálculo, productividad del equipo y la app en cinco idiomas."
+    },
+    "pantallas": {
+      "titulo": "Así se ve por dentro",
       "lista": [
         {
-          "titulo": "Citas desde tu web",
-          "texto": "Cada taller tiene un enlace propio. El cliente elige día y hueco, acepta tus avisos y la cita entra en tu agenda para que la confirmes."
+          "titulo": "El coche, su tiempo y quién está con él",
+          "texto": "Abres el coche y lo tienes todo: qué le pasa, fotos, piezas, el cronómetro en marcha y el historial de otras visitas. El botón grande es para el mecánico; el resto, para la oficina.",
+          "alt": "Ficha de un vehículo en ControlBox con el cronómetro en marcha"
         },
         {
-          "titulo": "En el móvil de cada uno",
-          "texto": "Se instala como una app en Android y iPhone. Cada persona ve lo suyo: el mecánico sus coches, la oficina todo."
+          "titulo": "La jornada, fichada desde el móvil",
+          "texto": "Cada persona ficha entrada, pausa y salida con un botón. La dirección ve el día de un vistazo y descarga el registro en PDF cuando se lo piden.",
+          "alt": "Registro de jornada de ControlBox con las entradas y salidas del día"
         },
         {
-          "titulo": "Historial por matrícula",
-          "texto": "Buscas una matrícula y ves todo lo que ese coche ha pasado por el taller, con tiempos y fotos."
-        },
-        {
-          "titulo": "Trae lo que ya tienes",
-          "texto": "Importa clientes y vehículos desde una hoja de cálculo. La app está en castellano, inglés, francés, alemán y portugués."
-        },
-        {
-          "titulo": "Cada taller, en su sitio",
-          "texto": "Tus datos solo los ve tu taller. Nadie de fuera, tampoco nosotros, entra a ver tus clientes ni tus coches."
+          "titulo": "El cliente pide cita sin llamar",
+          "texto": "Pones el enlace en tu web, en Google o en WhatsApp. El cliente elige día y hora entre los huecos que tú decides, acepta tus avisos y tú confirmas con un toque.",
+          "alt": "Página pública de cita previa de un taller en ControlBox, vista en un móvil"
         }
+      ],
+      "pendiente": "Captura pendiente"
+    },
+    "pasos": {
+      "titulo": "Empieza en 2 minutos",
+      "lista": [
+        { "titulo": "Crea tu cuenta", "texto": "Correo y contraseña. Sin tarjeta." },
+        { "titulo": "Da de alta tu taller", "texto": "Nombre del taller y listo. Invita al equipo con un código." },
+        { "titulo": "Mete el primer coche", "texto": "Matrícula, qué le pasa y a trabajar. Lo demás lo vas descubriendo." }
+      ],
+      "cta": "Empieza gratis 14 días"
+    },
+    "comparativa": {
+      "titulo": "¿Por qué no seguir como hasta ahora?",
+      "subtitulo": "Lo que da cada forma de llevar el taller.",
+      "columnas": { "cuaderno": "Cuaderno", "hoja": "Hoja de cálculo", "controlbox": "ControlBox" },
+      "filas": [
+        { "texto": "Quién está con cada coche ahora mismo", "cuaderno": false, "hoja": false, "controlbox": true },
+        { "texto": "Tiempo real por coche", "cuaderno": false, "hoja": "a mano", "controlbox": true },
+        { "texto": "Registro de jornada válido ante la inspección", "cuaderno": "firmas", "hoja": false, "controlbox": true },
+        { "texto": "El cliente pide cita solo", "cuaderno": false, "hoja": false, "controlbox": true },
+        { "texto": "Historial por matrícula", "cuaderno": "buscando", "hoja": "buscando", "controlbox": true },
+        { "texto": "Se ve desde el móvil de cada uno", "cuaderno": false, "hoja": false, "controlbox": true },
+        { "texto": "Aviso de ITV al cliente", "cuaderno": false, "hoja": false, "controlbox": true }
       ]
     },
     "planes": {
-      "titulo": "Planes",
-      "intro": "Los 14 primeros días, todo. Después, el plan que te encaje. El precio es por taller, no por persona.",
-      "alMes": "al mes, IVA aparte",
+      "titulo": "Planes para cada taller",
+      "subtitulo": "Los 14 primeros días, todo. Después, el plan que te encaje. El precio es por taller, no por persona.",
+      "alMes": "/mes",
+      "iva": "IVA aparte",
       "anual": "Pagando el año entero, dos meses gratis.",
-      "gratis": { "nombre": "Gratis", "precio": "0 €", "nota": "Para un taller de una persona." },
-      "profesional": { "nombre": "Profesional", "precio": "29,99 €", "nota": "Para talleres con equipo." },
-      "completo": { "nombre": "Completo", "precio": "39,99 €", "nota": "Para quien quiere citas por web y ver los números." },
-      "filas": {
-        "usuarios": "Personas",
-        "vehiculos": "Coches en el taller a la vez",
-        "historial": "Historial",
-        "jornada": "Registro de jornada",
-        "documentos": "Resguardos con tu logo",
-        "portal": "Portal del cliente",
-        "itv": "Avisos de ITV y revisiones",
-        "citas": "Citas desde la web",
-        "productividad": "Productividad del equipo",
-        "estadisticas": "Estadísticas"
-      },
-      "valores": {
-        "sinLimite": "Sin límite",
-        "tresMeses": "3 meses",
-        "completo": "Completo",
-        "incluido": "Incluido",
-        "noIncluido": "No incluido"
-      },
-      "cta": "Empezar con 14 días del plan Completo",
+      "cta": "Empezar gratis",
+      "ctaCompleto": "Probar 14 días gratis",
+      "lista": [
+        {
+          "codigo": "gratis",
+          "nombre": "Gratis",
+          "precio": "0 €",
+          "para": "Para un taller de una persona.",
+          "incluye": ["1 persona", "5 coches en el taller a la vez", "3 meses de historial", "Tablón, cronómetro y citas en la agenda"]
+        },
+        {
+          "codigo": "profesional",
+          "nombre": "Profesional",
+          "precio": "29,99 €",
+          "para": "Para talleres con equipo.",
+          "incluye": ["Hasta 5 personas", "Coches sin límite", "Historial completo", "Registro de jornada", "Resguardos con tu logo", "Portal del cliente", "Avisos de ITV y revisiones"]
+        },
+        {
+          "codigo": "completo",
+          "nombre": "Completo",
+          "precio": "39,99 €",
+          "para": "Para citas por web y ver los números.",
+          "incluye": ["Personas sin límite", "Todo lo del Profesional", "Citas desde tu web", "Productividad del equipo", "Estadísticas"]
+        }
+      ],
       "aviso": "Al acabar la prueba, si no contratas, el taller pasa a Gratis. No se borra nada."
     },
     "faq": {
-      "titulo": "Preguntas que nos hacen",
+      "titulo": "Preguntas frecuentes",
       "lista": [
-        {
-          "p": "¿Hace falta tarjeta para probar?",
-          "r": "No. Creas la cuenta, das de alta tu taller y tienes 14 días con todo. Si te convence, contratas desde dentro de la app."
-        },
-        {
-          "p": "¿Qué pasa cuando acaban los 14 días?",
-          "r": "El taller pasa al plan Gratis. No se borra nada, pero ese plan admite una persona y cinco coches a la vez, así que con más que eso tendrás que contratar para seguir dando de alta."
-        },
-        {
-          "p": "¿Hace facturas o presupuestos?",
-          "r": "No, y es a propósito. Eso se queda en tu programa de facturación, que es el que tiene que cumplir con Hacienda. ControlBox se ocupa de lo que pasa dentro del taller."
-        },
-        {
-          "p": "¿El registro de jornada vale legalmente?",
-          "r": "Guarda la hora de entrada, las pausas y la salida de cada persona cada día, se puede imprimir o descargar en PDF y cada trabajador puede ver el suyo. Es lo que exige el artículo 34.9 del Estatuto de los Trabajadores."
-        },
-        {
-          "p": "¿Cómo apuntan los mecánicos el tiempo?",
-          "r": "En el coche: pulsan Empezar cuando lo cogen y Finalizar cuando acaban. Pueden pausar si cambian de coche. No hay partes de trabajo que rellenar."
-        },
-        {
-          "p": "¿Quién ve mis datos?",
-          "r": "Tu taller y nadie más. Cada taller está separado de los demás en la base de datos. Nosotros vemos cuántos talleres hay y en qué plan están, no sus coches ni sus clientes."
-        },
-        {
-          "p": "¿Y si quiero dejarlo?",
-          "r": "Cancelas desde la propia app, sin llamar a nadie. Sigues teniendo acceso hasta el final del periodo que hayas pagado."
-        }
+        { "p": "¿Qué incluyen los 14 días gratis?", "r": "Todo el plan Completo, sin tarjeta. Creas la cuenta, das de alta tu taller y lo usas con tu equipo. Si te convence, contratas desde dentro de la app." },
+        { "p": "¿Qué pasa cuando acaban los 14 días?", "r": "El taller pasa al plan Gratis. No se borra nada, pero ese plan admite una persona y cinco coches a la vez, así que con más que eso tendrás que contratar para seguir dando de alta." },
+        { "p": "¿Hace facturas o presupuestos?", "r": "No, y es a propósito. Eso se queda en tu programa de facturación, que es el que tiene que cumplir con Hacienda. ControlBox se ocupa de lo que pasa dentro del taller." },
+        { "p": "¿El registro de jornada vale legalmente?", "r": "Guarda la hora de entrada, las pausas y la salida de cada persona cada día, se puede imprimir o descargar en PDF y cada trabajador puede ver el suyo. Es lo que exige el artículo 34.9 del Estatuto de los Trabajadores." },
+        { "p": "¿Cómo apuntan los mecánicos el tiempo?", "r": "En el coche: pulsan Empezar cuando lo cogen y Finalizar cuando acaban. Pueden pausar si cambian de coche. No hay partes de trabajo que rellenar." },
+        { "p": "¿Funciona en el móvil?", "r": "Sí. Se instala como una app en Android y iPhone desde el navegador, sin pasar por ninguna tienda. Cada persona ve lo suyo: el mecánico sus coches, la oficina todo." },
+        { "p": "¿Quién ve mis datos?", "r": "Tu taller y nadie más. Cada taller está separado de los demás en la base de datos. Nosotros vemos cuántos talleres hay y en qué plan están, no sus coches ni sus clientes." },
+        { "p": "¿Y si quiero dejarlo?", "r": "Cancelas desde la propia app, sin llamar a nadie. Sigues teniendo acceso hasta el final del periodo que hayas pagado." }
       ]
     },
     "cierre": {
-      "titulo": "Da de alta tu taller.",
+      "titulo": "¿Listo para poner el taller en orden?",
       "texto": "Catorce días con todo, sin tarjeta. Luego decides.",
-      "cta": "Empezar 14 días gratis"
+      "cta": "Empieza gratis 14 días",
+      "nota": "Nació en Taller Autos Formentera, con los coches entrando por la puerta."
     },
     "pie": {
-      "frase": "Entra el coche. Se trabaja. Se entrega. Queda apuntado.",
+      "descripcion": "El tablón del taller en el móvil: coches, tiempos, citas y jornada.",
+      "producto": "Producto",
+      "cuenta": "Cuenta",
+      "legal": "Legal",
+      "crearCuenta": "Crear cuenta",
       "contacto": "admin@controlboxapp.com",
       "avisoLegal": "Aviso legal",
-      "privacidad": "Privacidad",
-      "cookies": "Cookies",
-      "terminos": "Términos",
-      "copy": "© {{anio}} ControlBox"
+      "privacidad": "Política de privacidad",
+      "cookies": "Política de cookies",
+      "terminos": "Términos y condiciones",
+      "copy": "© {{anio}} ControlBox · Hecho en Formentera"
     }
   }
 }
